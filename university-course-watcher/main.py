@@ -32,6 +32,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--keyword", help="특정 키워드 중심으로 후보 링크를 우선 탐색합니다.")
     parser.add_argument("--dry-run", action="store_true", help="저장과 텔레그램 알림 없이 결과만 출력합니다.")
     parser.add_argument("--debug", action="store_true", help="D등급과 상세 로그를 저장합니다.")
+    parser.add_argument("--smoke-test", action="store_true", help="CI용 빠른 동작 확인 모드입니다.")
     return parser.parse_args()
 
 
@@ -54,7 +55,7 @@ def main() -> int:
     boards = [b for b in boards if b.get("university_name") in university_map]
 
     LOGGER.info("Crawling %d boards for %d universities without search APIs.", len(boards), len(university_map))
-    crawler = BoardCrawler()
+    crawler = BoardCrawler(timeout=5, max_links_per_board=2) if args.smoke_test else BoardCrawler()
     attachment_parser = AttachmentParser()
     course_finder = CourseFinder(keywords)
     crawled = crawler.crawl_boards(boards, university_map, keyword_hint=args.keyword)
@@ -64,7 +65,7 @@ def main() -> int:
     items: list[dict] = []
     for notice in crawled:
         university = university_map.get(notice.university_name, {})
-        attachment_texts = attachment_parser.extract_texts(notice.attachment_urls)
+        attachment_texts = {} if args.smoke_test else attachment_parser.extract_texts(notice.attachment_urls)
         combined_text = "\n".join([notice.body_text] + list(attachment_texts.values()))
         dates = parse_notice_dates(notice.title, combined_text, notice.notice_date, today)
         cls = classify(notice.title, combined_text, dates, keywords)
@@ -94,7 +95,7 @@ def main() -> int:
             "reason": cls.reason,
             "is_new": False,
         }
-        if item["grade"] in {"A", "B", "C"}:
+        if item["grade"] in {"A", "B", "C"} and not args.smoke_test:
             item = course_finder.enrich(item, university)
         items.append(item)
 

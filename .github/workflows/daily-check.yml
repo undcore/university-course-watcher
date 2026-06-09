@@ -46,7 +46,7 @@ jobs:
         run: |
           cd university-course-watcher
           if [ "${{ github.event_name }}" = "push" ]; then
-            python main.py --once --dry-run --region incheon --grade A
+            python main.py --once --dry-run --region incheon --grade A --smoke-test
           else
             python main.py --once
           fi
