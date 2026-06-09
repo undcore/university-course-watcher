@@ -1,6 +1,10 @@
 name: Daily university notice check
 
 on:
+  push:
+    branches:
+      - main
+      - codex/add-course-watcher-project
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
@@ -15,6 +19,18 @@ jobs:
           python-version: "3.11"
       - name: Install dependencies
         run: pip install -r university-course-watcher/requirements.txt
+      - name: Validate Telegram secrets are configured
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python - <<'PY'
+          import os
+          missing = [name for name in ("TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID") if not os.getenv(name)]
+          if missing:
+              raise SystemExit(f"Missing required secrets: {', '.join(missing)}")
+          print("Telegram secrets are configured.")
+          PY
       - name: Run watcher
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
