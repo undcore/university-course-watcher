@@ -37,6 +37,28 @@ jobs:
               raise SystemExit("Telegram bot token validation failed.")
           print("Telegram secrets are configured and bot token is valid.")
           PY
+      - name: Send Telegram smoke test message
+        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[telegram-smoke]')
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python - <<'PY'
+          import os
+          import requests
+          response = requests.post(
+              f"https://api.telegram.org/bot{os.environ['TELEGRAM_BOT_TOKEN']}/sendMessage",
+              json={
+                  "chat_id": os.environ["TELEGRAM_CHAT_ID"],
+                  "text": "[University Course Watcher] GitHub Actions Telegram smoke test passed.",
+                  "disable_web_page_preview": True,
+              },
+              timeout=10,
+          )
+          if not response.ok or not response.json().get("ok"):
+              raise SystemExit("Telegram smoke test message failed.")
+          print("Telegram smoke test message sent.")
+          PY
       - name: Run watcher
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
