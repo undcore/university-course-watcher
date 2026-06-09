@@ -12,6 +12,7 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -26,10 +27,15 @@ jobs:
         run: |
           python - <<'PY'
           import os
+          import requests
           missing = [name for name in ("TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID") if not os.getenv(name)]
           if missing:
               raise SystemExit(f"Missing required secrets: {', '.join(missing)}")
-          print("Telegram secrets are configured.")
+          token = os.environ["TELEGRAM_BOT_TOKEN"]
+          response = requests.get(f"https://api.telegram.org/bot{token}/getMe", timeout=10)
+          if not response.ok or not response.json().get("ok"):
+              raise SystemExit("Telegram bot token validation failed.")
+          print("Telegram secrets are configured and bot token is valid.")
           PY
       - name: Run watcher
         env:
@@ -37,7 +43,13 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           DEBUG: "false"
           TIMEZONE: Asia/Seoul
-        run: cd university-course-watcher && python main.py --once
+        run: |
+          cd university-course-watcher
+          if [ "${{ github.event_name }}" = "push" ]; then
+            python main.py --once --dry-run --region incheon --grade A
+          else
+            python main.py --once
+          fi
       - name: Upload result artifacts
         uses: actions/upload-artifact@v4
         with:
