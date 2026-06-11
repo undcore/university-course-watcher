@@ -16,7 +16,8 @@ from src.board_crawler import BoardCrawler
 from src.classifier import classify
 from src.course_finder import CourseFinder
 from src.date_parser import parse_notice_dates
-from src.notifier import TelegramNotifier
+from src.graduate_admission_watcher import GraduateAdmissionWatcher
+from src.notifier import GraduateAdmissionNotifier, TelegramNotifier
 from src.report_builder import build_report
 from src.storage import Storage
 from src.utils import CONFIG_DIR, ensure_dirs, load_json, now_kst, setup_logging
@@ -30,9 +31,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--region", choices=["seoul", "gyeonggi", "incheon"], help="특정 지역만 검색합니다.")
     parser.add_argument("--grade", choices=["A", "B", "C", "D"], help="지정 등급 이상만 출력/저장합니다.")
     parser.add_argument("--keyword", help="특정 키워드 중심으로 후보 링크를 우선 탐색합니다.")
+    parser.add_argument("--watch", choices=["course", "graduate-admission"], default="course", help="실행할 감시 대상을 선택합니다.")
     parser.add_argument("--dry-run", action="store_true", help="저장과 텔레그램 알림 없이 결과만 출력합니다.")
     parser.add_argument("--debug", action="store_true", help="D등급과 상세 로그를 저장합니다.")
     parser.add_argument("--smoke-test", action="store_true", help="CI용 빠른 동작 확인 모드입니다.")
+    parser.add_argument("--telegram-test-success", action="store_true", help="2026 후기 일반대학원 후보 발견 텔레그램 테스트 메시지를 보냅니다.")
+    parser.add_argument("--telegram-test-empty", action="store_true", help="2026 후기 일반대학원 신규 없음 텔레그램 테스트 메시지를 보냅니다.")
     return parser.parse_args()
 
 
@@ -42,6 +46,38 @@ def main() -> int:
     debug = args.debug or os.getenv("DEBUG", "false").lower() == "true"
     setup_logging(debug)
     ensure_dirs()
+
+    if args.telegram_test_success:
+        notifier = GraduateAdmissionNotifier()
+        notifier.send_test_success()
+        LOGGER.info("Graduate admission success telegram test sent.")
+        return 0
+
+    if args.telegram_test_empty:
+        notifier = GraduateAdmissionNotifier()
+        notifier.send_test_empty()
+        LOGGER.info("Graduate admission empty telegram test sent.")
+        return 0
+
+    if args.watch == "graduate-admission":
+        graduate_boards = load_json(CONFIG_DIR / "graduate_admission_boards.json", [])
+        active_count = len([board for board in graduate_boards if board.get("enabled", True)])
+        disabled_count = len(graduate_boards) - active_count
+        os.environ["GRADUATE_ADMISSION_ACTIVE_BOARD_COUNT"] = str(active_count)
+        os.environ["GRADUATE_ADMISSION_DISABLED_BOARD_COUNT"] = str(disabled_count)
+
+        watcher = GraduateAdmissionWatcher(smoke_test=args.smoke_test)
+        items = watcher.run(region=args.region, dry_run=args.dry_run)
+        sent = GraduateAdmissionNotifier().send_candidates(items, dry_run=args.dry_run)
+
+        if not args.dry_run:
+            watcher.mark_sent(sent)
+        else:
+            for item in items:
+                print(f"[{item['grade']}] {item['university_name']} {item['title']} {item['url']}")
+
+        LOGGER.info("Done. graduate_admission_candidates=%d notifications=%d", len(items), len(sent))
+        return 0
 
     universities = load_json(CONFIG_DIR / "universities.json", [])
     boards = load_json(CONFIG_DIR / "board_urls.json", [])
