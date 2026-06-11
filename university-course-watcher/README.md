@@ -151,3 +151,21 @@ GitHub 저장소 Settings → Secrets and variables → Actions에서 다음 Sec
 ## 중요 고지
 
 결과는 자동 검색 후보이며, 최종 지원 가능 여부는 대학 공식 모집요강 원문과 입학처 문의로 확인해야 합니다.
+
+## 2026 후기 일반대학원 모집요강 감시
+
+인서울 일반대학원 2026학년도 후기 모집요강/신입생 모집/입학전형 공고는 별도 모드로 감시합니다.
+
+```bash
+python main.py --once --watch graduate-admission --region seoul
+python main.py --once --watch graduate-admission --region seoul --dry-run
+python main.py --telegram-test-success
+python main.py --telegram-test-empty
+python validate_graduate_admission_boards.py
+```
+
+감시 대상 게시판은 `config/graduate_admission_boards.json`에서 관리합니다. 제목에 `2026`과 `후기`가 함께 있고, 본문 또는 첨부에서 `일반대학원`, `모집요강`, `신입생 모집`, `입학전형`, `전형일정`, `원서접수`, `2차`, `특별전형` 같은 신호가 확인될 때만 텔레그램 알림을 보냅니다. 학부, 편입, 특수대학원, 전문대학원 등으로 판단되는 공고는 제외합니다.
+
+일부 학교는 공지 게시판이 아니라 상시 입학안내 페이지에 모집요강 PDF를 직접 게시합니다. 이런 경우 `graduate_admission_boards.json`에 `"scan_page": true`를 추가하면 해당 페이지 본문과 첨부 링크까지 직접 검사합니다. URL 상태는 `validate_graduate_admission_boards.py`로 확인하며, `status`가 200이어도 `keyword_hits`가 0이거나 `final_url`이 error/login/SSO 페이지면 설정 보정이 필요합니다.
+
+GitHub Actions는 한국시간 오전 9시와 오후 7시에 실행되도록 `0 0 * * *`, `0 10 * * *` UTC cron을 사용합니다. `data/seen_graduate_admission_urls.json`은 Actions cache로 복원/저장하여 같은 공고를 반복 알림하지 않도록 했습니다.

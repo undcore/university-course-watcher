@@ -7,7 +7,18 @@ on:
       - codex/add-course-watcher-project
   schedule:
     - cron: "0 0 * * *"
+    - cron: "0 10 * * *"
   workflow_dispatch:
+    inputs:
+      telegram_test:
+        description: "Send a Telegram test message instead of running the watcher"
+        required: false
+        default: "none"
+        type: choice
+        options:
+          - none
+          - success
+          - empty
 
 jobs:
   check:
@@ -27,6 +38,14 @@ jobs:
             seen-urls-
       - name: Install dependencies
         run: pip install -r university-course-watcher/requirements.txt
+      - name: Restore notification history
+        uses: actions/cache@v4
+        with:
+          path: |
+            university-course-watcher/data/seen_graduate_admission_urls.json
+          key: graduate-admission-seen-${{ github.run_id }}
+          restore-keys: |
+            graduate-admission-seen-
       - name: Validate Telegram secrets are configured
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -74,10 +93,14 @@ jobs:
           TIMEZONE: Asia/Seoul
         run: |
           cd university-course-watcher
-          if [ "${{ github.event_name }}" = "push" ]; then
-            python main.py --once --dry-run --region incheon --grade A --smoke-test
+          if [ "${{ github.event.inputs.telegram_test }}" = "success" ]; then
+            python main.py --telegram-test-success
+          elif [ "${{ github.event.inputs.telegram_test }}" = "empty" ]; then
+            python main.py --telegram-test-empty
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            python main.py --once --watch graduate-admission --dry-run --region seoul --smoke-test
           else
-            python main.py --once
+            python main.py --once --watch graduate-admission --region seoul
           fi
       - name: Upload result artifacts
         uses: actions/upload-artifact@v7
@@ -87,3 +110,5 @@ jobs:
             university-course-watcher/data/results.csv
             university-course-watcher/data/results.json
             university-course-watcher/data/report.html
+            university-course-watcher/data/graduate_admission_results.csv
+            university-course-watcher/data/graduate_admission_results.json

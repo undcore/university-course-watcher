@@ -15,6 +15,11 @@ RESULT_FIELDS = [
     "course_evidence_url", "course_evidence_text", "attachment_urls", "matched_keywords", "reason", "is_new"
 ]
 
+GRADUATE_ADMISSION_FIELDS = [
+    "checked_at", "university_name", "region", "city", "board_type", "title", "url", "notice_date",
+    "grade", "matched_keywords", "reason", "attachment_urls", "is_new"
+]
+
 
 class Storage:
     def __init__(self, data_dir: Path = DATA_DIR):
@@ -119,6 +124,77 @@ class Storage:
 
     def _write_csv(self, path: Path, fields: list[str], rows: list[dict]) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("w", encoding="utf-8-sig", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fields)
+            writer.writeheader()
+            for row in rows:
+                writer.writerow({field: row.get(field, "") for field in fields})
+
+
+class GraduateAdmissionStorage:
+    def __init__(self, data_dir: Path = DATA_DIR):
+        self.data_dir = data_dir
+        self.seen_path = data_dir / "seen_graduate_admission_urls.json"
+        self.results_csv = data_dir / "graduate_admission_results.csv"
+        self.results_json = data_dir / "graduate_admission_results.json"
+
+    def load_seen(self) -> set[str]:
+        data = load_json(self.seen_path, [])
+        return set(data if isinstance(data, list) else data.keys())
+
+    def mark_is_new(self, items: list[dict]) -> list[dict]:
+        seen = self.load_seen()
+
+        for item in items:
+            item["is_new"] = item.get("url", "") not in seen
+
+        return items
+
+    def update_seen(self, notified_items: list[dict]) -> None:
+        seen = self.load_seen()
+
+        for item in notified_items:
+            if item.get("url"):
+                seen.add(item["url"])
+
+        save_json(self.seen_path, sorted(seen))
+
+    def dedupe(self, items: list[dict]) -> list[dict]:
+        result: list[dict] = []
+        keys: set[str] = set()
+
+        for item in items:
+            key = item.get("url") or self._title_key(item)
+            if key in keys:
+                continue
+            keys.add(key)
+            result.append(item)
+
+        return result
+
+    def save_results(self, items: list[dict]) -> None:
+        serialized_items = [self._serialize_item(item) for item in items]
+        save_json(self.results_json, serialized_items)
+        self._write_csv(self.results_csv, GRADUATE_ADMISSION_FIELDS, serialized_items)
+
+    def _serialize_item(self, item: dict) -> dict:
+        out = {}
+
+        for field in GRADUATE_ADMISSION_FIELDS:
+            value = item.get(field, "")
+            if isinstance(value, list):
+                value = "; ".join(value)
+            out[field] = value
+
+        return out
+
+    def _title_key(self, item: dict) -> str:
+        raw = f"{item.get('university_name')}::{item.get('title')}"
+        return hashlib.sha1(raw.encode("utf-8")).hexdigest()
+
+    def _write_csv(self, path: Path, fields: list[str], rows: list[dict]) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+
         with path.open("w", encoding="utf-8-sig", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=fields)
             writer.writeheader()

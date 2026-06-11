@@ -20,5 +20,19 @@
   {"name": "중앙대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["cau.ac.kr"], "priority": 2, "notes": ""},
   {"name": "한양대학교 ERICA", "region": "gyeonggi", "region_name": "경기", "city": "안산", "domains": ["hanyang.ac.kr"], "priority": 2, "notes": ""},
   {"name": "한국공학대학교", "region": "gyeonggi", "region_name": "경기", "city": "시흥", "domains": ["tukorea.ac.kr"], "priority": 2, "notes": ""},
-  {"name": "단국대학교 죽전캠퍼스", "region": "gyeonggi", "region_name": "경기", "city": "용인", "domains": ["dankook.ac.kr"], "priority": 2, "notes": ""}
+  {"name": "단국대학교 죽전캠퍼스", "region": "gyeonggi", "region_name": "경기", "city": "용인", "domains": ["dankook.ac.kr"], "priority": 2, "notes": ""},
+  {"name": "서울대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["snu.ac.kr"], "priority": 1, "notes": "2026 후기 일반대학원 모집요강 감시"},
+  {"name": "연세대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["yonsei.ac.kr"], "priority": 1, "notes": "2026 후기 일반대학원 모집요강 감시"},
+  {"name": "고려대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["korea.ac.kr"], "priority": 1, "notes": "2026 후기 일반대학원 모집요강 감시"},
+  {"name": "서강대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["sogang.ac.kr"], "priority": 1, "notes": "2026 후기 일반대학원 모집요강 감시"},
+  {"name": "성균관대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["skku.edu"], "priority": 1, "notes": "2026 후기 일반대학원 모집요강 감시"},
+  {"name": "한양대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["hanyang.ac.kr"], "priority": 1, "notes": "2026 후기 일반대학원 모집요강 감시"},
+  {"name": "경희대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["khu.ac.kr"], "priority": 1, "notes": "2026 후기 일반대학원 모집요강 감시"},
+  {"name": "한국외국어대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["hufs.ac.kr"], "priority": 1, "notes": "2026 후기 일반대학원 모집요강 감시"},
+  {"name": "홍익대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["hongik.ac.kr"], "priority": 1, "notes": "2026 후기 일반대학원 모집요강 감시"},
+  {"name": "숙명여자대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["sookmyung.ac.kr"], "priority": 1, "notes": "2026 후기 일반대학원 모집요강 감시"},
+  {"name": "이화여자대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["ewha.ac.kr"], "priority": 1, "notes": "2026 후기 일반대학원 모집요강 감시"},
+  {"name": "국민대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["kookmin.ac.kr"], "priority": 1, "notes": "2026 후기 일반대학원 모집요강 감시"},
+  {"name": "숭실대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["ssu.ac.kr"], "priority": 1, "notes": "2026 후기 일반대학원 모집요강 감시"},
+  {"name": "명지대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["mju.ac.kr"], "priority": 1, "notes": "2026 후기 일반대학원 모집요강 감시"}
 ]
