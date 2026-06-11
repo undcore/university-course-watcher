@@ -34,6 +34,13 @@ class BoardCrawler:
         self.timeout = timeout
         self.max_links_per_board = max_links_per_board
         self.session = requests.Session()
+        self.last_error = ""
+        self.last_stats = {
+            "boards_total": 0,
+            "boards_succeeded": 0,
+            "boards_failed": 0,
+            "boards_skipped": 0,
+        }
         self.session.headers.update(
             {
                 "User-Agent": "Mozilla/5.0 university-course-watcher/1.0 (official-board-crawler)",
@@ -43,21 +50,45 @@ class BoardCrawler:
 
     def crawl_boards(self, boards: list[dict], universities: dict[str, dict], keyword_hint: str | None = None) -> list[CrawledNotice]:
         notices: list[CrawledNotice] = []
+        self.last_stats = {
+            "boards_total": 0,
+            "boards_succeeded": 0,
+            "boards_failed": 0,
+            "boards_skipped": 0,
+        }
+
         for board in boards:
+            self.last_stats["boards_total"] += 1
+
             if not board.get("enabled", True):
+                self.last_stats["boards_skipped"] += 1
                 continue
+
             university = universities.get(board["university_name"])
             if not university:
                 LOGGER.warning("Unknown university in board config: %s", board.get("university_name"))
+                self.last_stats["boards_skipped"] += 1
                 continue
-            notices.extend(self.crawl_board(board, keyword_hint=keyword_hint))
+
+            board_notices = self.crawl_board(board, keyword_hint=keyword_hint)
+
+            if self.last_error:
+                self.last_stats["boards_failed"] += 1
+            else:
+                self.last_stats["boards_succeeded"] += 1
+
+            notices.extend(board_notices)
+
         return notices
 
     def crawl_board(self, board: dict, keyword_hint: str | None = None) -> list[CrawledNotice]:
         url = board["url"]
+        self.last_error = ""
+
         try:
             html = self._get_text(url)
         except Exception as exc:
+            self.last_error = str(exc)
             LOGGER.warning("Board fetch failed: %s %s", url, exc)
             return []
 

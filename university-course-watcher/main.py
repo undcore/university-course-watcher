@@ -36,6 +36,30 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def count_by_key(items: list[dict], key: str) -> dict[str, int]:
+    counts: dict[str, int] = {}
+
+    for item in items:
+        value = str(item.get(key) or "unknown")
+        counts[value] = counts.get(value, 0) + 1
+
+    return counts
+
+
+def count_candidate_targets(items: list[dict]) -> int:
+    count = 0
+
+    for item in items:
+        is_new = item.get("is_new")
+        grade = item.get("grade")
+        deadline_status = item.get("deadline_status")
+
+        if is_new and grade in {"A", "B"} and deadline_status != "마감됨":
+            count += 1
+
+    return count
+
+
 def main() -> int:
     load_dotenv()
     args = parse_args()
@@ -54,12 +78,15 @@ def main() -> int:
 
     university_map = {university["name"]: university for university in universities}
     boards = [board for board in boards if board.get("university_name") in university_map]
+    board_count = len(boards)
+    university_count = len(university_map)
 
-    LOGGER.info("Crawling %d boards for %d universities without search APIs.", len(boards), len(university_map))
+    LOGGER.info("Crawling %d boards for %d universities without search APIs.", board_count, university_count)
     crawler = BoardCrawler(timeout=5, max_links_per_board=2) if args.smoke_test else BoardCrawler()
     attachment_parser = AttachmentParser()
     course_finder = CourseFinder(keywords)
     crawled = crawler.crawl_boards(boards, university_map, keyword_hint=args.keyword)
+    crawled_count = len(crawled)
 
     checked_at = now_kst().isoformat(timespec="seconds")
     today = date.today()
@@ -106,22 +133,43 @@ def main() -> int:
 
     items = storage.dedupe(items)
     items = storage.mark_is_new(items)
+    deduped_count = len(items)
 
     if args.grade:
         rank = {"A": 0, "B": 1, "C": 2, "D": 3}
         items = [item for item in items if rank.get(item.get("grade"), 9) <= rank[args.grade]]
 
+    public_count = len([item for item in items if item.get("grade") != "D"])
+    candidate_count = count_candidate_targets(items)
+
     if not args.dry_run:
         storage.save_results([item for item in items if item.get("grade") != "D"], debug_items=items if debug else None)
         build_report(items)
-        sent = TelegramNotifier().send_candidates(items, dry_run=False)
+        notifier = TelegramNotifier()
+        sent = notifier.send_candidates(items, dry_run=False)
         storage.update_seen(sent)
+        summary = {
+            "checked_at": checked_at,
+            "university_count": university_count,
+            "board_count": board_count,
+            "board_success_count": crawler.last_stats.get("boards_succeeded", 0),
+            "board_failure_count": crawler.last_stats.get("boards_failed", 0),
+            "board_skip_count": crawler.last_stats.get("boards_skipped", 0),
+            "crawled_count": crawled_count,
+            "deduped_count": deduped_count,
+            "public_count": public_count,
+            "candidate_count": candidate_count,
+            "sent_count": len(sent),
+            "grade_counts": count_by_key(items, "grade"),
+            "status_counts": count_by_key(items, "deadline_status"),
+        }
+        report_sent = notifier.send_daily_report(summary, dry_run=False)
+        LOGGER.info("Daily Telegram report sent=%s", report_sent)
     else:
         for item in items:
             if item.get("grade") != "D" or debug:
                 print(f"[{item['grade']}] {item['university_name']} {item['title']} {item['url']}")
 
-    public_count = len([item for item in items if item.get("grade") != "D"])
     LOGGER.info("Done. candidates=%d public=%d", len(items), public_count)
     return 0
 
