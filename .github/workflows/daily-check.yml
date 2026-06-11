@@ -18,6 +18,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Restore seen URL cache
+        uses: actions/cache@v4
+        with:
+          path: university-course-watcher/data/seen_urls.json
+          key: seen-urls-${{ github.run_id }}
+          restore-keys: |
+            seen-urls-
       - name: Install dependencies
         run: pip install -r university-course-watcher/requirements.txt
       - name: Validate Telegram secrets are configured

@@ -26,11 +26,14 @@ class TelegramNotifier:
             item for item in items
             if item.get("is_new") and item.get("grade") in {"A", "B"} and item.get("deadline_status") != "마감됨"
         ]
+
         if dry_run:
             return targets
+
         if not self.token or not self.chat_id:
             LOGGER.info("Telegram settings missing; notification skipped.")
             return []
+
         sent: list[dict] = []
         for item in targets:
             try:
@@ -38,6 +41,7 @@ class TelegramNotifier:
                 sent.append(item)
             except Exception as exc:
                 LOGGER.warning("Telegram send failed: %s", exc)
+
         return sent
 
     def _send(self, text: str) -> None:
@@ -46,8 +50,10 @@ class TelegramNotifier:
         response.raise_for_status()
 
     def _message(self, item: dict) -> str:
-        courses = ", ".join((item.get("possible_departments") or []) + (item.get("possible_computer_courses") or [])) or "확인 필요"
+        courses = ", ".join((item.get("possible_departments") or []) + (item.get("possible_computer_courses") or []))
+        courses = courses or "확인 필요"
         period = f"{item.get('application_start_date') or '?'} ~ {item.get('application_end_date') or '?'}"
+
         return (
             "[시간제등록/외부 수강 공고 후보 발견]\n\n"
             f"등급: {item.get('grade')}\n"

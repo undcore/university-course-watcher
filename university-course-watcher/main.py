@@ -50,9 +50,10 @@ def main() -> int:
     storage.ensure_empty_files()
 
     if args.region:
-        universities = [u for u in universities if u.get("region") == args.region]
-    university_map = {u["name"]: u for u in universities}
-    boards = [b for b in boards if b.get("university_name") in university_map]
+        universities = [university for university in universities if university.get("region") == args.region]
+
+    university_map = {university["name"]: university for university in universities}
+    boards = [board for board in boards if board.get("university_name") in university_map]
 
     LOGGER.info("Crawling %d boards for %d universities without search APIs.", len(boards), len(university_map))
     crawler = BoardCrawler(timeout=5, max_links_per_board=2) if args.smoke_test else BoardCrawler()
@@ -63,12 +64,14 @@ def main() -> int:
     checked_at = now_kst().isoformat(timespec="seconds")
     today = date.today()
     items: list[dict] = []
+
     for notice in crawled:
         university = university_map.get(notice.university_name, {})
         attachment_texts = {} if args.smoke_test else attachment_parser.extract_texts(notice.attachment_urls)
         combined_text = "\n".join([notice.body_text] + list(attachment_texts.values()))
         dates = parse_notice_dates(notice.title, combined_text, notice.notice_date, today)
-        cls = classify(notice.title, combined_text, dates, keywords)
+        classification = classify(notice.title, combined_text, dates, keywords)
+
         item = {
             "checked_at": checked_at,
             "university_name": notice.university_name,
@@ -79,34 +82,37 @@ def main() -> int:
             "source_type": "대학 공식 게시판 직접 크롤링",
             "source_query": notice.board_type,
             **dates,
-            "registration_score": cls.registration_score,
-            "external_score": cls.external_score,
-            "computer_score": cls.computer_score,
-            "freshness_score": cls.freshness_score,
-            "grade": cls.grade,
-            "external_applicant_status": cls.external_applicant_status,
-            "computer_course_status": cls.computer_course_status,
+            "registration_score": classification.registration_score,
+            "external_score": classification.external_score,
+            "computer_score": classification.computer_score,
+            "freshness_score": classification.freshness_score,
+            "grade": classification.grade,
+            "external_applicant_status": classification.external_applicant_status,
+            "computer_course_status": classification.computer_course_status,
             "possible_departments": [],
             "possible_computer_courses": [],
             "course_evidence_url": "",
             "course_evidence_text": "",
             "attachment_urls": notice.attachment_urls,
-            "matched_keywords": cls.matched_keywords,
-            "reason": cls.reason,
+            "matched_keywords": classification.matched_keywords,
+            "reason": classification.reason,
             "is_new": False,
         }
+
         if item["grade"] in {"A", "B", "C"} and not args.smoke_test:
             item = course_finder.enrich(item, university)
+
         items.append(item)
 
     items = storage.dedupe(items)
     items = storage.mark_is_new(items)
+
     if args.grade:
         rank = {"A": 0, "B": 1, "C": 2, "D": 3}
-        items = [i for i in items if rank.get(i.get("grade"), 9) <= rank[args.grade]]
+        items = [item for item in items if rank.get(item.get("grade"), 9) <= rank[args.grade]]
 
     if not args.dry_run:
-        storage.save_results([i for i in items if i.get("grade") != "D"], debug_items=items if debug else None)
+        storage.save_results([item for item in items if item.get("grade") != "D"], debug_items=items if debug else None)
         build_report(items)
         sent = TelegramNotifier().send_candidates(items, dry_run=False)
         storage.update_seen(sent)
@@ -115,7 +121,8 @@ def main() -> int:
             if item.get("grade") != "D" or debug:
                 print(f"[{item['grade']}] {item['university_name']} {item['title']} {item['url']}")
 
-    LOGGER.info("Done. candidates=%d public=%d", len(items), len([i for i in items if i.get("grade") != "D"]))
+    public_count = len([item for item in items if item.get("grade") != "D"])
+    LOGGER.info("Done. candidates=%d public=%d", len(items), public_count)
     return 0
 
 
