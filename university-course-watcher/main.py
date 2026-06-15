@@ -64,6 +64,41 @@ def count_candidate_targets(items: list[dict]) -> int:
     return count
 
 
+def github_actions_run_url() -> str:
+    server_url = os.getenv("GITHUB_SERVER_URL", "")
+    repository = os.getenv("GITHUB_REPOSITORY", "")
+    run_id = os.getenv("GITHUB_RUN_ID", "")
+
+    if not server_url or not repository or not run_id:
+        return ""
+
+    return f"{server_url}/{repository}/actions/runs/{run_id}"
+
+
+def report_preview_items(items: list[dict], limit: int = 5) -> list[dict]:
+    preview: list[dict] = []
+    rank = {"A": 0, "B": 1, "C": 2, "D": 3}
+    sorted_items = sorted(items, key=lambda item: rank.get(item.get("grade"), 9))
+
+    for item in sorted_items:
+        if item.get("grade") == "D":
+            continue
+
+        preview.append({
+            "grade": item.get("grade", ""),
+            "university_name": item.get("university_name", ""),
+            "title": item.get("title", ""),
+            "url": item.get("url", ""),
+            "reason": item.get("reason", ""),
+            "is_new": item.get("is_new", False),
+        })
+
+        if len(preview) >= limit:
+            break
+
+    return preview
+
+
 def main() -> int:
     load_dotenv()
     args = parse_args()
@@ -198,6 +233,10 @@ def main() -> int:
             "sent_count": len(sent),
             "grade_counts": count_by_key(items, "grade"),
             "status_counts": count_by_key(items, "deadline_status"),
+            "preview_items": report_preview_items(items),
+            "failed_boards": crawler.last_stats.get("failed_boards", []),
+            "actions_run_url": github_actions_run_url(),
+            "artifact_name": "university-course-watcher-results",
         }
         report_sent = notifier.send_daily_report(summary, dry_run=False)
         LOGGER.info("Daily Telegram report sent=%s", report_sent)

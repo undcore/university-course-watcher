@@ -93,9 +93,16 @@ class TelegramNotifier:
         grade_counts = summary.get("grade_counts", {})
         status_counts = summary.get("status_counts", {})
         sent_count = summary.get("sent_count", 0)
+        preview_items = summary.get("preview_items", [])
+        failed_boards = summary.get("failed_boards", [])
+        actions_run_url = summary.get("actions_run_url", "")
+        artifact_name = summary.get("artifact_name", "university-course-watcher-results")
 
         grade_line = ", ".join(f"{grade}:{grade_counts.get(grade, 0)}" for grade in ["A", "B", "C", "D"])
         status_line = self._format_counts(status_counts) or "없음"
+        preview_line = self._format_preview_items(preview_items)
+        failure_line = self._format_failed_boards(failed_boards)
+        report_line = self._format_report_location(actions_run_url, artifact_name)
 
         if summary.get("candidate_count", 0):
             result_line = f"알림 후보 {summary.get('candidate_count')}건 중 {sent_count}건을 텔레그램으로 발송했습니다."
@@ -114,8 +121,10 @@ class TelegramNotifier:
             f"신규 A/B 후보: {summary.get('candidate_count')}건\n"
             f"등급 분포: {grade_line}\n"
             f"마감 상태 분포: {status_line}\n\n"
+            f"상위 확인 후보:\n{preview_line}\n\n"
+            f"실패/점검 필요 게시판:\n{failure_line}\n\n"
             f"처리 결과: {result_line}\n\n"
-            f"보고서 파일: GitHub Actions artifact의 report.html을 확인하세요.\n"
+            f"보고서 확인: {report_line}\n"
             f"{DISCLAIMER}"
         )
 
@@ -126,6 +135,46 @@ class TelegramNotifier:
             parts.append(f"{key}:{counts[key]}")
 
         return ", ".join(parts)
+
+    def _format_preview_items(self, items: list[dict]) -> str:
+        if not items:
+            return "- A~C 후보 없음"
+
+        lines: list[str] = []
+
+        for index, item in enumerate(items[:5]):
+            sNew = "신규" if item.get("is_new") else "기존"
+            lines.append(
+                f"{index + 1}. [{item.get('grade')}/{sNew}] {item.get('university_name')} - {item.get('title')}\n"
+                f"   {item.get('url')}"
+            )
+
+        return "\n".join(lines)
+
+    def _format_failed_boards(self, boards: list[dict]) -> str:
+        if not boards:
+            return "- 없음"
+
+        lines: list[str] = []
+
+        for index, board in enumerate(boards[:5]):
+            sError = str(board.get("error", "")).splitlines()[0]
+            if len(sError) > 120:
+                sError = sError[:117] + "..."
+            lines.append(
+                f"{index + 1}. {board.get('university_name')} / {board.get('board_type')}: {sError}"
+            )
+
+        if len(boards) > 5:
+            lines.append(f"- 그 외 {len(boards) - 5}개는 report.html 또는 Actions 로그 확인")
+
+        return "\n".join(lines)
+
+    def _format_report_location(self, actions_run_url: str, artifact_name: str) -> str:
+        if not actions_run_url:
+            return f"GitHub 저장소 > Actions > 최신 실행 > Artifacts > {artifact_name} > report.html"
+
+        return f"{actions_run_url} 에서 Artifacts > {artifact_name} 다운로드 후 report.html 열기"
 
 
 class GraduateAdmissionNotifier:

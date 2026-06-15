@@ -40,6 +40,7 @@ class BoardCrawler:
             "boards_succeeded": 0,
             "boards_failed": 0,
             "boards_skipped": 0,
+            "failed_boards": [],
         }
         self.session.headers.update(
             {
@@ -55,6 +56,7 @@ class BoardCrawler:
             "boards_succeeded": 0,
             "boards_failed": 0,
             "boards_skipped": 0,
+            "failed_boards": [],
         }
 
         for board in boards:
@@ -74,6 +76,12 @@ class BoardCrawler:
 
             if self.last_error:
                 self.last_stats["boards_failed"] += 1
+                self.last_stats["failed_boards"].append({
+                    "university_name": board.get("university_name", ""),
+                    "board_type": board.get("board_type", ""),
+                    "url": board.get("url", ""),
+                    "error": self.last_error,
+                })
             else:
                 self.last_stats["boards_succeeded"] += 1
 

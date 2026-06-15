@@ -98,8 +98,10 @@ jobs:
           elif [ "${{ github.event.inputs.telegram_test }}" = "empty" ]; then
             python main.py --telegram-test-empty
           elif [ "${{ github.event_name }}" = "push" ]; then
+            python main.py --once --dry-run --region incheon --grade A --smoke-test
             python main.py --once --watch graduate-admission --dry-run --region seoul --smoke-test
           else
+            python main.py --once
             python main.py --once --watch graduate-admission --region seoul
           fi
       - name: Upload result artifacts
