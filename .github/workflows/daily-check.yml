@@ -105,6 +105,7 @@ jobs:
             python main.py --once --watch graduate-admission --region seoul
           fi
       - name: Upload result artifacts
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none')
         uses: actions/upload-artifact@v7
         with:
           name: university-course-watcher-results

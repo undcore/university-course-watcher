@@ -135,6 +135,15 @@ GitHub 저장소 Settings → Secrets and variables → Actions에서 다음 Sec
 
 워크플로 실행 결과로 `data/report.html`, `data/results.csv`, `data/results.json`이 artifact에 업로드됩니다.
 
+`report.html`은 GitHub Actions의 정기 실행(`schedule`) 또는 수동 실행(`workflow_dispatch`, `telegram_test=none`) 결과에서 확인합니다. 코드 push로 자동 실행되는 smoke-test는 `--dry-run`으로만 동작하므로 실제 결과 artifact를 업로드하지 않습니다.
+
+확인 경로:
+
+1. GitHub 저장소의 Actions 탭을 엽니다.
+2. `Daily university notice check`에서 최신 정기 실행 또는 직접 실행한 수동 실행을 클릭합니다.
+3. 화면 하단 `Artifacts`에서 `university-course-watcher-results`를 다운로드합니다.
+4. 압축을 풀고 `report.html`을 엽니다.
+
 기본 실행 주기는 하루 1회입니다. 모집철에는 수동으로 cron을 늘릴 수 있습니다.
 
 - 5월~8월: 하루 2회
