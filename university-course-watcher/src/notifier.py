@@ -97,12 +97,13 @@ class TelegramNotifier:
         failed_boards = summary.get("failed_boards", [])
         actions_run_url = summary.get("actions_run_url", "")
         artifact_name = summary.get("artifact_name", "university-course-watcher-results")
+        report_html_url = summary.get("report_html_url", "")
 
         grade_line = ", ".join(f"{grade}:{grade_counts.get(grade, 0)}" for grade in ["A", "B", "C", "D"])
         status_line = self._format_counts(status_counts) or "없음"
         preview_line = self._format_preview_items(preview_items)
         failure_line = self._format_failed_boards(failed_boards)
-        report_line = self._format_report_location(actions_run_url, artifact_name)
+        report_line = self._format_report_location(actions_run_url, artifact_name, report_html_url)
 
         if summary.get("candidate_count", 0):
             result_line = f"알림 후보 {summary.get('candidate_count')}건 중 {sent_count}건을 텔레그램으로 발송했습니다."
@@ -170,7 +171,10 @@ class TelegramNotifier:
 
         return "\n".join(lines)
 
-    def _format_report_location(self, actions_run_url: str, artifact_name: str) -> str:
+    def _format_report_location(self, actions_run_url: str, artifact_name: str, report_html_url: str = "") -> str:
+        if report_html_url:
+            return report_html_url
+
         if not actions_run_url:
             return f"GitHub 저장소 > Actions > 최신 실행 > Artifacts > {artifact_name} > report.html"
 

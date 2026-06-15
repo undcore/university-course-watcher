@@ -20,6 +20,9 @@ on:
           - success
           - empty
 
+permissions:
+  contents: write
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -91,6 +94,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           DEBUG: "false"
           TIMEZONE: Asia/Seoul
+          REPORT_HTML_URL: https://htmlpreview.github.io/?https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/university-course-watcher/data/report.html
         run: |
           cd university-course-watcher
           if [ "${{ github.event.inputs.telegram_test }}" = "success" ]; then
@@ -103,6 +107,23 @@ jobs:
           else
             python main.py --once
             python main.py --once --watch graduate-admission --region seoul
+          fi
+      - name: Commit latest report files
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none')
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            university-course-watcher/data/results.csv \
+            university-course-watcher/data/results.json \
+            university-course-watcher/data/report.html \
+            university-course-watcher/data/graduate_admission_results.csv \
+            university-course-watcher/data/graduate_admission_results.json
+          if git diff --cached --quiet; then
+            echo "No report changes to commit."
+          else
+            git commit -m "Update latest watcher reports [skip ci]"
+            git push
           fi
       - name: Upload result artifacts
         if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none')

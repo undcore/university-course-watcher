@@ -237,6 +237,7 @@ def main() -> int:
             "failed_boards": crawler.last_stats.get("failed_boards", []),
             "actions_run_url": github_actions_run_url(),
             "artifact_name": "university-course-watcher-results",
+            "report_html_url": os.getenv("REPORT_HTML_URL", ""),
         }
         report_sent = notifier.send_daily_report(summary, dry_run=False)
         LOGGER.info("Daily Telegram report sent=%s", report_sent)

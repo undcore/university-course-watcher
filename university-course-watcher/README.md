@@ -133,11 +133,13 @@ GitHub 저장소 Settings → Secrets and variables → Actions에서 다음 Sec
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_CHAT_ID`
 
-워크플로 실행 결과로 `data/report.html`, `data/results.csv`, `data/results.json`이 artifact에 업로드됩니다.
+워크플로 실행 결과로 `data/report.html`, `data/results.csv`, `data/results.json`이 저장소에 최신 파일로 커밋되고 artifact에도 업로드됩니다.
+
+정기 실행 후 텔레그램 일일 점검 보고의 `보고서 확인`에 바로보기 링크가 포함됩니다. 보통은 이 링크를 열면 되고, zip artifact를 직접 받을 필요는 없습니다.
 
 `report.html`은 GitHub Actions의 정기 실행(`schedule`) 또는 수동 실행(`workflow_dispatch`, `telegram_test=none`) 결과에서 확인합니다. 코드 push로 자동 실행되는 smoke-test는 `--dry-run`으로만 동작하므로 실제 결과 artifact를 업로드하지 않습니다.
 
-확인 경로:
+artifact로 직접 확인해야 할 때의 경로:
 
 1. GitHub 저장소의 Actions 탭을 엽니다.
 2. `Daily university notice check`에서 최신 정기 실행 또는 직접 실행한 수동 실행을 클릭합니다.
