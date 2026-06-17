@@ -1,1 +1,8 @@
-university_name,region,semester,notice_date,application_start_date,application_end_date,url,title,source
+﻿university_name,region,semester,notice_date,application_start_date,application_end_date,url,title,source
+아주대학교,경기,,2026-06-15,2026-07-01,2026-07-08,https://www.ajou.ac.kr/kr/ajou/notice.do,본문 바로가기,대학 공식 게시판 직접 크롤링
+아주대학교,경기,2학기,2026-06-15,2026-07-01,2026-07-08,https://www.ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=370361&article.offset=0&articleLimit=10,[공지] [학부] 2026-2학기 시간제등록생 신청 기간 안내(07.01.~07.08.),대학 공식 게시판 직접 크롤링
+아주대학교,경기,2학기,2026-06-15,,,https://www.ajou.ac.kr/kr/ajou/notice.do?mode=download&articleNo=370361&attachNo=328277,2026학년도 2학기 시간제등록생 모집요강.pdf,대학 공식 게시판 직접 크롤링
+아주대학교,경기,2학기,2026-06-15,2026-07-01,2026-07-08,https://www.ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=370302&article.offset=0&articleLimit=10,[공지] [학사] 2026-2학기 휴학/복학 신청 안내,대학 공식 게시판 직접 크롤링
+아주대학교,경기,,2026-06-15,2026-07-01,2026-07-08,https://www.ajou.ac.kr/kr/ajou/notice.do?mode=list&srCategoryId1=1,본문 바로가기,대학 공식 게시판 직접 크롤링
+서울과학기술대학교,서울,,,,,https://www.seoultech.ac.kr/life/info,학사안내,대학 공식 게시판 직접 크롤링
+서울과학기술대학교,서울,,,,,https://www.seoultech.ac.kr/life/info/college/schedule/,학사행정,대학 공식 게시판 직접 크롤링
