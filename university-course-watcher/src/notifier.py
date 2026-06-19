@@ -20,6 +20,7 @@ class TelegramNotifier:
         load_dotenv()
         self.token = os.getenv("TELEGRAM_BOT_TOKEN", "")
         self.chat_id = os.getenv("TELEGRAM_CHAT_ID", "")
+        self.delivery_failures: list[str] = []
 
     def send_candidates(self, items: list[dict], dry_run: bool = False) -> list[dict]:
         targets = [
@@ -41,6 +42,7 @@ class TelegramNotifier:
                 sent.append(item)
             except Exception as exc:
                 LOGGER.warning("Telegram candidate send failed: %s", exc)
+                self.delivery_failures.append(str(exc))
 
         return sent
 
@@ -57,6 +59,7 @@ class TelegramNotifier:
             return True
         except Exception as exc:
             LOGGER.warning("Telegram daily report send failed: %s", exc)
+            self.delivery_failures.append(str(exc))
             return False
 
     def _is_configured(self) -> bool:
@@ -95,6 +98,7 @@ class TelegramNotifier:
         sent_count = summary.get("sent_count", 0)
         preview_items = summary.get("preview_items", [])
         failed_boards = summary.get("failed_boards", [])
+        failed_details = summary.get("failed_details", [])
         actions_run_url = summary.get("actions_run_url", "")
         artifact_name = summary.get("artifact_name", "university-course-watcher-results")
         report_html_url = summary.get("report_html_url", "")
@@ -102,7 +106,7 @@ class TelegramNotifier:
         grade_line = ", ".join(f"{grade}:{grade_counts.get(grade, 0)}" for grade in ["A", "B", "C", "D"])
         status_line = self._format_counts(status_counts) or "없음"
         preview_line = self._format_preview_items(preview_items)
-        failure_line = self._format_failed_boards(failed_boards)
+        failure_line = self._format_failed_boards(failed_boards + failed_details)
         report_line = self._format_report_location(actions_run_url, artifact_name, report_html_url)
 
         if summary.get("candidate_count", 0):
@@ -116,6 +120,7 @@ class TelegramNotifier:
             f"점검 대학: {summary.get('university_count')}개\n"
             f"점검 게시판: {summary.get('board_count')}개\n"
             f"게시판 처리: 성공 {summary.get('board_success_count')}개, 실패 {summary.get('board_failure_count')}개, 스킵 {summary.get('board_skip_count')}개\n"
+            f"상세 글 처리: 전체 {summary.get('detail_count')}개, 실패 {summary.get('detail_failure_count')}개\n"
             f"수집 공지: {summary.get('crawled_count')}건\n"
             f"중복 제거 후: {summary.get('deduped_count')}건\n"
             f"공개 보고 대상(A~C): {summary.get('public_count')}건\n"
@@ -186,6 +191,7 @@ class GraduateAdmissionNotifier:
         load_dotenv()
         self.token = os.getenv("TELEGRAM_BOT_TOKEN", "")
         self.chat_id = os.getenv("TELEGRAM_CHAT_ID", "")
+        self.delivery_failures: list[str] = []
 
     def send_candidates(self, items: list[dict], dry_run: bool = False) -> list[dict]:
         targets = [
@@ -205,6 +211,7 @@ class GraduateAdmissionNotifier:
                 self._send(self._summary_message(items))
             except Exception as exc:
                 LOGGER.warning("Telegram summary send failed: %s", exc)
+                self.delivery_failures.append(str(exc))
             return sent
 
         for item in targets:
@@ -213,6 +220,7 @@ class GraduateAdmissionNotifier:
                 sent.append(item)
             except Exception as exc:
                 LOGGER.warning("Telegram send failed: %s", exc)
+                self.delivery_failures.append(str(exc))
 
         return sent
 

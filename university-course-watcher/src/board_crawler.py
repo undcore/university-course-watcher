@@ -40,7 +40,10 @@ class BoardCrawler:
             "boards_succeeded": 0,
             "boards_failed": 0,
             "boards_skipped": 0,
+            "details_total": 0,
+            "details_failed": 0,
             "failed_boards": [],
+            "failed_details": [],
         }
         self.session.headers.update(
             {
@@ -56,7 +59,10 @@ class BoardCrawler:
             "boards_succeeded": 0,
             "boards_failed": 0,
             "boards_skipped": 0,
+            "details_total": 0,
+            "details_failed": 0,
             "failed_boards": [],
+            "failed_details": [],
         }
 
         for board in boards:
@@ -102,8 +108,13 @@ class BoardCrawler:
 
         soup = BeautifulSoup(html, HTML_PARSER)
         candidates = self._extract_candidate_links(soup, url, keyword_hint)
+        candidates = self._select_candidates(candidates)
         notices: list[CrawledNotice] = []
+        iDetailSuccessCount = 0
+
         for title, detail_url, notice_date in candidates[: self.max_links_per_board]:
+            self.last_stats["details_total"] += 1
+
             try:
                 detail_html = self._get_text(detail_url)
                 detail_soup = BeautifulSoup(detail_html, HTML_PARSER)
@@ -112,8 +123,16 @@ class BoardCrawler:
                     notice_date = sDetailNoticeDate
                 body_text = self._extract_body_text(detail_soup)
                 attachments = self._extract_attachment_urls(detail_soup, detail_url)
+                iDetailSuccessCount += 1
             except Exception as exc:
-                LOGGER.debug("Detail fetch failed: %s %s", detail_url, exc)
+                self.last_stats["details_failed"] += 1
+                self.last_stats["failed_details"].append({
+                    "university_name": board.get("university_name", ""),
+                    "board_type": board.get("board_type", ""),
+                    "url": detail_url,
+                    "error": str(exc),
+                })
+                LOGGER.warning("Detail fetch failed: %s %s", detail_url, exc)
                 body_text = ""
                 attachments = []
             notices.append(
@@ -127,7 +146,24 @@ class BoardCrawler:
                     attachment_urls=attachments,
                 )
             )
+
+        if candidates and iDetailSuccessCount == 0:
+            self.last_error = f"All {min(len(candidates), self.max_links_per_board)} detail pages failed."
+
         return notices
+
+    def _select_candidates(self, candidates: list[tuple[str, str, str]]) -> list[tuple[str, str, str]]:
+        lstDatedCandidates: list[tuple[str, str, str]] = []
+        lstUndatedCandidates: list[tuple[str, str, str]] = []
+
+        for tupleCandidate in candidates:
+            if tupleCandidate[2]:
+                lstDatedCandidates.append(tupleCandidate)
+            else:
+                lstUndatedCandidates.append(tupleCandidate)
+
+        lstDatedCandidates.sort(key=lambda tupleCandidate: tupleCandidate[2], reverse=True)
+        return lstDatedCandidates + lstUndatedCandidates
 
     def _get_text(self, url: str) -> str:
         try:

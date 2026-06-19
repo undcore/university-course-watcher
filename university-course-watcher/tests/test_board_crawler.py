@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import Mock
 
 from bs4 import BeautifulSoup
 
@@ -65,6 +66,31 @@ class BoardCrawlerLinkTest(unittest.TestCase):
 
         self.assertEqual("2026-04-03", self.crawler._extract_notice_date(soupLabeled))
         self.assertEqual("", self.crawler._extract_notice_date(soupUnlabeled))
+
+    def test_candidates_with_dates_are_sorted_newest_first(self) -> None:
+        lstCandidates = [
+            ("날짜 없음", "https://example.com/0", ""),
+            ("오래된 글", "https://example.com/1", "2026-04-03"),
+            ("최신 글", "https://example.com/2", "2026-06-20"),
+        ]
+
+        lstSelected = self.crawler._select_candidates(lstCandidates)
+
+        self.assertEqual(["최신 글", "오래된 글", "날짜 없음"], [tupleItem[0] for tupleItem in lstSelected])
+
+    def test_all_detail_failures_mark_board_as_failed(self) -> None:
+        sListHtml = '<a href="?articleNo=1">2026학년도 시간제등록 모집</a>'
+        self.crawler._get_text = Mock(side_effect=[sListHtml, RuntimeError("detail unavailable")])
+        dictBoard = {
+            "university_name": "테스트대학교",
+            "board_type": "공지사항",
+            "url": self.sBaseUrl,
+        }
+
+        self.crawler.crawl_board(dictBoard)
+
+        self.assertEqual(1, self.crawler.last_stats["details_failed"])
+        self.assertIn("All 1 detail pages failed", self.crawler.last_error)
 
 
 if __name__ == "__main__":

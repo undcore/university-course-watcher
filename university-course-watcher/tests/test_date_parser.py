@@ -35,6 +35,28 @@ class NoticeDateParserTest(unittest.TestCase):
 
         self.assertEqual("2026-04-03", dictDates["notice_date"])
 
+    def test_unrelated_dates_are_not_used_as_application_period(self) -> None:
+        dictDates = parse_notice_dates(
+            "시간제등록 모집",
+            "게시일 2026-04-03. 설명회 2026-06-10. 개강일 2026-06-20.",
+            "2026-04-03",
+            date(2026, 6, 19),
+        )
+
+        self.assertEqual("", dictDates["application_start_date"])
+        self.assertEqual("", dictDates["application_end_date"])
+
+    def test_reversed_application_period_is_rejected(self) -> None:
+        dictDates = parse_notice_dates(
+            "시간제등록 모집",
+            "접수기간 2026-06-20 ~ 2026-01-01",
+            "2026-04-03",
+            date(2026, 6, 19),
+        )
+
+        self.assertEqual("", dictDates["application_start_date"])
+        self.assertEqual("", dictDates["application_end_date"])
+
 
 if __name__ == "__main__":
     unittest.main()

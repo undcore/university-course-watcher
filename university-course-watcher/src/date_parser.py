@@ -14,6 +14,7 @@ RANGE_RE = re.compile(
     r"(20\d{2})?\D{0,5}(\d{1,2})\D{0,5}(\d{1,2})",
     re.IGNORECASE,
 )
+RANGE_CONTEXT_WORDS = ["접수", "신청", "등록", "원서", "모집기간", "수강"]
 
 
 def parse_notice_dates(title: str, body: str, notice_date: str, today: date) -> dict[str, str]:
@@ -52,32 +53,25 @@ def deadline_status(start: Optional[date], end: Optional[date], today: date) -> 
 
 
 def _find_range(text: str) -> tuple[Optional[date], Optional[date]]:
-    dates: list[date] = []
+    lstSegments = re.split(r"[\n\r]|(?<=[.!?])\s+", text)
 
-    for match in RANGE_RE.finditer(text):
-        start_year, start_month, start_day, end_year, end_month, end_day = match.groups()
-        start_date = _to_date((start_year, start_month, start_day))
-        end_date = _to_date((end_year or start_year, end_month, end_day))
+    for sSegment in lstSegments:
+        sNormalizedSegment = " ".join(sSegment.split())
 
-        if start_date and end_date:
-            return start_date, end_date
-
-    for match in DATE_RE.finditer(text):
-        found_date = _to_date(match.groups())
-
-        if not found_date:
+        if not any(sWord in sNormalizedSegment for sWord in RANGE_CONTEXT_WORDS):
             continue
 
-        dates.append(found_date)
+        for match in RANGE_RE.finditer(sNormalizedSegment):
+            sStartYear, sStartMonth, sStartDay, sEndYear, sEndMonth, sEndDay = match.groups()
+            dateStart = _to_date((sStartYear, sStartMonth, sStartDay))
+            dateEnd = _to_date((sEndYear or sStartYear, sEndMonth, sEndDay))
 
-        if len(dates) >= 2:
-            break
+            if dateStart is None or dateEnd is None:
+                continue
+            if dateEnd < dateStart:
+                continue
 
-    if len(dates) >= 2:
-        return dates[0], dates[1]
-
-    if len(dates) == 1:
-        return None, dates[0]
+            return dateStart, dateEnd
 
     return None, None
 

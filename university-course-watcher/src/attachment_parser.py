@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import logging
+import re
 from urllib.parse import urlparse
 
 import requests
@@ -51,6 +52,9 @@ class AttachmentParser:
         except SSLError:
             response = self.session.get(url, timeout=self.timeout, stream=True, verify=False)
         response.raise_for_status()
+        suffix = self._detect_suffix(url, response)
+        if suffix in {".hwp", ".hwpx", ".zip"}:
+            return ""
         content = response.raw.read(self.max_bytes + 1, decode_content=True)
         if len(content) > self.max_bytes:
             LOGGER.info("Attachment too large, skipped text extraction: %s", url)
@@ -69,6 +73,32 @@ class AttachmentParser:
                 return ""
             return self._xlsx_text(data)
         return ""
+
+    def _detect_suffix(self, url: str, response: requests.Response) -> str:
+        sUrlSuffix = self._suffix(url)
+
+        if sUrlSuffix:
+            return sUrlSuffix
+
+        sDisposition = response.headers.get("Content-Disposition", "")
+        match = re.search(r"filename\*?=(?:UTF-8''|\")?([^\";]+)", sDisposition, re.IGNORECASE)
+
+        if match:
+            sFileName = match.group(1).strip()
+            sFileSuffix = self._suffix(sFileName)
+            if sFileSuffix:
+                return sFileSuffix
+
+        sContentType = response.headers.get("Content-Type", "").split(";", 1)[0].strip().lower()
+        dictContentTypes = {
+            "application/pdf": ".pdf",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx",
+            "application/x-hwp": ".hwp",
+            "application/haansofthwp": ".hwp",
+        }
+
+        return dictContentTypes.get(sContentType, "")
 
     def _suffix(self, url: str) -> str:
         path = urlparse(url).path.lower()

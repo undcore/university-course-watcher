@@ -165,13 +165,17 @@ def main() -> int:
 
         watcher = GraduateAdmissionWatcher(smoke_test=args.smoke_test)
         items = watcher.run(region=args.region, dry_run=args.dry_run)
-        sent = GraduateAdmissionNotifier().send_candidates(items, dry_run=args.dry_run)
+        notifier = GraduateAdmissionNotifier()
+        sent = notifier.send_candidates(items, dry_run=args.dry_run)
 
         if not args.dry_run:
             watcher.mark_sent(sent)
         else:
             for item in items:
                 print(f"[{item['grade']}] {item['university_name']} {item['title']} {item['url']}")
+
+        if notifier.delivery_failures:
+            raise RuntimeError(f"Telegram delivery failed {len(notifier.delivery_failures)} time(s).")
 
         LOGGER.info("Done. graduate_admission_candidates=%d notifications=%d", len(items), len(sent))
         return 0
@@ -267,6 +271,8 @@ def main() -> int:
             "board_success_count": crawler.last_stats.get("boards_succeeded", 0),
             "board_failure_count": crawler.last_stats.get("boards_failed", 0),
             "board_skip_count": crawler.last_stats.get("boards_skipped", 0),
+            "detail_count": crawler.last_stats.get("details_total", 0),
+            "detail_failure_count": crawler.last_stats.get("details_failed", 0),
             "crawled_count": crawled_count,
             "deduped_count": deduped_count,
             "public_count": public_count,
@@ -276,12 +282,16 @@ def main() -> int:
             "status_counts": count_by_key(items, "deadline_status"),
             "preview_items": report_preview_items(items),
             "failed_boards": crawler.last_stats.get("failed_boards", []),
+            "failed_details": crawler.last_stats.get("failed_details", []),
             "actions_run_url": github_actions_run_url(),
             "artifact_name": "university-course-watcher-results",
             "report_html_url": os.getenv("REPORT_HTML_URL", ""),
         }
         report_sent = notifier.send_daily_report(summary, dry_run=False)
         LOGGER.info("Daily Telegram report sent=%s", report_sent)
+
+        if notifier.delivery_failures or not report_sent:
+            raise RuntimeError(f"Telegram delivery failed {len(notifier.delivery_failures)} time(s).")
     else:
         for item in items:
             if item.get("grade") != "D" or debug:
