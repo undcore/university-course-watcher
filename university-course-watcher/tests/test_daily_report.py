@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
 
 
@@ -15,11 +16,12 @@ from src.storage import Storage
 
 class DailyReportTest(unittest.TestCase):
     def test_preview_contains_only_new_public_items(self) -> None:
+        sToday = date.today().isoformat()
         lstItems = [
-            {"grade": "A", "is_new": False, "title": "existing A"},
-            {"grade": "B", "is_new": True, "title": "new B"},
-            {"grade": "C", "is_new": True, "title": "new C"},
-            {"grade": "D", "is_new": True, "title": "new D"},
+            {"grade": "A", "is_new": False, "title": "existing A", "notice_date": sToday},
+            {"grade": "B", "is_new": True, "title": "new B", "notice_date": sToday},
+            {"grade": "C", "is_new": True, "title": "new C", "notice_date": sToday},
+            {"grade": "D", "is_new": True, "title": "new D", "notice_date": sToday},
         ]
 
         lstPreview = report_preview_items(lstItems)
@@ -56,6 +58,16 @@ class DailyReportTest(unittest.TestCase):
             setSeenUrls = Storage(pathData).load_seen()
 
         self.assertEqual({"https://example.com/c"}, setSeenUrls)
+
+    def test_stale_grade_a_and_b_items_are_marked_seen_without_delivery(self) -> None:
+        lstItems = [
+            {"url": "https://example.com/a", "grade": "A", "is_new": True, "notice_date": "2026-03-01"},
+            {"url": "https://example.com/b", "grade": "B", "is_new": True, "notice_date": "2026-04-01"},
+        ]
+
+        lstSeenItems = items_to_mark_seen(lstItems, [])
+
+        self.assertEqual(2, len(lstSeenItems))
 
     def test_weak_grade_c_requires_target_signal_in_title(self) -> None:
         dictNoise = normalize_weak_candidate({"grade": "C", "title": "2026학년도 인턴십 학생모집"})

@@ -18,6 +18,7 @@ from src.course_finder import CourseFinder
 from src.date_parser import parse_notice_dates
 from src.graduate_admission_watcher import GraduateAdmissionWatcher
 from src.notifier import GraduateAdmissionNotifier, TelegramNotifier
+from src.recency import is_recent_notice, is_stale_notice
 from src.report_builder import build_report
 from src.storage import Storage
 from src.utils import CONFIG_DIR, ensure_dirs, load_json, now_kst, setup_logging
@@ -58,7 +59,7 @@ def count_candidate_targets(items: list[dict]) -> int:
         grade = item.get("grade")
         deadline_status = item.get("deadline_status")
 
-        if is_new and grade in {"A", "B"} and deadline_status != "마감됨":
+        if is_new and grade in {"A", "B"} and deadline_status != "마감됨" and is_recent_notice(item):
             count += 1
 
     return count
@@ -81,7 +82,7 @@ def report_preview_items(items: list[dict], limit: int = 5) -> list[dict]:
     sorted_items = sorted(items, key=lambda item: rank.get(item.get("grade"), 9))
 
     for item in sorted_items:
-        if item.get("grade") == "D" or not item.get("is_new"):
+        if item.get("grade") == "D" or not item.get("is_new") or not is_recent_notice(item):
             continue
 
         preview.append({
@@ -108,7 +109,9 @@ def items_to_mark_seen(items: list[dict], sent_items: list[dict]) -> list[dict]:
         sGrade = dictItem.get("grade", "")
         bIsNew = bool(dictItem.get("is_new"))
 
-        if not bIsNew or sGrade != "C" or not sUrl:
+        bShouldMarkSeen = sGrade == "C" or is_stale_notice(dictItem)
+
+        if not bIsNew or not bShouldMarkSeen or not sUrl:
             continue
         if sUrl in setSeenUrls:
             continue
@@ -169,7 +172,7 @@ def main() -> int:
         sent = notifier.send_candidates(items, dry_run=args.dry_run)
 
         if not args.dry_run:
-            watcher.mark_sent(sent)
+            watcher.mark_sent(items_to_mark_seen(items, sent))
         else:
             for item in items:
                 print(f"[{item['grade']}] {item['university_name']} {item['title']} {item['url']}")

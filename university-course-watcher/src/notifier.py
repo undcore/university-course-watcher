@@ -5,6 +5,8 @@ import os
 
 import requests
 
+from .recency import is_recent_notice
+
 try:
     from dotenv import load_dotenv
 except ImportError:  # pragma: no cover
@@ -25,7 +27,10 @@ class TelegramNotifier:
     def send_candidates(self, items: list[dict], dry_run: bool = False) -> list[dict]:
         targets = [
             item for item in items
-            if item.get("is_new") and item.get("grade") in {"A", "B"} and item.get("deadline_status") != "마감됨"
+            if item.get("is_new")
+            and item.get("grade") in {"A", "B"}
+            and item.get("deadline_status") != "마감됨"
+            and is_recent_notice(item)
         ]
 
         if dry_run:
@@ -196,7 +201,7 @@ class GraduateAdmissionNotifier:
     def send_candidates(self, items: list[dict], dry_run: bool = False) -> list[dict]:
         targets = [
             item for item in items
-            if item.get("is_new") and item.get("grade") in {"A", "B"}
+            if item.get("is_new") and item.get("grade") in {"A", "B"} and is_recent_notice(item)
         ]
 
         if dry_run:

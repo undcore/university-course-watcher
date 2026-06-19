@@ -86,6 +86,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           DEBUG: "false"
           TIMEZONE: Asia/Seoul
+          NOTICE_MAX_AGE_DAYS: "7"
           REPORT_HTML_URL: https://htmlpreview.github.io/?https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/university-course-watcher/data/report.html
         run: |
           cd university-course-watcher
@@ -132,6 +133,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           DEBUG: "false"
           TIMEZONE: Asia/Seoul
+          NOTICE_MAX_AGE_DAYS: "7"
         run: |
           cd university-course-watcher
           if [ "${{ github.event_name }}" = "push" ] && [[ "${{ github.event.head_commit.message }}" != *"[full-run]"* ]]; then
