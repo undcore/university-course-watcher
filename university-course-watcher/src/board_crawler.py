@@ -171,6 +171,37 @@ class BoardCrawler:
     def _looks_like_notice_link(self, title: str, url: str, base_url: str, keyword_hint: str | None) -> bool:
         if not title or len(title) < 3:
             return False
+        if len(title) > 180:
+            return False
+
+        sNormalizedTitle = normalize_space(title).lower()
+        parsedCandidateUrl = urlparse(url)
+        parsedBoardUrl = urlparse(base_url)
+        sCandidatePath = parsedCandidateUrl.path.rstrip("/")
+        sBoardPath = parsedBoardUrl.path.rstrip("/")
+        bIsSamePage = (
+            parsedCandidateUrl.netloc == parsedBoardUrl.netloc
+            and sCandidatePath == sBoardPath
+            and parsedCandidateUrl.query == parsedBoardUrl.query
+        )
+        setMenuTitles = {
+            "학사일정", "커뮤니티", "대학소개", "학사안내", "학사행정", "신입학", "편입학",
+            "공지사항", "동문소식", "모집안내", "입학안내", "학사자료실", "교직과공지",
+            "대학전체", "사회과학대학", "정보기술대학", "사범대학", "more view",
+        }
+        lstTargetWords = ["시간제", "등록생", "학점은행", "비학위", "모집요강", "수강"]
+        bHasKeywordHint = bool(keyword_hint and keyword_hint.lower() in sNormalizedTitle)
+        bHasTargetTitle = any(sWord in sNormalizedTitle for sWord in lstTargetWords)
+        bHasDetailUrl = bool(re.search(
+            r"(article(no)?=|artclview|bbs|board/info|encmenuboardseq|mode=(view|download)|ntt|seq=|wr_id=)",
+            url.lower(),
+        ))
+
+        if bIsSamePage or sNormalizedTitle in setMenuTitles:
+            return False
+        if not bHasKeywordHint and not bHasTargetTitle and not bHasDetailUrl:
+            return False
+
         parsed = urlparse(url)
         if parsed.scheme not in {"http", "https"}:
             return False

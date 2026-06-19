@@ -119,6 +119,24 @@ def items_to_mark_seen(items: list[dict], sent_items: list[dict]) -> list[dict]:
     return lstSeenItems
 
 
+def normalize_weak_candidate(item: dict) -> dict:
+    if item.get("grade") != "C":
+        return item
+
+    sTitle = str(item.get("title", "")).lower()
+    lstTargetWords = [
+        "시간제", "등록생", "학점은행", "비학위", "외부 수강", "타교생", "일반인 수강",
+    ]
+    bHasTargetTitle = any(sWord in sTitle for sWord in lstTargetWords)
+
+    if bHasTargetTitle:
+        return item
+
+    item["grade"] = "D"
+    item["reason"] = "C등급 약한 후보이지만 제목에 시간제등록 또는 외부 수강 신호가 없어 제외했습니다."
+    return item
+
+
 def main() -> int:
     load_dotenv()
     args = parse_args()
@@ -216,6 +234,8 @@ def main() -> int:
             "reason": classification.reason,
             "is_new": False,
         }
+
+        item = normalize_weak_candidate(item)
 
         if item["grade"] in {"A", "B", "C"} and not args.smoke_test:
             item = course_finder.enrich(item, university)

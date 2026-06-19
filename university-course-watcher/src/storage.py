@@ -32,7 +32,17 @@ class Storage:
 
     def load_seen(self) -> set[str]:
         data = load_json(self.seen_path, [])
-        return set(data if isinstance(data, list) else data.keys())
+        setSeenUrls = set(data if isinstance(data, list) else data.keys())
+        lstPreviousItems = load_json(self.results_json, [])
+
+        for dictItem in lstPreviousItems:
+            sUrl = dictItem.get("url", "")
+            sGrade = dictItem.get("grade", "")
+
+            if sGrade == "C" and sUrl:
+                setSeenUrls.add(sUrl)
+
+        return setSeenUrls
 
     def mark_is_new(self, items: list[dict]) -> list[dict]:
         seen = self.load_seen()
