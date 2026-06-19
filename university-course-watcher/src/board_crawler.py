@@ -107,6 +107,9 @@ class BoardCrawler:
             try:
                 detail_html = self._get_text(detail_url)
                 detail_soup = BeautifulSoup(detail_html, HTML_PARSER)
+                sDetailNoticeDate = self._extract_notice_date(detail_soup)
+                if sDetailNoticeDate:
+                    notice_date = sDetailNoticeDate
                 body_text = self._extract_body_text(detail_soup)
                 attachments = self._extract_attachment_urls(detail_soup, detail_url)
             except Exception as exc:
@@ -144,10 +147,9 @@ class BoardCrawler:
             links = container.find_all("a", href=True)
             if not links:
                 continue
-            text = normalize_space(container.get_text(" "))
-            date = self._find_date(text)
             for a in links:
-                title = normalize_space(a.get_text(" ") or a.get("title") or text)
+                sContextText = self._link_context_text(a, container)
+                title = normalize_space(a.get_text(" ") or a.get("title") or sContextText)
                 href = a.get("href", "")
                 full_url = urljoin(base_url, href)
                 if not self._looks_like_notice_link(title, full_url, base_url, keyword_hint):
@@ -156,7 +158,8 @@ class BoardCrawler:
                 if key in seen:
                     continue
                 seen.add(key)
-                rows.append((title[:250], key, date))
+                sNoticeDate = self._find_date(sContextText)
+                rows.append((title[:250], key, sNoticeDate))
 
         if rows:
             return rows
@@ -167,6 +170,59 @@ class BoardCrawler:
             if self._looks_like_notice_link(title, full_url, base_url, keyword_hint):
                 rows.append((title[:250], full_url.split("#")[0], ""))
         return rows
+
+    def _link_context_text(self, link, container) -> str:
+        nodeContext = link.find_parent(["tr", "li", "article"])
+
+        if nodeContext is not None:
+            return normalize_space(nodeContext.get_text(" "))
+
+        nodeContext = link.parent
+
+        for iDepth in range(0, 3):
+            if nodeContext is None:
+                break
+
+            iLinkCount = len(nodeContext.find_all("a", href=True))
+            if iLinkCount < 3:
+                return normalize_space(nodeContext.get_text(" "))
+
+            nodeContext = nodeContext.parent
+
+        if container.name != "div" or len(container.find_all("a", href=True)) < 3:
+            return normalize_space(container.get_text(" "))
+
+        return ""
+
+    def _extract_notice_date(self, soup: BeautifulSoup) -> str:
+        lstMetaSelectors = [
+            "meta[property='article:published_time']",
+            "meta[name='date']",
+            "meta[name='publish-date']",
+        ]
+
+        for sSelector in lstMetaSelectors:
+            nodeDate = soup.select_one(sSelector)
+            if nodeDate is None:
+                continue
+
+            sDate = self._find_date(nodeDate.get("content", ""))
+            if sDate:
+                return sDate
+
+        for nodeDate in soup.select("time[datetime], .regdate, .write-date, .view-date, .board-date"):
+            sDateText = nodeDate.get("datetime", "") or nodeDate.get_text(" ")
+            sDate = self._find_date(sDateText)
+            if sDate:
+                return sDate
+
+        sPageText = normalize_space(soup.get_text(" "))
+        match = re.search(r"(?:게시일|작성일|등록일|작성일자)\s*[:：]?\s*((?:19|20)\d{2}\D{0,5}\d{1,2}\D{0,5}\d{1,2})", sPageText)
+
+        if match:
+            return self._find_date(match.group(1))
+
+        return ""
 
     def _looks_like_notice_link(self, title: str, url: str, base_url: str, keyword_hint: str | None) -> bool:
         if not title or len(title) < 3:

@@ -19,7 +19,7 @@ RANGE_RE = re.compile(
 def parse_notice_dates(title: str, body: str, notice_date: str, today: date) -> dict[str, str]:
     text = f"{title}\n{body}"
     start, end = _find_range(text)
-    notice = _normalize_date(notice_date) or _find_first_date(text)
+    notice = _normalize_date(notice_date)
 
     return {
         "notice_date": notice or "",

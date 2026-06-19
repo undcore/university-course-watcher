@@ -4,6 +4,8 @@ import sys
 import unittest
 from pathlib import Path
 
+from bs4 import BeautifulSoup
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -36,6 +38,33 @@ class BoardCrawlerLinkTest(unittest.TestCase):
         for sTitle, sUrl in lstLinks:
             with self.subTest(sTitle=sTitle):
                 self.assertTrue(self.crawler._looks_like_notice_link(sTitle, sUrl, self.sBaseUrl, None))
+
+    def test_candidate_dates_are_read_from_each_link_context(self) -> None:
+        sHtml = """
+        <div class="board-list">
+          <div class="row"><a href="?articleNo=1">첫 번째 공고</a><span>2026-06-10</span></div>
+          <div class="row"><a href="?articleNo=2">두 번째 공고</a><span>2026-04-03</span></div>
+        </div>
+        """
+        soup = BeautifulSoup(sHtml, "html.parser")
+
+        lstRows = self.crawler._extract_candidate_links(soup, self.sBaseUrl, None)
+
+        self.assertEqual("2026-06-10", lstRows[0][2])
+        self.assertEqual("2026-04-03", lstRows[1][2])
+
+    def test_detail_page_uses_only_explicit_notice_date(self) -> None:
+        soupLabeled = BeautifulSoup(
+            "<div>등록일: 2026-04-03</div><div>접수기간 2026-06-10 ~ 2026-06-20</div>",
+            "html.parser",
+        )
+        soupUnlabeled = BeautifulSoup(
+            "<div>접수기간 2026-06-10 ~ 2026-06-20</div>",
+            "html.parser",
+        )
+
+        self.assertEqual("2026-04-03", self.crawler._extract_notice_date(soupLabeled))
+        self.assertEqual("", self.crawler._extract_notice_date(soupUnlabeled))
 
 
 if __name__ == "__main__":
