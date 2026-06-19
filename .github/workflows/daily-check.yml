@@ -93,13 +93,13 @@ jobs:
             python main.py --telegram-test-success
           elif [ "${{ github.event.inputs.telegram_test }}" = "empty" ]; then
             python main.py --telegram-test-empty
-          elif [ "${{ github.event_name }}" = "push" ]; then
+          elif [ "${{ github.event_name }}" = "push" ] && [[ "${{ github.event.head_commit.message }}" != *"[full-run]"* ]]; then
             python main.py --once --dry-run --region incheon --grade A --smoke-test
           else
             python main.py --once
           fi
       - name: Upload course results
-        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none')
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[full-run]'))
         uses: actions/upload-artifact@v7
         with:
           name: course-watcher-results
@@ -128,7 +128,7 @@ jobs:
           restore-keys: |
             graduate-admission-seen-
       - name: Download course results
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[full-run]')
         uses: actions/download-artifact@v8
         with:
           name: course-watcher-results
@@ -141,13 +141,13 @@ jobs:
           TIMEZONE: Asia/Seoul
         run: |
           cd university-course-watcher
-          if [ "${{ github.event_name }}" = "push" ]; then
+          if [ "${{ github.event_name }}" = "push" ] && [[ "${{ github.event.head_commit.message }}" != *"[full-run]"* ]]; then
             python main.py --once --watch graduate-admission --dry-run --region seoul --smoke-test
           else
             python main.py --once --watch graduate-admission --region seoul
           fi
       - name: Commit latest report files
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[full-run]')
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -164,7 +164,7 @@ jobs:
             git push
           fi
       - name: Upload combined result artifacts
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[full-run]')
         uses: actions/upload-artifact@v7
         with:
           name: university-course-watcher-results
