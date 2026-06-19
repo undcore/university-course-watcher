@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from urllib.parse import urljoin, urlparse
 
@@ -54,6 +55,7 @@ class BoardCrawler:
 
     def crawl_boards(self, boards: list[dict], universities: dict[str, dict], keyword_hint: str | None = None) -> list[CrawledNotice]:
         notices: list[CrawledNotice] = []
+        lstActiveBoards: list[dict] = []
         self.last_stats = {
             "boards_total": 0,
             "boards_succeeded": 0,
@@ -78,15 +80,32 @@ class BoardCrawler:
                 self.last_stats["boards_skipped"] += 1
                 continue
 
-            board_notices = self.crawl_board(board, keyword_hint=keyword_hint)
+            lstActiveBoards.append(board)
 
-            if self.last_error:
+        if not lstActiveBoards:
+            return notices
+
+        iWorkerCount = min(4, len(lstActiveBoards))
+
+        with ThreadPoolExecutor(max_workers=iWorkerCount) as executor:
+            lstResults = list(executor.map(
+                lambda dictBoard: self._crawl_board_worker(dictBoard, keyword_hint),
+                lstActiveBoards,
+            ))
+
+        for dictBoard, tupleResult in zip(lstActiveBoards, lstResults):
+            board_notices, sBoardError, dictBoardStats = tupleResult
+            self.last_stats["details_total"] += dictBoardStats.get("details_total", 0)
+            self.last_stats["details_failed"] += dictBoardStats.get("details_failed", 0)
+            self.last_stats["failed_details"].extend(dictBoardStats.get("failed_details", []))
+
+            if sBoardError:
                 self.last_stats["boards_failed"] += 1
                 self.last_stats["failed_boards"].append({
-                    "university_name": board.get("university_name", ""),
-                    "board_type": board.get("board_type", ""),
-                    "url": board.get("url", ""),
-                    "error": self.last_error,
+                    "university_name": dictBoard.get("university_name", ""),
+                    "board_type": dictBoard.get("board_type", ""),
+                    "url": dictBoard.get("url", ""),
+                    "error": sBoardError,
                 })
             else:
                 self.last_stats["boards_succeeded"] += 1
@@ -151,6 +170,15 @@ class BoardCrawler:
             self.last_error = f"All {min(len(candidates), self.max_links_per_board)} detail pages failed."
 
         return notices
+
+    def _crawl_board_worker(
+        self,
+        board: dict,
+        keyword_hint: str | None,
+    ) -> tuple[list[CrawledNotice], str, dict]:
+        crawler = BoardCrawler(timeout=self.timeout, max_links_per_board=self.max_links_per_board)
+        lstNotices = crawler.crawl_board(board, keyword_hint=keyword_hint)
+        return lstNotices, crawler.last_error, crawler.last_stats
 
     def _select_candidates(self, candidates: list[tuple[str, str, str]]) -> list[tuple[str, str, str]]:
         lstDatedCandidates: list[tuple[str, str, str]] = []

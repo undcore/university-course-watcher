@@ -92,6 +92,42 @@ class BoardCrawlerLinkTest(unittest.TestCase):
         self.assertEqual(1, self.crawler.last_stats["details_failed"])
         self.assertIn("All 1 detail pages failed", self.crawler.last_error)
 
+    def test_parallel_board_results_preserve_order_and_merge_stats(self) -> None:
+        lstBoards = [
+            {"university_name": "첫째대학교", "board_type": "공지", "url": "https://first.example"},
+            {"university_name": "둘째대학교", "board_type": "공지", "url": "https://second.example"},
+        ]
+        dictUniversities = {
+            "첫째대학교": {"name": "첫째대학교"},
+            "둘째대학교": {"name": "둘째대학교"},
+        }
+
+        def worker(dictBoard, keyword_hint):
+            notice = self._notice(dictBoard["university_name"])
+            dictStats = {"details_total": 1, "details_failed": 0, "failed_details": []}
+            return [notice], "", dictStats
+
+        self.crawler._crawl_board_worker = Mock(side_effect=worker)
+
+        lstNotices = self.crawler.crawl_boards(lstBoards, dictUniversities)
+
+        self.assertEqual(["첫째대학교", "둘째대학교"], [notice.university_name for notice in lstNotices])
+        self.assertEqual(2, self.crawler.last_stats["boards_succeeded"])
+        self.assertEqual(2, self.crawler.last_stats["details_total"])
+
+    def _notice(self, sUniversityName):
+        from src.board_crawler import CrawledNotice
+
+        return CrawledNotice(
+            university_name=sUniversityName,
+            board_type="공지",
+            title="시간제등록 모집",
+            url="https://example.com/article",
+            notice_date="2026-06-20",
+            body_text="",
+            attachment_urls=[],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

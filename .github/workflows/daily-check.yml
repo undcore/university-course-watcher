@@ -109,7 +109,6 @@ jobs:
             university-course-watcher/data/report.html
 
   graduate-admission-check:
-    needs: course-check
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.telegram_test == 'none'
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -127,12 +126,6 @@ jobs:
           key: graduate-admission-seen-${{ github.run_id }}
           restore-keys: |
             graduate-admission-seen-
-      - name: Download course results
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[full-run]')
-        uses: actions/download-artifact@v8
-        with:
-          name: course-watcher-results
-          path: university-course-watcher/data
       - name: Run graduate admission watcher
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -146,8 +139,35 @@ jobs:
           else
             python main.py --once --watch graduate-admission --region seoul
           fi
-      - name: Commit latest report files
+      - name: Upload graduate admission results
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[full-run]')
+        uses: actions/upload-artifact@v7
+        with:
+          name: graduate-admission-results
+          path: |
+            university-course-watcher/data/graduate_admission_results.csv
+            university-course-watcher/data/graduate_admission_results.json
+
+  publish-results:
+    needs:
+      - course-check
+      - graduate-admission-check
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[full-run]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - name: Download course results
+        uses: actions/download-artifact@v8
+        with:
+          name: course-watcher-results
+          path: university-course-watcher/data
+      - name: Download graduate admission results
+        uses: actions/download-artifact@v8
+        with:
+          name: graduate-admission-results
+          path: university-course-watcher/data
+      - name: Commit latest report files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
