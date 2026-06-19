@@ -24,7 +24,7 @@ permissions:
   contents: write
 
 jobs:
-  check:
+  course-check:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -41,14 +41,6 @@ jobs:
             seen-urls-
       - name: Install dependencies
         run: pip install -r university-course-watcher/requirements.txt
-      - name: Restore notification history
-        uses: actions/cache@v4
-        with:
-          path: |
-            university-course-watcher/data/seen_graduate_admission_urls.json
-          key: graduate-admission-seen-${{ github.run_id }}
-          restore-keys: |
-            graduate-admission-seen-
       - name: Validate Telegram secrets are configured
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -88,7 +80,7 @@ jobs:
               raise SystemExit("Telegram smoke test message failed.")
           print("Telegram smoke test message sent.")
           PY
-      - name: Run watcher
+      - name: Run course watcher
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -103,13 +95,59 @@ jobs:
             python main.py --telegram-test-empty
           elif [ "${{ github.event_name }}" = "push" ]; then
             python main.py --once --dry-run --region incheon --grade A --smoke-test
-            python main.py --once --watch graduate-admission --dry-run --region seoul --smoke-test
           else
             python main.py --once
+          fi
+      - name: Upload course results
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none')
+        uses: actions/upload-artifact@v7
+        with:
+          name: course-watcher-results
+          path: |
+            university-course-watcher/data/results.csv
+            university-course-watcher/data/results.json
+            university-course-watcher/data/report.html
+
+  graduate-admission-check:
+    needs: course-check
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.telegram_test == 'none'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r university-course-watcher/requirements.txt
+      - name: Restore notification history
+        uses: actions/cache@v5
+        with:
+          path: university-course-watcher/data/seen_graduate_admission_urls.json
+          key: graduate-admission-seen-${{ github.run_id }}
+          restore-keys: |
+            graduate-admission-seen-
+      - name: Download course results
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        uses: actions/download-artifact@v8
+        with:
+          name: course-watcher-results
+          path: university-course-watcher/data
+      - name: Run graduate admission watcher
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DEBUG: "false"
+          TIMEZONE: Asia/Seoul
+        run: |
+          cd university-course-watcher
+          if [ "${{ github.event_name }}" = "push" ]; then
+            python main.py --once --watch graduate-admission --dry-run --region seoul --smoke-test
+          else
             python main.py --once --watch graduate-admission --region seoul
           fi
       - name: Commit latest report files
-        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none')
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -125,8 +163,8 @@ jobs:
             git commit -m "Update latest watcher reports [skip ci]"
             git push
           fi
-      - name: Upload result artifacts
-        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none')
+      - name: Upload combined result artifacts
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v7
         with:
           name: university-course-watcher-results
