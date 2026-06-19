@@ -81,7 +81,7 @@ def report_preview_items(items: list[dict], limit: int = 5) -> list[dict]:
     sorted_items = sorted(items, key=lambda item: rank.get(item.get("grade"), 9))
 
     for item in sorted_items:
-        if item.get("grade") == "D":
+        if item.get("grade") == "D" or not item.get("is_new"):
             continue
 
         preview.append({
@@ -97,6 +97,26 @@ def report_preview_items(items: list[dict], limit: int = 5) -> list[dict]:
             break
 
     return preview
+
+
+def items_to_mark_seen(items: list[dict], sent_items: list[dict]) -> list[dict]:
+    lstSeenItems = list(sent_items)
+    setSeenUrls = {dictItem.get("url", "") for dictItem in sent_items}
+
+    for dictItem in items:
+        sUrl = dictItem.get("url", "")
+        sGrade = dictItem.get("grade", "")
+        bIsNew = bool(dictItem.get("is_new"))
+
+        if not bIsNew or sGrade != "C" or not sUrl:
+            continue
+        if sUrl in setSeenUrls:
+            continue
+
+        lstSeenItems.append(dictItem)
+        setSeenUrls.add(sUrl)
+
+    return lstSeenItems
 
 
 def main() -> int:
@@ -218,7 +238,8 @@ def main() -> int:
         build_report(items)
         notifier = TelegramNotifier()
         sent = notifier.send_candidates(items, dry_run=False)
-        storage.update_seen(sent)
+        lstSeenItems = items_to_mark_seen(items, sent)
+        storage.update_seen(lstSeenItems)
         summary = {
             "checked_at": checked_at,
             "university_count": university_count,
