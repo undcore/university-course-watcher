@@ -1,6 +1,6 @@
 [
   {
-    "checked_at": "2026-06-20T02:20:20+09:00",
+    "checked_at": "2026-06-20T13:14:55+09:00",
     "university_name": "아주대학교",
     "region": "경기",
     "city": "수원",
@@ -26,10 +26,10 @@
     "attachment_urls": "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=file-download&articleNo=370361&attachNo=328277",
     "matched_keywords": "시간제등록생; 시간제등록; 시간제등록생 모집요강; 시간제등록생 모집; 원서접수; 모집요강; 2학기; 학점은행제; 대학원; 편입학; 고등학교 졸업; 소프트웨어; 소프트웨어학과; 소프트웨어융합; 사이버보안",
     "reason": "시간제등록 또는 외부 수강 관련성이 높고, 외부 신청 가능성과 컴퓨터 관련 과목 가능성이 함께 감지됨. 현재 상태: 날짜확인필요.",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T02:20:20+09:00",
+    "checked_at": "2026-06-20T13:14:55+09:00",
     "university_name": "아주대학교",
     "region": "경기",
     "city": "수원",
@@ -55,10 +55,10 @@
     "attachment_urls": "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=file-download&articleNo=370302&attachNo=328222; https://www.ajou.ac.kr/kr/ajou/notice.do?mode=file-download&articleNo=370302&attachNo=328223; https://www.ajou.ac.kr/kr/ajou/notice.do?mode=file-download&articleNo=370302&attachNo=328224",
     "matched_keywords": "시간제등록생; 시간제등록; 2학기",
     "reason": "공식 게시판에서 유력 후보가 발견되었으나 외부 신청 또는 컴퓨터 과목 여부 추가 확인 필요. 현재 상태: 날짜확인필요.",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T02:20:20+09:00",
+    "checked_at": "2026-06-20T13:14:55+09:00",
     "university_name": "서울과학기술대학교",
     "region": "서울",
     "city": "서울",
@@ -87,7 +87,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-06-20T02:20:20+09:00",
+    "checked_at": "2026-06-20T13:14:55+09:00",
     "university_name": "강남대학교",
     "region": "경기",
     "city": "용인",
