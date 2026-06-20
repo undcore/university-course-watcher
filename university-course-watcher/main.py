@@ -17,11 +17,12 @@ from src.classifier import classify
 from src.course_finder import CourseFinder
 from src.date_parser import parse_notice_dates
 from src.graduate_admission_watcher import GraduateAdmissionWatcher
+from src.http_state import HttpStateCache
 from src.notifier import GraduateAdmissionNotifier, TelegramNotifier
 from src.recency import is_recent_notice, is_stale_notice
 from src.report_builder import build_report
 from src.storage import Storage
-from src.utils import CONFIG_DIR, ensure_dirs, load_json, now_kst, setup_logging
+from src.utils import CONFIG_DIR, DATA_DIR, ensure_dirs, load_json, now_kst, setup_logging
 
 LOGGER = logging.getLogger(__name__)
 
@@ -140,6 +141,15 @@ def normalize_weak_candidate(item: dict) -> dict:
     return item
 
 
+def should_parse_course_attachments(sTitle: str, sPreliminaryGrade: str) -> bool:
+    if sPreliminaryGrade in {"A", "B", "C"}:
+        return True
+
+    sLoweredTitle = sTitle.lower()
+    lstTargetWords = ["시간제", "등록생", "학점은행", "비학위", "외부 수강", "타교생"]
+    return any(sWord in sLoweredTitle for sWord in lstTargetWords)
+
+
 def main() -> int:
     load_dotenv()
     args = parse_args()
@@ -198,8 +208,9 @@ def main() -> int:
     university_count = len(university_map)
 
     LOGGER.info("Crawling %d boards for %d universities without search APIs.", board_count, university_count)
-    crawler = BoardCrawler(timeout=5, max_links_per_board=2) if args.smoke_test else BoardCrawler()
-    attachment_parser = AttachmentParser()
+    httpState = HttpStateCache(DATA_DIR / "course_http_state.json")
+    crawler = BoardCrawler(timeout=5, max_links_per_board=2, state_cache=httpState) if args.smoke_test else BoardCrawler(state_cache=httpState)
+    attachment_parser = AttachmentParser(state_cache=httpState)
     course_finder = CourseFinder(keywords)
     crawled = crawler.crawl_boards(boards, university_map, keyword_hint=args.keyword)
     crawled_count = len(crawled)
@@ -210,7 +221,14 @@ def main() -> int:
 
     for notice in crawled:
         university = university_map.get(notice.university_name, {})
-        attachment_texts = {} if args.smoke_test else attachment_parser.extract_texts(notice.attachment_urls)
+        preliminary_dates = parse_notice_dates(notice.title, notice.body_text, notice.notice_date, today)
+        preliminary_classification = classify(notice.title, notice.body_text, preliminary_dates, keywords)
+        bParseAttachments = should_parse_course_attachments(notice.title, preliminary_classification.grade)
+        attachment_texts = {}
+
+        if not args.smoke_test and bParseAttachments:
+            attachment_texts = attachment_parser.extract_texts(notice.attachment_urls)
+
         combined_text = "\n".join([notice.body_text] + list(attachment_texts.values()))
         dates = parse_notice_dates(notice.title, combined_text, notice.notice_date, today)
         classification = classify(notice.title, combined_text, dates, keywords)

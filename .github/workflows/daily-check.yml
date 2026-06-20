@@ -35,7 +35,9 @@ jobs:
       - name: Restore seen URL cache
         uses: actions/cache@v5
         with:
-          path: university-course-watcher/data/seen_urls.json
+          path: |
+            university-course-watcher/data/seen_urls.json
+            university-course-watcher/data/course_http_state.json
           key: seen-urls-${{ github.run_id }}
           restore-keys: |
             seen-urls-
@@ -87,6 +89,7 @@ jobs:
           DEBUG: "false"
           TIMEZONE: Asia/Seoul
           NOTICE_MAX_AGE_DAYS: "7"
+          PDF_MAX_PAGES: "8"
           REPORT_HTML_URL: https://htmlpreview.github.io/?https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/university-course-watcher/data/report.html
         run: |
           cd university-course-watcher
@@ -123,7 +126,9 @@ jobs:
       - name: Restore notification history
         uses: actions/cache@v5
         with:
-          path: university-course-watcher/data/seen_graduate_admission_urls.json
+          path: |
+            university-course-watcher/data/seen_graduate_admission_urls.json
+            university-course-watcher/data/graduate_http_state.json
           key: graduate-admission-seen-${{ github.run_id }}
           restore-keys: |
             graduate-admission-seen-
@@ -134,6 +139,7 @@ jobs:
           DEBUG: "false"
           TIMEZONE: Asia/Seoul
           NOTICE_MAX_AGE_DAYS: "7"
+          PDF_MAX_PAGES: "8"
         run: |
           cd university-course-watcher
           if [ "${{ github.event_name }}" = "push" ] && [[ "${{ github.event.head_commit.message }}" != *"[full-run]"* ]]; then

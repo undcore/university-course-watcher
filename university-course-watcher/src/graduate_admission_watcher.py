@@ -7,8 +7,9 @@ from bs4 import BeautifulSoup
 
 from .attachment_parser import AttachmentParser
 from .board_crawler import BoardCrawler, CrawledNotice
+from .http_state import HttpStateCache
 from .storage import GraduateAdmissionStorage
-from .utils import CONFIG_DIR, load_json, normalize_space, now_kst
+from .utils import CONFIG_DIR, DATA_DIR, load_json, normalize_space, now_kst
 
 LOGGER = logging.getLogger(__name__)
 
@@ -57,8 +58,13 @@ class GraduateAdmissionWatcher:
         intTimeout = 5 if smoke_test else 8
 
         self.smoke_test = smoke_test
-        self.crawler = BoardCrawler(timeout=intTimeout, max_links_per_board=intMaxLinks)
-        self.attachment_parser = AttachmentParser()
+        self.http_state = HttpStateCache(DATA_DIR / "graduate_http_state.json")
+        self.crawler = BoardCrawler(
+            timeout=intTimeout,
+            max_links_per_board=intMaxLinks,
+            state_cache=self.http_state,
+        )
+        self.attachment_parser = AttachmentParser(state_cache=self.http_state)
         self.storage = GraduateAdmissionStorage()
 
     def run(self, region: str | None = None, dry_run: bool = False) -> list[dict]:
@@ -145,13 +151,26 @@ class GraduateAdmissionWatcher:
     def _build_items(self, notices: list[CrawledNotice], university_map: dict[str, dict]) -> list[dict]:
         checked_at = now_kst().isoformat(timespec="seconds")
         items: list[dict] = []
+        lstAttachmentUrls: list[str] = []
+
+        if not self.smoke_test:
+            for notice in notices:
+                bStrictTitle = not self._is_direct_page_notice(notice)
+                sGrade, _, _ = self._classify_notice(notice.title, notice.body_text, strict_title=bStrictTitle)
+
+                if sGrade != "D":
+                    lstAttachmentUrls.extend(notice.attachment_urls)
+
+        lstUniqueAttachmentUrls = list(dict.fromkeys(lstAttachmentUrls))
+        dictAttachmentTexts = self.attachment_parser.extract_texts(lstUniqueAttachmentUrls)
 
         for notice in notices:
             university = university_map.get(notice.university_name, {})
-            attachment_texts = {}
-
-            if not self.smoke_test:
-                attachment_texts = self.attachment_parser.extract_texts(notice.attachment_urls)
+            attachment_texts = {
+                sUrl: dictAttachmentTexts.get(sUrl, "")
+                for sUrl in notice.attachment_urls
+                if sUrl in dictAttachmentTexts
+            }
 
             combined_text = "\n".join([notice.body_text] + list(attachment_texts.values()))
             strict_title = not self._is_direct_page_notice(notice)

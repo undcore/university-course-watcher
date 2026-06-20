@@ -10,7 +10,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from main import items_to_mark_seen, normalize_weak_candidate, report_preview_items
+from main import items_to_mark_seen, normalize_weak_candidate, report_preview_items, should_parse_course_attachments
 from src.storage import Storage
 
 
@@ -75,6 +75,11 @@ class DailyReportTest(unittest.TestCase):
 
         self.assertEqual("D", dictNoise["grade"])
         self.assertEqual("C", dictTarget["grade"])
+
+    def test_attachments_are_skipped_for_irrelevant_low_score_notice(self) -> None:
+        self.assertFalse(should_parse_course_attachments("일반 행사 안내", "D"))
+        self.assertTrue(should_parse_course_attachments("시간제등록 안내", "D"))
+        self.assertTrue(should_parse_course_attachments("관련 내용", "B"))
 
 
 if __name__ == "__main__":

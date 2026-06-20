@@ -5,3 +5,4 @@ __pycache__/
 venv/
 university-course-watcher/.env
 university-course-watcher/.venv/
+university-course-watcher/data/*_http_state.json

@@ -8,12 +8,15 @@ from urllib.parse import urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
+from requests.adapters import HTTPAdapter
 from requests.exceptions import SSLError
 from urllib3.exceptions import InsecureRequestWarning
+from urllib3.util.retry import Retry
 
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
-from .utils import normalize_space
+from .http_state import HttpStateCache
+from .utils import DATA_DIR, normalize_space
 
 LOGGER = logging.getLogger(__name__)
 HTML_PARSER = "html.parser"
@@ -31,9 +34,15 @@ class CrawledNotice:
 
 
 class BoardCrawler:
-    def __init__(self, timeout: int = 8, max_links_per_board: int = 15):
+    def __init__(
+        self,
+        timeout: int = 8,
+        max_links_per_board: int = 15,
+        state_cache: HttpStateCache | None = None,
+    ):
         self.timeout = timeout
         self.max_links_per_board = max_links_per_board
+        self.state_cache = state_cache or HttpStateCache(DATA_DIR / "course_http_state.json")
         self.session = requests.Session()
         self.last_error = ""
         self.last_stats = {
@@ -52,6 +61,18 @@ class BoardCrawler:
                 "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.7",
             }
         )
+        retry = Retry(
+            total=2,
+            connect=1,
+            read=1,
+            status=2,
+            backoff_factor=0.5,
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods=["GET"],
+            raise_on_status=False,
+        )
+        self.session.mount("http://", HTTPAdapter(max_retries=retry))
+        self.session.mount("https://", HTTPAdapter(max_retries=retry))
 
     def crawl_boards(self, boards: list[dict], universities: dict[str, dict], keyword_hint: str | None = None) -> list[CrawledNotice]:
         notices: list[CrawledNotice] = []
@@ -112,6 +133,7 @@ class BoardCrawler:
 
             notices.extend(board_notices)
 
+        self.state_cache.save()
         return notices
 
     def crawl_board(self, board: dict, keyword_hint: str | None = None) -> list[CrawledNotice]:
@@ -176,7 +198,11 @@ class BoardCrawler:
         board: dict,
         keyword_hint: str | None,
     ) -> tuple[list[CrawledNotice], str, dict]:
-        crawler = BoardCrawler(timeout=self.timeout, max_links_per_board=self.max_links_per_board)
+        crawler = BoardCrawler(
+            timeout=self.timeout,
+            max_links_per_board=self.max_links_per_board,
+            state_cache=self.state_cache,
+        )
         lstNotices = crawler.crawl_board(board, keyword_hint=keyword_hint)
         return lstNotices, crawler.last_error, crawler.last_stats
 
@@ -194,15 +220,27 @@ class BoardCrawler:
         return lstDatedCandidates + lstUndatedCandidates
 
     def _get_text(self, url: str) -> str:
+        dictHeaders = self.state_cache.conditional_headers(url)
+
         try:
-            response = self.session.get(url, timeout=self.timeout)
+            response = self.session.get(url, headers=dictHeaders, timeout=(4, self.timeout))
         except SSLError:
             LOGGER.info("SSL verification failed; retrying without verification: %s", url)
-            response = self.session.get(url, timeout=self.timeout, verify=False)
+            response = self.session.get(url, headers=dictHeaders, timeout=(4, self.timeout), verify=False)
+
+        if response.status_code == 304:
+            sCachedHtml = self.state_cache.cached_value(url, "html")
+            if sCachedHtml:
+                return sCachedHtml
+
+            response = self.session.get(url, timeout=(4, self.timeout))
+
         response.raise_for_status()
         if not response.encoding or response.encoding.lower() == "iso-8859-1":
             response.encoding = response.apparent_encoding
-        return response.text
+        sHtml = response.text
+        self.state_cache.update(url, response.headers, response.content, html=sHtml)
+        return sHtml
 
     def _extract_candidate_links(self, soup: BeautifulSoup, base_url: str, keyword_hint: str | None) -> list[tuple[str, str, str]]:
         rows: list[tuple[str, str, str]] = []
