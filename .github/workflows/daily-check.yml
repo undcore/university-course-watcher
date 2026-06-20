@@ -189,7 +189,17 @@ jobs:
             echo "No report changes to commit."
           else
             git commit -m "Update latest watcher reports [skip ci]"
-            git push
+            for attempt in 1 2 3; do
+              git fetch origin "${GITHUB_REF_NAME}"
+              git rebase -X theirs "origin/${GITHUB_REF_NAME}"
+              if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+                exit 0
+              fi
+              echo "Push attempt ${attempt} failed; retrying after remote refresh."
+              sleep 2
+            done
+            echo "Failed to publish report files after 3 attempts."
+            exit 1
           fi
       - name: Upload combined result artifacts
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[full-run]')
