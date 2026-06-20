@@ -1,6 +1,6 @@
 [
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "연세대학교",
     "region": "서울",
     "city": "서울",
@@ -15,7 +15,7 @@
     "is_new": true
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "서강대학교",
     "region": "서울",
     "city": "서울",
@@ -30,7 +30,7 @@
     "is_new": true
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "성균관대학교",
     "region": "서울",
     "city": "서울",
@@ -45,7 +45,7 @@
     "is_new": true
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "삼육대학교",
     "region": "서울",
     "city": "서울",
@@ -60,7 +60,7 @@
     "is_new": true
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "서울대학교",
     "region": "서울",
     "city": "서울",
@@ -72,10 +72,10 @@
     "matched_keywords": "2026; 2026학년도; 후기; 대학원; 원서접수",
     "reason": "2026학년도 후기 대학원 모집 공고이며 일반대학원 여부 추가 확인이 필요합니다.",
     "attachment_urls": "https://admission.snu.ac.kr/graduate/general/spring/download; https://admission.snu.ac.kr/graduate/general/fall/download",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "서울대학교",
     "region": "서울",
     "city": "서울",
@@ -87,10 +87,10 @@
     "matched_keywords": "2026; 2026학년도; 후기; 대학원; 원서접수",
     "reason": "2026학년도 후기 대학원 모집 공고이며 일반대학원 여부 추가 확인이 필요합니다.",
     "attachment_urls": "https://admission.snu.ac.kr/graduate/general/spring/download; https://admission.snu.ac.kr/graduate/general/fall/download",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "성균관대학교",
     "region": "서울",
     "city": "서울",
@@ -102,16 +102,16 @@
     "matched_keywords": "2026; 2026학년도; 후기; 일반대학원; 대학원; 모집요강; 원서접수",
     "reason": "2026학년도 후기 일반대학원 모집 공고로 판단됩니다.",
     "attachment_urls": "javascript:fn_file_down('grad_dataroom','Ce0GAtxxnsM=','58933');; javascript:fn_file_down('grad_dataroom','SAWjJiRtRs4=','58933');",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "성균관대학교",
     "region": "서울",
     "city": "서울",
     "board_type": "대학원 입학",
     "title": "일반 2026학년도 후기 일반대학원 수시전형 면접 일정 및 ...",
-    "url": "https://gradschool.skku.edu/grad/guide/notice_regul.htm?bbsid=grad_notice&ctg_cd=&mode=view&bltn_seq=58966&PHPSESSID=c79ac6bd1d429d52fbbbcebbfd39888f",
+    "url": "https://gradschool.skku.edu/grad/guide/notice_regul.htm?bbsid=grad_notice&ctg_cd=&mode=view&bltn_seq=58966&PHPSESSID=dd6702fdb2eec2c1bd15882f37517a98",
     "notice_date": "2026-06-10",
     "grade": "A",
     "matched_keywords": "2026; 2026학년도; 후기; 일반대학원; 대학원; 2차; 편입",
@@ -120,7 +120,7 @@
     "is_new": true
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "한양대학교",
     "region": "서울",
     "city": "서울",
@@ -132,25 +132,25 @@
     "matched_keywords": "2026; 2026학년도; 후기; 일반대학원; 대학원; 모집요강; 신입생 모집; 원서접수; 특별전형; 학부; 외국인전형; 특수대학원; 전문대학원; 교육대학원; 경영전문대학원",
     "reason": "2026학년도 후기 일반대학원 모집 공고로 판단됩니다.",
     "attachment_urls": "http://www.grad.hanyang.ac.kr/img/roadmap.hwp; http://www.grad.hanyang.ac.kr/img/tel_number.pdf; http://www.grad.hanyang.ac.kr/admin/bbs/down.php?code=data&idx=10466&no=1; http://www.grad.hanyang.ac.kr/admin/bbs/down.php?code=data&idx=10466&no=2; http://www.grad.hanyang.ac.kr/admin/bbs/down.php?code=data&idx=10466&no=3",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "한양대학교",
     "region": "서울",
     "city": "서울",
     "board_type": "모집요강 자료실",
-    "title": "126 [입학] 2026학년도 일반대학원 신입학 후기 특별전형 모집요강 관리자 26.04.15 17081",
+    "title": "126 [입학] 2026학년도 일반대학원 신입학 후기 특별전형 모집요강 관리자 26.04.15 17091",
     "url": "http://www.grad.hanyang.ac.kr/admin/bbs/down.php?code=data&idx=10466&no=1",
     "notice_date": "2026-04-15",
     "grade": "A",
     "matched_keywords": "2026; 2026학년도; 후기; 일반대학원; 대학원; 모집요강; 특별전형",
     "reason": "2026학년도 후기 일반대학원 모집 공고로 판단됩니다.",
     "attachment_urls": "",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "동국대학교",
     "region": "서울",
     "city": "서울",
@@ -162,10 +162,10 @@
     "matched_keywords": "2026; 2026학년도; 후기; 일반대학원; 대학원; 모집요강; 신입생 모집; 입학전형; 전형일정; 원서접수; 특별전형; 편입",
     "reason": "2026학년도 후기 일반대학원 모집 공고로 판단됩니다.",
     "attachment_urls": "https://gs.dongguk.edu/cmmn/fileDown.do?fileSeq=25035; https://gs.dongguk.edu/cmmn/fileDown.do?fileSeq=25034",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "동국대학교",
     "region": "서울",
     "city": "서울",
@@ -177,10 +177,10 @@
     "matched_keywords": "2026; 후기; 일반대학원; 대학원; 신입생 모집; 입학전형; 특별전형; 학부; 편입; 특수대학원",
     "reason": "2026학년도 후기 일반대학원 모집 공고로 판단됩니다.",
     "attachment_urls": "https://gs.dongguk.edu/cmmn/fileDown.do?fileSeq=25010; https://gs.dongguk.edu/cmmn/fileDown.do?fileSeq=25009",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "동국대학교",
     "region": "서울",
     "city": "서울",
@@ -192,10 +192,10 @@
     "matched_keywords": "2026; 후기; 일반대학원; 대학원; 입학전형; 학부; 편입",
     "reason": "2026학년도 후기 일반대학원 모집 공고로 판단됩니다.",
     "attachment_urls": "https://gs.dongguk.edu/cmmn/fileDown.do?fileSeq=25008",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "동국대학교",
     "region": "서울",
     "city": "서울",
@@ -207,10 +207,10 @@
     "matched_keywords": "2026; 2026학년도; 후기; 일반대학원; 대학원; 입학전형; 학부; 편입",
     "reason": "2026학년도 후기 일반대학원 모집 공고로 판단됩니다.",
     "attachment_urls": "https://gs.dongguk.edu/cmmn/fileDown.do?fileSeq=25007; https://gs.dongguk.edu/cmmn/fileDown.do?fileSeq=25006",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "동국대학교",
     "region": "서울",
     "city": "서울",
@@ -222,10 +222,10 @@
     "matched_keywords": "2026; 2026학년도; 후기; 일반대학원; 대학원; 입학전형; 전형일정",
     "reason": "2026학년도 후기 일반대학원 모집 공고로 판단됩니다.",
     "attachment_urls": "https://gs.dongguk.edu/cmmn/fileDown.do?fileSeq=24320; https://gs.dongguk.edu/cmmn/fileDown.do?fileSeq=24288",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "동국대학교",
     "region": "서울",
     "city": "서울",
@@ -237,10 +237,10 @@
     "matched_keywords": "2026; 2026학년도; 후기; 일반대학원; 대학원; 모집요강; 신입생 모집; 입학전형; 전형일정; 원서접수; 학부; 편입",
     "reason": "2026학년도 후기 일반대학원 모집 공고로 판단됩니다.",
     "attachment_urls": "https://gs.dongguk.edu/cmmn/fileDown.do?fileSeq=23879; https://gs.dongguk.edu/cmmn/fileDown.do?fileSeq=23875",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "홍익대학교",
     "region": "서울",
     "city": "서울",
@@ -252,10 +252,10 @@
     "matched_keywords": "2026; 2026학년도; 후기; 일반대학원; 대학원; 신입생 모집; 학부; 특수대학원; 전문대학원; 교육대학원",
     "reason": "2026학년도 후기 일반대학원 모집 공고로 판단됩니다.",
     "attachment_urls": "https://www.hongik.ac.kr/kr/admission/notice-military.do?mode=download&articleNo=151740&attachNo=88439; https://www.hongik.ac.kr/kr/admission/notice-military.do?mode=download&articleNo=151740&attachNo=88440",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "홍익대학교",
     "region": "서울",
     "city": "서울",
@@ -267,10 +267,10 @@
     "matched_keywords": "2026; 2026학년도; 후기; 일반대학원; 대학원; 모집요강; 신입생 모집; 전형일정; 원서접수; 특수대학원; 전문대학원; 교육대학원",
     "reason": "2026학년도 후기 일반대학원 모집 공고로 판단됩니다.",
     "attachment_urls": "https://www.hongik.ac.kr/kr/admission/notice-military.do?mode=download&articleNo=149783&attachNo=87085; https://www.hongik.ac.kr/kr/admission/notice-military.do?mode=download&articleNo=149783&attachNo=87086",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "숭실대학교",
     "region": "서울",
     "city": "서울",
@@ -281,11 +281,11 @@
     "grade": "A",
     "matched_keywords": "2026; 2026학년도; 후기; 일반대학원; 대학원; 모집요강; 전형일정; 원서접수; 특별전형; 편입; 재외국민",
     "reason": "2026학년도 후기 일반대학원 모집 공고로 판단됩니다.",
-    "attachment_urls": "https://grad.ssu.ac.kr/wp-content/plugins/board/api/download.php?enc=qhZvzRiEbir3vJky7yiKl3QlKnbN%2FICw%2FfqH9Isf2IygxO77VeWYfZIZe0Du9ESBEjiy7m3uRaAw3F4L57fq1es5qaFErMtdN4W9ehIXGbwR0vpzJZKGtDROGLcihffqmnzCH76XYRmtKfJyywkFiP4uq6H1b5%2F9cvH4Xk9lSb4eWBDwHWClMNGa9qD6wbzFnuxSlo3odSObRs2lyqpD%2FwoY%2BVxpILzu%2BZsKRRN1jmnmBCPxVwjhwHxYLKd%2FxJYxtyputKSdtofHJl8g51KUkaMbO0pY1AQsFFf751SRt8nhUObj7PhvtftLkWl29Ae69mS4n2ZGAn9%2F8WkOAFx9hg%3D%3D",
-    "is_new": true
+    "attachment_urls": "https://grad.ssu.ac.kr/wp-content/plugins/board/api/download.php?enc=qhZvzRiEbir3vJky7yiKl3QlKnbN%2FICw%2FfqH9Isf2IygxO77VeWYfZIZe0Du9ESBEjiy7m3uRaAw3F4L57fq1es5qaFErMtdN4W9ehIXGbwR0vpzJZKGtDROGLcihffqmnzCH76XYRmtKfJyywkFiP4uq6H1b5%2F9cvH4Xk9lSb4eWBDwHWClMNGa9qD6wbzFnuxSlo3odSObRs2lyqpD%2FwoY%2BVxpILzu%2BZsKRRN1jmnmBCPxVwjhwHxYLKd%2FxJYxtyputKSdtofHJl8g51KUkaMbO0pY1AQsFFf751SRt8nhUObj7PhvtftLkWl29Ae6CNzdfAvhZ6ERVmKl7%2FjSQg%3D%3D",
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "상명대학교",
     "region": "서울",
     "city": "서울",
@@ -297,10 +297,10 @@
     "matched_keywords": "2026; 2026학년도; 후기; 일반대학원; 대학원; 모집요강; 원서접수; 특별전형; 학부; 편입; 외국인전형; 특수대학원; 교육대학원",
     "reason": "2026학년도 후기 일반대학원 모집 공고로 판단됩니다.",
     "attachment_urls": "https://www.smu.ac.kr/grad/admission/notice.do?mode=download&articleNo=766154&attachNo=558665; https://www.smu.ac.kr/grad/admission/notice.do?mode=download&articleNo=766154&attachNo=558666; https://www.smu.ac.kr/grad/admission/notice.do?mode=download&articleNo=766154&attachNo=558667; https://www.smu.ac.kr/grad/admission/notice.do?mode=download&articleNo=766154&attachNo=558668; https://www.smu.ac.kr/grad/admission/notice.do?mode=download&articleNo=766154&attachNo=558669; https://www.smu.ac.kr/grad/admission/notice.do?mode=download&articleNo=766154&attachNo=558670; https://www.smu.ac.kr/grad/admission/notice.do?mode=download&articleNo=766154&attachNo=558672",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "상명대학교",
     "region": "서울",
     "city": "서울",
@@ -312,10 +312,10 @@
     "matched_keywords": "2026; 2026학년도; 후기; 일반대학원; 대학원; 모집요강; 원서접수; 특별전형; 특수대학원; 교육대학원",
     "reason": "2026학년도 후기 일반대학원 모집 공고로 판단됩니다.",
     "attachment_urls": "",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "상명대학교",
     "region": "서울",
     "city": "서울",
@@ -327,10 +327,10 @@
     "matched_keywords": "2026; 2026학년도; 후기; 일반대학원; 대학원; 모집요강; 신입생 모집; 입학전형; 원서접수; 특별전형; 학부; 편입; 외국인전형; 특수대학원; 교육대학원",
     "reason": "2026학년도 후기 일반대학원 모집 공고로 판단됩니다.",
     "attachment_urls": "https://www.smu.ac.kr/grad/admission/notice.do?mode=download&articleNo=764902&attachNo=556983; https://www.smu.ac.kr/grad/admission/notice.do?mode=download&articleNo=764902&attachNo=556984; https://www.smu.ac.kr/grad/admission/notice.do?mode=download&articleNo=764902&attachNo=556985; https://www.smu.ac.kr/grad/admission/notice.do?mode=download&articleNo=764902&attachNo=556986; https://www.smu.ac.kr/grad/admission/notice.do?mode=download&articleNo=764902&attachNo=556987; https://www.smu.ac.kr/grad/admission/notice.do?mode=download&articleNo=764902&attachNo=556988; https://www.smu.ac.kr/grad/admission/notice.do?mode=download&articleNo=764902&attachNo=556989",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "상명대학교",
     "region": "서울",
     "city": "서울",
@@ -342,10 +342,10 @@
     "matched_keywords": "2026; 2026학년도; 후기; 일반대학원; 대학원; 모집요강; 신입생 모집; 원서접수; 특별전형; 특수대학원; 교육대학원",
     "reason": "2026학년도 후기 일반대학원 모집 공고로 판단됩니다.",
     "attachment_urls": "",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "삼육대학교",
     "region": "서울",
     "city": "서울",
@@ -357,10 +357,10 @@
     "matched_keywords": "2026; 2026학년도; 후기; 일반대학원; 대학원; 모집요강; 전형일정; 원서접수; 편입",
     "reason": "2026학년도 후기 일반대학원 모집 공고로 판단됩니다.",
     "attachment_urls": "https://www.syu.ac.kr/grad/wp-admin/admin-ajax.php?action=file_download_id&t_id=51102&o_name=2026%EB%85%84-%ED%9B%84%EA%B8%B0-%EA%B3%84%EC%95%BD%ED%95%99%EA%B3%BC-%EC%84%9D.%EB%B0%95%EC%82%AC%EA%B3%BC%EC%A0%95-%EC%8B%A0.%ED%8E%B8%EC%9E%85%EC%83%9D-%EB%AA%A8%EC%A7%91-%EC%9A%94%EA%B0%95%EB%AA%A8%EC%A7%91-%EC%9A%94%EA%B0%95.hwp; https://www.syu.ac.kr/grad/wp-admin/admin-ajax.php?action=file_download_id&t_id=51061&o_name=%EC%96%91%EC%8B%9D%EA%B3%84%EC%95%BD%ED%95%99%EA%B3%BC-%EC%A0%9C%EC%B6%9C%EC%84%9C%EB%A5%98%EC%82%B0%EC%97%85%EC%B2%B4-1-1.hwp; https://www.syu.ac.kr/grad/wp-admin/admin-ajax.php?action=file_download_id&t_id=51062&o_name=%EC%96%91%EC%8B%9D%EA%B3%84%EC%95%BD%ED%95%99%EA%B3%BC-%EC%A0%9C%EC%B6%9C%EC%84%9C%EB%A5%98%ED%95%99%EC%83%9D-1-2.hwp",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-06-20T20:54:16+09:00",
+    "checked_at": "2026-06-20T21:12:12+09:00",
     "university_name": "삼육대학교",
     "region": "서울",
     "city": "서울",
@@ -372,6 +372,6 @@
     "matched_keywords": "2026; 2026학년도; 후기; 일반대학원; 대학원; 모집요강; 전형일정; 원서접수; 편입",
     "reason": "2026학년도 후기 일반대학원 모집 공고로 판단됩니다.",
     "attachment_urls": "http://www.syu.ac.kr/grad/wp-content/uploads/sites/37/2026/03/2026학년도-후기-일반대학원-신편입생-추가모집-요강_정원내.pdf; https://www.syu.ac.kr/grad/wp-admin/admin-ajax.php?action=file_download_id&t_id=50877&o_name=2026%ED%95%99%EB%85%84%EB%8F%84-%ED%9B%84%EA%B8%B0-%EC%9D%BC%EB%B0%98%EB%8C%80%ED%95%99%EC%9B%90-%EC%8B%A0%ED%8E%B8%EC%9E%85%EC%83%9D-%EC%B6%94%EA%B0%80%EB%AA%A8%EC%A7%91-%EC%9A%94%EA%B0%95_%EC%A0%95%EC%9B%90%EB%82%B4.pdf; https://www.syu.ac.kr/grad/wp-admin/admin-ajax.php?action=file_download_id&t_id=50881&o_name=%EA%B0%81%EC%A2%85%EC%96%91%EC%8B%9D.zip; https://www.syu.ac.kr/grad/wp-admin/admin-ajax.php?action=file_download_id&t_id=50882&o_name=%ED%8E%B8%EC%9E%85%ED%95%99-%EC%A7%80%EC%9B%90%EC%84%9C%EB%A5%98.zip",
-    "is_new": true
+    "is_new": false
   }
 ]
