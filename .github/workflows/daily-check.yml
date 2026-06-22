@@ -6,8 +6,9 @@ on:
       - main
       - codex/add-course-watcher-project
   schedule:
-    - cron: "0 0 * * *"
-    - cron: "0 10 * * *"
+    # 09:00 and 19:00 KST, Monday through Friday.
+    - cron: "0 0 * * 1-5"
+    - cron: "0 10 * * 1-5"
   workflow_dispatch:
     inputs:
       telegram_test:
