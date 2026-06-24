@@ -1,6 +1,6 @@
 [
   {
-    "checked_at": "2026-06-24T11:30:29+09:00",
+    "checked_at": "2026-06-24T21:22:24+09:00",
     "university_name": "아주대학교",
     "region": "경기",
     "city": "수원",
@@ -12,7 +12,7 @@
     "application_start_date": "",
     "application_end_date": "",
     "deadline_status": "날짜확인필요",
-    "registration_score": 125,
+    "registration_score": 135,
     "external_score": 0,
     "computer_score": 0,
     "freshness_score": 10,
@@ -24,12 +24,12 @@
     "course_evidence_url": "https://www.ajou.ac.kr",
     "course_evidence_text": "아주대학교 본문 바로가기 주메뉴 바로가기 서브메뉴 바로가기 HOME LOGIN PORTAL 발전기금 LANGUAGE ENGLISH CHINESE 통합검색 검색어 입력 검색 대학정보 대학정보 대학소개 이념 역사 연혁 교육목표/인재상 개교 50주년 아주비전 5.0 홍보영상 대학상징 상징 UI 50주년 엠블럼/슬로건 전용서체 캐릭터 대학 상징 아카이브 대학현황 대학기구 규정 통계 대학정보공개 총장실 인사말 약력 연설문 총장레터 동정 역대총장 캠퍼스 안내 캠퍼스맵 오시는길 교내전화번호↗ 주차안내 학교법인 이사장 연혁/조직 이사회 입학 입학 대학 학부 입학(입학처)↗ 외국인 입학↗ 대학원 대학원 진행중인 모집요강 교육 교육 대…",
     "attachment_urls": "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=file-download&articleNo=370705&attachNo=328637",
-    "matched_keywords": "시간제등록생; 시간제등록; 2학기",
+    "matched_keywords": "시간제등록생; 시간제등록; 1학기; 2학기",
     "reason": "공식 게시판에서 유력 후보가 발견되었으나 외부 신청 또는 컴퓨터 과목 여부 추가 확인 필요. 현재 상태: 날짜확인필요.",
     "is_new": false
   },
   {
-    "checked_at": "2026-06-24T11:30:29+09:00",
+    "checked_at": "2026-06-24T21:22:24+09:00",
     "university_name": "아주대학교",
     "region": "경기",
     "city": "수원",
@@ -58,36 +58,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-06-24T11:30:29+09:00",
-    "university_name": "아주대학교",
-    "region": "경기",
-    "city": "수원",
-    "title": "[공지] [학사] 2026-2학기 휴학/복학 신청 안내",
-    "url": "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=370302&article.offset=0&articleLimit=10",
-    "source_type": "대학 공식 게시판 직접 크롤링",
-    "source_query": "입학처 공지",
-    "notice_date": "2026-06-15",
-    "application_start_date": "",
-    "application_end_date": "",
-    "deadline_status": "날짜확인필요",
-    "registration_score": 125,
-    "external_score": 0,
-    "computer_score": 0,
-    "freshness_score": 10,
-    "grade": "B",
-    "external_applicant_status": "확인 필요",
-    "computer_course_status": "확인 필요",
-    "possible_departments": "소프트웨어학과",
-    "possible_computer_courses": "알고리즘; 인공지능",
-    "course_evidence_url": "https://www.ajou.ac.kr",
-    "course_evidence_text": "아주대학교 본문 바로가기 주메뉴 바로가기 서브메뉴 바로가기 HOME LOGIN PORTAL 발전기금 LANGUAGE ENGLISH CHINESE 통합검색 검색어 입력 검색 대학정보 대학정보 대학소개 이념 역사 연혁 교육목표/인재상 개교 50주년 아주비전 5.0 홍보영상 대학상징 상징 UI 50주년 엠블럼/슬로건 전용서체 캐릭터 대학 상징 아카이브 대학현황 대학기구 규정 통계 대학정보공개 총장실 인사말 약력 연설문 총장레터 동정 역대총장 캠퍼스 안내 캠퍼스맵 오시는길 교내전화번호↗ 주차안내 학교법인 이사장 연혁/조직 이사회 입학 입학 대학 학부 입학(입학처)↗ 외국인 입학↗ 대학원 대학원 진행중인 모집요강 교육 교육 대…",
-    "attachment_urls": "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=file-download&articleNo=370302&attachNo=328222; https://www.ajou.ac.kr/kr/ajou/notice.do?mode=file-download&articleNo=370302&attachNo=328223; https://www.ajou.ac.kr/kr/ajou/notice.do?mode=file-download&articleNo=370302&attachNo=328224",
-    "matched_keywords": "시간제등록생; 시간제등록; 2학기",
-    "reason": "공식 게시판에서 유력 후보가 발견되었으나 외부 신청 또는 컴퓨터 과목 여부 추가 확인 필요. 현재 상태: 날짜확인필요.",
-    "is_new": false
-  },
-  {
-    "checked_at": "2026-06-24T11:30:29+09:00",
+    "checked_at": "2026-06-24T21:22:24+09:00",
     "university_name": "서울과학기술대학교",
     "region": "서울",
     "city": "서울",
@@ -116,7 +87,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-06-24T11:30:29+09:00",
+    "checked_at": "2026-06-24T21:22:24+09:00",
     "university_name": "강남대학교",
     "region": "경기",
     "city": "용인",
