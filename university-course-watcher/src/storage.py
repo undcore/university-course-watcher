@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import re
 from pathlib import Path
 
 from .utils import DATA_DIR, load_json, save_json
@@ -32,18 +33,26 @@ class Storage:
 
     def load_seen(self) -> set[str]:
         data = load_json(self.seen_path, [])
-        return set(data if isinstance(data, list) else data.keys())
+        if isinstance(data, list):
+            return set(data)
+        if isinstance(data, dict):
+            values = set(data.keys())
+            for item in data.values():
+                if isinstance(item, list):
+                    values.update(item)
+            return values
+        return set()
 
     def mark_is_new(self, items: list[dict]) -> list[dict]:
         seen = self.load_seen()
         for item in items:
-            item["is_new"] = item["url"] not in seen
+            item["is_new"] = not self._has_seen_item(item, seen)
         return items
 
     def update_seen(self, notified_items: list[dict]) -> None:
         seen = self.load_seen()
         for item in notified_items:
-            seen.add(item["url"])
+            seen.update(self._seen_keys(item))
         save_json(self.seen_path, sorted(seen))
 
     def dedupe(self, items: list[dict]) -> list[dict]:
@@ -52,7 +61,7 @@ class Storage:
         for item in items:
             key = item.get("url") or self._title_key(item)
             attachment_key = "|".join(item.get("attachment_urls") or [])
-            combined = key + attachment_key
+            combined = key + attachment_key + self._content_fingerprint(item)
             if combined in keys:
                 continue
             keys.add(combined)
@@ -119,8 +128,32 @@ class Storage:
             self._write_csv(self.history_csv, list(unique_rows[0].keys()), unique_rows)
 
     def _title_key(self, item: dict) -> str:
-        raw = f"{item.get('university_name')}::{item.get('title')}"
+        raw = f"{item.get('university_name')}::{self._normalized_title(item.get('title', ''))}"
         return hashlib.sha1(raw.encode("utf-8")).hexdigest()
+
+    def _has_seen_item(self, item: dict, seen: set[str]) -> bool:
+        return any(key in seen for key in self._seen_keys(item))
+
+    def _seen_keys(self, item: dict) -> set[str]:
+        keys = {item.get("url", ""), self._title_key(item), self._content_fingerprint(item)}
+        return {key for key in keys if key}
+
+    def _content_fingerprint(self, item: dict) -> str:
+        attachments = "|".join(sorted(item.get("attachment_urls") or []))
+        raw = "::".join([
+            item.get("university_name", ""),
+            self._normalized_title(item.get("title", "")),
+            item.get("application_start_date", ""),
+            item.get("application_end_date", ""),
+            attachments,
+        ])
+        return hashlib.sha1(raw.encode("utf-8")).hexdigest()
+
+    def _normalized_title(self, title: str) -> str:
+        normalized = re.sub(r"\[[^\]]+\]|\([^)]+\)", " ", title.lower())
+        normalized = re.sub(r"20\d{2}|\d{1,2}학기|전기|후기|수시|정시", " ", normalized)
+        normalized = re.sub(r"\s+", " ", normalized)
+        return normalized.strip()
 
     def _write_csv(self, path: Path, fields: list[str], rows: list[dict]) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
