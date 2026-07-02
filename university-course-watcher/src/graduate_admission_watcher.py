@@ -86,6 +86,15 @@ class GraduateAdmissionWatcher:
     def mark_sent(self, sent_items: list[dict]) -> None:
         self.storage.update_seen(sent_items)
 
+    def should_send_empty_summary(self, items: list[dict], active_count: int, disabled_count: int) -> bool:
+        new_items = [item for item in items if item.get("is_new") and item.get("grade") in {"A", "B"}]
+        if new_items:
+            return True
+        return self.storage.should_send_empty_summary(items, active_count, disabled_count)
+
+    def mark_empty_summary_sent(self, items: list[dict], active_count: int, disabled_count: int) -> None:
+        self.storage.update_empty_summary_state(items, active_count, disabled_count)
+
     def _select_boards(self, graduate_boards: list[dict], university_map: dict[str, dict]) -> list[dict]:
         boards: list[dict] = []
 

@@ -70,8 +70,9 @@ class GraduateAdmissionNotifier:
         load_dotenv()
         self.token = os.getenv("TELEGRAM_BOT_TOKEN", "")
         self.chat_id = os.getenv("TELEGRAM_CHAT_ID", "")
+        self.summary_sent = False
 
-    def send_candidates(self, items: list[dict], dry_run: bool = False) -> list[dict]:
+    def send_candidates(self, items: list[dict], dry_run: bool = False, send_empty_summary: bool = True) -> list[dict]:
         targets = [
             item for item in items
             if item.get("is_new") and item.get("grade") in {"A", "B"}
@@ -85,8 +86,12 @@ class GraduateAdmissionNotifier:
 
         sent: list[dict] = []
         if not targets:
+            if not send_empty_summary:
+                LOGGER.info("Graduate admission empty summary unchanged; notification skipped.")
+                return sent
             try:
                 self._send(self._summary_message(items))
+                self.summary_sent = True
             except Exception as exc:
                 LOGGER.warning("Telegram summary send failed: %s", exc)
             return sent
