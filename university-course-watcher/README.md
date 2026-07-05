@@ -83,6 +83,8 @@ python main.py --debug
 - `data/university_history.csv`
 - `data/debug_results.json`
 
+`data/university_history.csv`는 매 실행마다 덮어쓰지 않고 누적됩니다. 같은 공고(`url`+`title`)는 `last_seen_at`과 변동 필드(접수일 등)만 갱신하고, 새 공고는 `first_seen_at`/`last_seen_at`과 함께 추가하여 장기 이력을 유지합니다.
+
 CSV/JSON 주요 필드는 `checked_at`, `university_name`, `region`, `city`, `title`, `url`, `notice_date`, `application_start_date`, `application_end_date`, `deadline_status`, `registration_score`, `external_score`, `computer_score`, `freshness_score`, `grade`, `external_applicant_status`, `computer_course_status`, `possible_departments`, `possible_computer_courses`, `attachment_urls`, `matched_keywords`, `reason`, `is_new`입니다.
 
 ## HTML 리포트
@@ -120,6 +122,30 @@ CSV/JSON 주요 필드는 `checked_at`, `university_name`, `region`, `city`, `ti
 
 게시판 구조가 대학마다 다르므로 MVP는 `requests + BeautifulSoup` 기반 범용 파서로 제목, URL, 날짜, 본문, 첨부 링크를 최대한 추출합니다.
 
+### 게시판별 탐색 설정 (선택)
+
+기본 탐색 깊이·선택자로 부족한 게시판은 board 항목에 다음 키를 추가해 개별 보정할 수 있습니다. 모든 키는 선택 사항이며, 없으면 기존 기본값을 사용합니다.
+
+```json
+{
+  "university_name": "아주대학교",
+  "board_type": "학사 공지",
+  "url": "https://www.ajou.ac.kr/kr/ajou/notice.do?bbsNo=1000",
+  "enabled": true,
+  "max_links": 25,
+  "pagination": {"param": "pageIndex", "start": 1, "count": 3, "step": 1},
+  "list_pages": ["https://www.ajou.ac.kr/kr/ajou/notice.do?bbsNo=1000&pageIndex=4"],
+  "selectors": {"list": "table.board-list tr", "body": ".view-content", "date": ".view-date"}
+}
+```
+
+- `max_links`: 이 게시판에서 열어볼 상세 공고 수 상한(기본값 대신 사용).
+- `pagination`: 목록 URL의 `param` 값을 `start`에서 `step`씩 늘려 `count`개의 페이지를 순회합니다. 오프셋 방식은 `{"param": "article.offset", "start": 0, "step": 10, "count": 3}`처럼 지정합니다.
+- `list_pages`: 규칙으로 표현하기 어려운 추가 목록 URL을 직접 나열합니다.
+- `selectors`: 목록 컨테이너(`list`), 상세 본문(`body`), 게시일(`date`) CSS 선택자를 개별 지정합니다.
+
+smoke-test(`--smoke-test`) 실행에서는 속도를 위해 `max_links`/`pagination`/`list_pages` 보정을 건너뛰고, `selectors`만 적용합니다.
+
 ## 키워드 수정
 
 `config/keywords.json`에서 가점/감점 키워드와 컴퓨터 과목 후보를 수정합니다. 코드 안에 키워드를 하드코딩하지 않습니다.
@@ -155,7 +181,7 @@ artifact로 직접 확인해야 할 때의 경로:
 ## 한계점
 
 - JavaScript 렌더링 전용 게시판은 MVP에서 누락될 수 있습니다.
-- HWP/HWPX는 텍스트 추출 대신 링크만 저장합니다.
+- HWP/HWPX 첨부는 본문 텍스트를 추출해 분류에 사용합니다. HWPX는 OWPML(zip+XML)에서 직접 추출하고, HWP 5.x는 `BodyText` 레코드 또는 `PrvText` 미리보기 스트림에서 추출합니다. 스캔 이미지 기반 문서나 비표준 구조는 부분 추출에 그칠 수 있습니다.
 - 날짜 표현이 복잡한 공고는 `날짜확인필요`로 남길 수 있습니다.
 - 자동 분류는 최종 지원 가능 여부를 확정하지 않습니다.
 
@@ -179,4 +205,23 @@ python validate_graduate_admission_boards.py
 
 일부 학교는 공지 게시판이 아니라 상시 입학안내 페이지에 모집요강 PDF를 직접 게시합니다. 이런 경우 `graduate_admission_boards.json`에 `"scan_page": true`를 추가하면 해당 페이지 본문과 첨부 링크까지 직접 검사합니다. URL 상태는 `validate_graduate_admission_boards.py`로 확인하며, `status`가 200이어도 `keyword_hits`가 0이거나 `final_url`이 error/login/SSO 페이지면 설정 보정이 필요합니다.
 
-GitHub Actions는 한국시간 오전 9시와 오후 7시에 실행되도록 `0 0 * * *`, `0 10 * * *` UTC cron을 사용합니다. `data/seen_graduate_admission_urls.json`은 Actions cache로 복원/저장하여 같은 공고를 반복 알림하지 않도록 했습니다.
+GitHub Actions는 한국시간 오전 9시와 오후 7시에 실행되도록 `0 0 * * *`, `0 10 * * *` UTC cron을 사용합니다.
+
+### 상태 저장 (state branch)
+
+`seen_urls.json`, `seen_graduate_admission_urls.json`, HTTP 조건부 요청 캐시(`*_http_state.json`)는 `run_id` 기반 Actions cache 대신 전용 `watcher-state` 브랜치에 저장합니다. Actions cache는 키가 불변이고 약 7일간 접근이 없으면 제거되어 장기 상태가 유실될 수 있기 때문입니다.
+
+- 각 감시 잡은 시작 시 `scripts/state_branch.sh restore`로 이전 상태를 내려받습니다(읽기 전용, 병렬 안전).
+- `publish-results` 잡이 한 번만 `scripts/state_branch.sh save`로 상태를 오펀 커밋 1개로 강제 푸시합니다. 브랜치 히스토리는 항상 커밋 1개로 유지되어 비대해지지 않습니다.
+- 워크플로 상단 `concurrency` 그룹으로 동일 ref의 실행을 직렬화하여 저장 경합을 막습니다.
+
+### 게시판 URL 검증 자동화
+
+`validate-boards` 잡이 정기 실행마다 `validate_graduate_admission_boards.py`를 돌려 대학원 입학 게시판 URL 상태를 점검하고, 결과를 GitHub Step Summary 표와 `data/board_validation.json`(저장소 커밋 + artifact)로 남깁니다. `status`가 200이 아니거나, error/login/SSO로 리다이렉트되거나, 대학원 키워드가 검출되지 않는 게시판은 `⚠️`로 표시됩니다.
+
+```bash
+python validate_graduate_admission_boards.py                 # TSV (기존 호환)
+python validate_graduate_admission_boards.py --json           # JSON 출력
+python validate_graduate_admission_boards.py --report data/board_validation.json --summary
+python validate_graduate_admission_boards.py --fail-on-error  # 문제 발견 시 종료 코드 1
+```
