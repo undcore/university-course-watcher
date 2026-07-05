@@ -36,6 +36,7 @@ jobs:
         with:
           path: |
             university-course-watcher/data/seen_graduate_admission_urls.json
+            university-course-watcher/data/graduate_admission_summary_state.json
           key: graduate-admission-seen-${{ github.run_id }}
           restore-keys: |
             graduate-admission-seen-
@@ -105,3 +106,5 @@ jobs:
             university-course-watcher/data/report.html
             university-course-watcher/data/graduate_admission_results.csv
             university-course-watcher/data/graduate_admission_results.json
+            university-course-watcher/data/graduate_admission_report.html
+            university-course-watcher/data/graduate_admission_summary_state.json
