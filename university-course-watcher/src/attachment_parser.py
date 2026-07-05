@@ -14,6 +14,7 @@ from requests.exceptions import SSLError
 from urllib3.util.retry import Retry
 
 from .http_state import HttpStateCache
+from .hwp_parser import extract_hwp_text, extract_hwpx_text
 from .utils import DATA_DIR
 
 try:
@@ -97,7 +98,7 @@ class AttachmentParser:
 
     def extract_text(self, url: str) -> str:
         sSuffix = self._suffix(url)
-        if sSuffix in {".hwp", ".hwpx", ".zip"}:
+        if sSuffix == ".zip":
             return ""
 
         session = self._session()
@@ -113,7 +114,7 @@ class AttachmentParser:
 
         response.raise_for_status()
         sSuffix = self._detect_suffix(url, response)
-        if sSuffix in {".hwp", ".hwpx", ".zip"}:
+        if sSuffix == ".zip":
             return ""
 
         bytesContent = response.raw.read(self.max_bytes + 1, decode_content=True)
@@ -134,6 +135,10 @@ class AttachmentParser:
             sExtractedText = self._docx_text(data)
         elif sSuffix == ".xlsx" and load_workbook is not None:
             sExtractedText = self._xlsx_text(data)
+        elif sSuffix == ".hwpx":
+            sExtractedText = extract_hwpx_text(bytesContent)
+        elif sSuffix == ".hwp":
+            sExtractedText = extract_hwp_text(bytesContent)
 
         self.state_cache.update(url, response.headers, bytesContent, extracted_text=sExtractedText)
         return sExtractedText
@@ -160,6 +165,10 @@ class AttachmentParser:
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx",
             "application/x-hwp": ".hwp",
             "application/haansofthwp": ".hwp",
+            "application/vnd.hancom.hwp": ".hwp",
+            "application/hwp+zip": ".hwpx",
+            "application/haansofthwpx": ".hwpx",
+            "application/vnd.hancom.hwpx": ".hwpx",
         }
 
         return dictContentTypes.get(sContentType, "")

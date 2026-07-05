@@ -63,6 +63,7 @@ class GraduateAdmissionWatcher:
             timeout=intTimeout,
             max_links_per_board=intMaxLinks,
             state_cache=self.http_state,
+            allow_board_overrides=not smoke_test,
         )
         self.attachment_parser = AttachmentParser(state_cache=self.http_state)
         self.storage = GraduateAdmissionStorage()
@@ -120,8 +121,9 @@ class GraduateAdmissionWatcher:
                 continue
 
             soup = BeautifulSoup(html, "html.parser")
+            selectors = board.get("selectors") if isinstance(board.get("selectors"), dict) else {}
             title = self._extract_page_title(soup, board)
-            body_text = self.crawler._extract_body_text(soup)
+            body_text = self.crawler._extract_body_text(soup, selectors.get("body"))
             attachment_urls = self.crawler._extract_attachment_urls(soup, sUrl)
 
             notices.append(

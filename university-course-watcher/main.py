@@ -209,7 +209,7 @@ def main() -> int:
 
     LOGGER.info("Crawling %d boards for %d universities without search APIs.", board_count, university_count)
     httpState = HttpStateCache(DATA_DIR / "course_http_state.json")
-    crawler = BoardCrawler(timeout=5, max_links_per_board=2, state_cache=httpState) if args.smoke_test else BoardCrawler(state_cache=httpState)
+    crawler = BoardCrawler(timeout=5, max_links_per_board=2, state_cache=httpState, allow_board_overrides=False) if args.smoke_test else BoardCrawler(state_cache=httpState)
     attachment_parser = AttachmentParser(state_cache=httpState)
     course_finder = CourseFinder(keywords)
     crawled = crawler.crawl_boards(boards, university_map, keyword_hint=args.keyword)

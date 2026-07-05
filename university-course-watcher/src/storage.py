@@ -20,6 +20,11 @@ GRADUATE_ADMISSION_FIELDS = [
     "grade", "matched_keywords", "reason", "attachment_urls", "is_new"
 ]
 
+HISTORY_FIELDS = [
+    "university_name", "region", "semester", "notice_date", "application_start_date",
+    "application_end_date", "url", "title", "source", "first_seen_at", "last_seen_at"
+]
+
 
 class Storage:
     def __init__(self, data_dir: Path = DATA_DIR):
@@ -83,10 +88,7 @@ class Storage:
             if not path.exists():
                 with path.open("w", encoding="utf-8-sig", newline="") as f:
                     writer = csv.writer(f)
-                    writer.writerow(RESULT_FIELDS if path == self.results_csv else [
-                        "university_name", "region", "semester", "notice_date", "application_start_date",
-                        "application_end_date", "url", "title", "source"
-                    ])
+                    writer.writerow(RESULT_FIELDS if path == self.results_csv else HISTORY_FIELDS)
         for path, default in [(self.results_json, []), (self.seen_path, []), (self.debug_json, [])]:
             if not path.exists():
                 save_json(path, default)
@@ -101,12 +103,12 @@ class Storage:
         return out
 
     def _save_history(self, items: list[dict]) -> None:
-        rows = []
+        new_rows = []
         for item in items:
             if item.get("registration_score", 0) < 40:
                 continue
             semester = "2학기" if "2학기" in item.get("title", "") else "1학기" if "1학기" in item.get("title", "") else ""
-            rows.append({
+            new_rows.append({
                 "university_name": item.get("university_name", ""),
                 "region": item.get("region", ""),
                 "semester": semester,
@@ -116,17 +118,47 @@ class Storage:
                 "url": item.get("url", ""),
                 "title": item.get("title", ""),
                 "source": item.get("source_type", ""),
+                "checked_at": item.get("checked_at", ""),
             })
-        if rows:
-            unique_rows = []
-            seen = set()
-            for row in rows:
-                key = (row["url"], row["title"])
-                if key in seen:
-                    continue
-                seen.add(key)
-                unique_rows.append(row)
-            self._write_csv(self.history_csv, list(unique_rows[0].keys()), unique_rows)
+        if new_rows:
+            self._merge_history(new_rows)
+
+    def _read_history(self) -> list[dict]:
+        if not self.history_csv.exists():
+            return []
+        with self.history_csv.open("r", encoding="utf-8-sig", newline="") as f:
+            return list(csv.DictReader(f))
+
+    def _merge_history(self, new_rows: list[dict]) -> None:
+        """Accumulate history instead of overwriting.
+
+        Existing rows are kept; a notice already recorded (same url+title) refreshes
+        its evolving fields and last_seen_at, while genuinely new notices are appended
+        with first_seen_at/last_seen_at stamped from the current run.
+        """
+        merged: list[dict] = self._read_history()
+        index = {(row.get("url", ""), row.get("title", "")): row for row in merged}
+        updatable = ("region", "semester", "notice_date", "application_start_date",
+                     "application_end_date", "source")
+
+        for row in new_rows:
+            stamp = row.pop("checked_at", "") or ""
+            key = (row["url"], row["title"])
+            existing = index.get(key)
+            if existing is None:
+                row["first_seen_at"] = stamp
+                row["last_seen_at"] = stamp
+                index[key] = row
+                merged.append(row)
+                continue
+            existing["last_seen_at"] = stamp or existing.get("last_seen_at", "")
+            if not existing.get("first_seen_at"):
+                existing["first_seen_at"] = stamp
+            for field in updatable:
+                if row.get(field):
+                    existing[field] = row[field]
+
+        self._write_csv(self.history_csv, HISTORY_FIELDS, merged)
 
     def _title_key(self, item: dict) -> str:
         raw = f"{item.get('university_name')}::{item.get('title')}"

@@ -4,7 +4,7 @@ import logging
 import re
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from urllib.parse import urljoin, urlparse
+from urllib.parse import parse_qsl, urlencode, urljoin, urlparse, urlunparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -39,9 +39,11 @@ class BoardCrawler:
         timeout: int = 8,
         max_links_per_board: int = 15,
         state_cache: HttpStateCache | None = None,
+        allow_board_overrides: bool = True,
     ):
         self.timeout = timeout
         self.max_links_per_board = max_links_per_board
+        self.allow_board_overrides = allow_board_overrides
         self.state_cache = state_cache or HttpStateCache(DATA_DIR / "course_http_state.json")
         self.session = requests.Session()
         self.last_error = ""
@@ -137,32 +139,50 @@ class BoardCrawler:
         return notices
 
     def crawl_board(self, board: dict, keyword_hint: str | None = None) -> list[CrawledNotice]:
-        url = board["url"]
         self.last_error = ""
+        selectors = self._board_selectors(board)
+        iMaxLinks = self._board_max_links(board)
+        lstListUrls = self._list_page_urls(board)
 
-        try:
-            html = self._get_text(url)
-        except Exception as exc:
-            self.last_error = str(exc)
-            LOGGER.warning("Board fetch failed: %s %s", url, exc)
+        candidates: list[tuple[str, str, str]] = []
+        setSeenKeys: set[str] = set()
+        lstFetchErrors: list[str] = []
+
+        for sListUrl in lstListUrls:
+            try:
+                html = self._get_text(sListUrl)
+            except Exception as exc:
+                lstFetchErrors.append(str(exc))
+                LOGGER.warning("Board fetch failed: %s %s", sListUrl, exc)
+                continue
+
+            soup = BeautifulSoup(html, HTML_PARSER)
+            for tupleCandidate in self._extract_candidate_links(soup, sListUrl, keyword_hint, selectors.get("list")):
+                if tupleCandidate[1] in setSeenKeys:
+                    continue
+                setSeenKeys.add(tupleCandidate[1])
+                candidates.append(tupleCandidate)
+
+        if not candidates:
+            if lstFetchErrors:
+                self.last_error = lstFetchErrors[0]
             return []
 
-        soup = BeautifulSoup(html, HTML_PARSER)
-        candidates = self._extract_candidate_links(soup, url, keyword_hint)
         candidates = self._select_candidates(candidates)
+        lstSelected = candidates[:iMaxLinks]
         notices: list[CrawledNotice] = []
         iDetailSuccessCount = 0
 
-        for title, detail_url, notice_date in candidates[: self.max_links_per_board]:
+        for title, detail_url, notice_date in lstSelected:
             self.last_stats["details_total"] += 1
 
             try:
                 detail_html = self._get_text(detail_url)
                 detail_soup = BeautifulSoup(detail_html, HTML_PARSER)
-                sDetailNoticeDate = self._extract_notice_date(detail_soup)
+                sDetailNoticeDate = self._extract_notice_date(detail_soup, selectors.get("date"))
                 if sDetailNoticeDate:
                     notice_date = sDetailNoticeDate
-                body_text = self._extract_body_text(detail_soup)
+                body_text = self._extract_body_text(detail_soup, selectors.get("body"))
                 attachments = self._extract_attachment_urls(detail_soup, detail_url)
                 iDetailSuccessCount += 1
             except Exception as exc:
@@ -188,10 +208,52 @@ class BoardCrawler:
                 )
             )
 
-        if candidates and iDetailSuccessCount == 0:
-            self.last_error = f"All {min(len(candidates), self.max_links_per_board)} detail pages failed."
+        if lstSelected and iDetailSuccessCount == 0:
+            self.last_error = f"All {len(lstSelected)} detail pages failed."
 
         return notices
+
+    def _board_selectors(self, board: dict) -> dict:
+        selectors = board.get("selectors")
+        return selectors if isinstance(selectors, dict) else {}
+
+    def _board_max_links(self, board: dict) -> int:
+        if not self.allow_board_overrides:
+            return self.max_links_per_board
+        try:
+            override = int(board.get("max_links", self.max_links_per_board))
+        except (TypeError, ValueError):
+            return self.max_links_per_board
+        return max(1, override)
+
+    def _list_page_urls(self, board: dict) -> list[str]:
+        base = board["url"]
+        pagination = board.get("pagination") if self.allow_board_overrides else None
+
+        if isinstance(pagination, dict) and pagination.get("param"):
+            try:
+                count = max(1, int(pagination.get("count", 1)))
+                start = int(pagination.get("start", 1))
+                step = int(pagination.get("step", 1))
+            except (TypeError, ValueError):
+                urls = [base]
+            else:
+                param = str(pagination["param"])
+                urls = [self._set_query_param(base, param, str(start + index * step)) for index in range(count)]
+        else:
+            urls = [base]
+
+        if self.allow_board_overrides:
+            for extra in board.get("list_pages", []) or []:
+                urls.append(urljoin(base, str(extra)))
+
+        return list(dict.fromkeys(urls))
+
+    def _set_query_param(self, url: str, key: str, value: str) -> str:
+        parsed = urlparse(url)
+        query = [(k, v) for k, v in parse_qsl(parsed.query, keep_blank_values=True) if k != key]
+        query.append((key, value))
+        return urlunparse(parsed._replace(query=urlencode(query)))
 
     def _crawl_board_worker(
         self,
@@ -202,6 +264,7 @@ class BoardCrawler:
             timeout=self.timeout,
             max_links_per_board=self.max_links_per_board,
             state_cache=self.state_cache,
+            allow_board_overrides=self.allow_board_overrides,
         )
         lstNotices = crawler.crawl_board(board, keyword_hint=keyword_hint)
         return lstNotices, crawler.last_error, crawler.last_stats
@@ -242,10 +305,17 @@ class BoardCrawler:
         self.state_cache.update(url, response.headers, response.content, html=sHtml)
         return sHtml
 
-    def _extract_candidate_links(self, soup: BeautifulSoup, base_url: str, keyword_hint: str | None) -> list[tuple[str, str, str]]:
+    def _extract_candidate_links(
+        self,
+        soup: BeautifulSoup,
+        base_url: str,
+        keyword_hint: str | None,
+        list_selector: str | None = None,
+    ) -> list[tuple[str, str, str]]:
         rows: list[tuple[str, str, str]] = []
         seen: set[str] = set()
-        for container in soup.select("table tr, ul li, ol li, div, article"):
+        sContainerSelector = list_selector or "table tr, ul li, ol li, div, article"
+        for container in soup.select(sContainerSelector):
             links = container.find_all("a", href=True)
             if not links:
                 continue
@@ -296,7 +366,13 @@ class BoardCrawler:
 
         return ""
 
-    def _extract_notice_date(self, soup: BeautifulSoup) -> str:
+    def _extract_notice_date(self, soup: BeautifulSoup, date_selector: str | None = None) -> str:
+        if date_selector:
+            for nodeDate in soup.select(date_selector):
+                sDate = self._find_date(nodeDate.get("datetime", "") or nodeDate.get_text(" "))
+                if sDate:
+                    return sDate
+
         lstMetaSelectors = [
             "meta[property='article:published_time']",
             "meta[name='date']",
@@ -375,10 +451,12 @@ class BoardCrawler:
             return True
         return bool(re.search(r"(notice|board|bbs|article|view|ntt|seq|mode=view|wr_id|공지|모집|학사|입학)", lowered + " " + title))
 
-    def _extract_body_text(self, soup: BeautifulSoup) -> str:
+    def _extract_body_text(self, soup: BeautifulSoup, body_selector: str | None = None) -> str:
         for tag in soup(["script", "style", "nav", "header", "footer"]):
             tag.decompose()
         selectors = [".view", ".board_view", ".bbs-view", ".article", ".content", "#content", "main"]
+        if body_selector:
+            selectors = [body_selector] + selectors
         for selector in selectors:
             node = soup.select_one(selector)
             if node:
