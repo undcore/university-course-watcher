@@ -96,7 +96,7 @@ def main() -> int:
     boards = [b for b in boards if b.get("university_name") in university_map]
 
     LOGGER.info("Crawling %d boards for %d universities without search APIs.", len(boards), len(university_map))
-    crawler = BoardCrawler(timeout=5, max_links_per_board=2) if args.smoke_test else BoardCrawler()
+    crawler = BoardCrawler(timeout=5, max_links_per_board=2, allow_board_overrides=False) if args.smoke_test else BoardCrawler()
     attachment_parser = AttachmentParser()
     course_finder = CourseFinder(keywords)
     crawled = crawler.crawl_boards(boards, university_map, keyword_hint=args.keyword)

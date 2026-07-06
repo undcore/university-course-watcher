@@ -57,7 +57,7 @@ class GraduateAdmissionWatcher:
         intTimeout = 5 if smoke_test else 8
 
         self.smoke_test = smoke_test
-        self.crawler = BoardCrawler(timeout=intTimeout, max_links_per_board=intMaxLinks)
+        self.crawler = BoardCrawler(timeout=intTimeout, max_links_per_board=intMaxLinks, allow_board_overrides=not smoke_test)
         self.attachment_parser = AttachmentParser()
         self.storage = GraduateAdmissionStorage()
 
@@ -123,8 +123,9 @@ class GraduateAdmissionWatcher:
                 continue
 
             soup = BeautifulSoup(html, "html.parser")
+            selectors = board.get("selectors") if isinstance(board.get("selectors"), dict) else {}
             title = self._extract_page_title(soup, board)
-            body_text = self.crawler._extract_body_text(soup)
+            body_text = self.crawler._extract_body_text(soup, selectors.get("body"))
             attachment_urls = self.crawler._extract_attachment_urls(soup, sUrl)
 
             notices.append(
