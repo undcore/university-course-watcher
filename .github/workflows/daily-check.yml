@@ -20,6 +20,15 @@ on:
           - success
           - empty
 
+permissions:
+  contents: write
+
+# Serialize runs on the same ref so the single-writer state-branch save never
+# races another run.
+concurrency:
+  group: daily-check-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -29,17 +38,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Restore watcher state
+        run: bash university-course-watcher/scripts/state_branch.sh restore university-course-watcher/data/seen_graduate_admission_urls.json university-course-watcher/data/graduate_admission_summary_state.json
       - name: Install dependencies
         run: pip install -r university-course-watcher/requirements.txt
-      - name: Restore notification history
-        uses: actions/cache@v4
-        with:
-          path: |
-            university-course-watcher/data/seen_graduate_admission_urls.json
-            university-course-watcher/data/graduate_admission_summary_state.json
-          key: graduate-admission-seen-${{ github.run_id }}
-          restore-keys: |
-            graduate-admission-seen-
       - name: Validate Telegram secrets are configured
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -96,10 +98,17 @@ jobs:
           else
             python main.py --once --watch graduate-admission --region seoul
           fi
+      - name: Save watcher state to state branch
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none')
+        run: |
+          bash university-course-watcher/scripts/state_branch.sh save \
+            university-course-watcher/data/seen_graduate_admission_urls.json \
+            university-course-watcher/data/graduate_admission_summary_state.json
       - name: Upload result artifacts
         uses: actions/upload-artifact@v4
         with:
           name: university-course-watcher-results
+          if-no-files-found: ignore
           path: |
             university-course-watcher/data/results.csv
             university-course-watcher/data/results.json
@@ -108,3 +117,24 @@ jobs:
             university-course-watcher/data/graduate_admission_results.json
             university-course-watcher/data/graduate_admission_report.html
             university-course-watcher/data/graduate_admission_summary_state.json
+
+  validate-boards:
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r university-course-watcher/requirements.txt
+      - name: Validate graduate admission board URLs
+        run: |
+          cd university-course-watcher
+          python validate_graduate_admission_boards.py --report data/board_validation.json --summary
+      - name: Upload board validation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: board-validation
+          path: university-course-watcher/data/board_validation.json
