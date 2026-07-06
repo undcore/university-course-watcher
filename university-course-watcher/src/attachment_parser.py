@@ -7,6 +7,8 @@ from urllib.parse import urlparse
 import requests
 from requests.exceptions import SSLError
 
+from .hwp_parser import extract_hwp_text, extract_hwpx_text
+
 try:
     from docx import Document
 except ImportError:  # pragma: no cover
@@ -44,7 +46,7 @@ class AttachmentParser:
 
     def extract_text(self, url: str) -> str:
         suffix = self._suffix(url)
-        if suffix in {".hwp", ".hwpx", ".zip"}:
+        if suffix == ".zip":
             return ""
         try:
             response = self.session.get(url, timeout=self.timeout, stream=True)
@@ -68,6 +70,10 @@ class AttachmentParser:
             if load_workbook is None:
                 return ""
             return self._xlsx_text(data)
+        if suffix == ".hwpx":
+            return extract_hwpx_text(content)
+        if suffix == ".hwp":
+            return extract_hwp_text(content)
         return ""
 
     def _suffix(self, url: str) -> str:
