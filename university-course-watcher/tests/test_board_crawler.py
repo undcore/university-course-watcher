@@ -12,6 +12,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.board_crawler import BoardCrawler
+from src.utils import now_kst
 
 
 class BoardCrawlerLinkTest(unittest.TestCase):
@@ -102,18 +103,52 @@ class BoardCrawlerLinkTest(unittest.TestCase):
             "둘째대학교": {"name": "둘째대학교"},
         }
 
-        def worker(dictBoard, keyword_hint):
-            notice = self._notice(dictBoard["university_name"])
-            dictStats = {"details_total": 1, "details_failed": 0, "failed_details": []}
-            return [notice], "", dictStats
+        def collect(dictBoard, keyword_hint):
+            sUrl = f"https://example.com/{dictBoard['university_name']}"
+            return [("시간제등록 모집", sUrl, "2026-06-20")], ""
 
-        self.crawler._crawl_board_worker = Mock(side_effect=worker)
+        def fetch(dictBoard, sTitle, sUrl, sNoticeDate):
+            return self._notice(dictBoard["university_name"]), True, ""
+
+        self.crawler._collect_board_candidates = Mock(side_effect=collect)
+        self.crawler._fetch_detail = Mock(side_effect=fetch)
+        self.crawler.state_cache = Mock()
 
         lstNotices = self.crawler.crawl_boards(lstBoards, dictUniversities)
 
         self.assertEqual(["첫째대학교", "둘째대학교"], [notice.university_name for notice in lstNotices])
         self.assertEqual(2, self.crawler.last_stats["boards_succeeded"])
         self.assertEqual(2, self.crawler.last_stats["details_total"])
+
+    def test_board_with_all_failed_details_is_counted_failed_in_crawl_boards(self) -> None:
+        lstBoards = [{"university_name": "첫째대학교", "board_type": "공지", "url": "https://first.example"}]
+        dictUniversities = {"첫째대학교": {"name": "첫째대학교"}}
+
+        self.crawler._collect_board_candidates = Mock(return_value=([("공고", "https://example.com/1", "")], ""))
+        self.crawler._fetch_detail = Mock(return_value=(self._notice("첫째대학교"), False, "detail unavailable"))
+        self.crawler.state_cache = Mock()
+
+        lstNotices = self.crawler.crawl_boards(lstBoards, dictUniversities)
+
+        self.assertEqual(1, len(lstNotices))
+        self.assertEqual(1, self.crawler.last_stats["boards_failed"])
+        self.assertEqual(1, self.crawler.last_stats["details_failed"])
+        self.assertIn("All 1 detail pages failed", self.crawler.last_stats["failed_boards"][0]["error"])
+
+    def test_seen_and_stale_candidates_are_skipped_before_fetch(self) -> None:
+        crawler = BoardCrawler(skip_urls={"https://example.com/seen"}, max_notice_age_days=7)
+        sTodayDate = now_kst().date().isoformat()
+        lstCandidates = [
+            ("새 공고", "https://example.com/new", sTodayDate),
+            ("본 공고", "https://example.com/seen", sTodayDate),
+            ("오래된 공고", "https://example.com/old", "2020-01-01"),
+            ("날짜 없는 공고", "https://example.com/undated", ""),
+        ]
+
+        lstFiltered = crawler._filter_candidates(lstCandidates)
+
+        self.assertEqual(["새 공고", "날짜 없는 공고"], [tupleItem[0] for tupleItem in lstFiltered])
+        self.assertEqual(2, crawler.last_stats["details_skipped"])
 
     def _notice(self, sUniversityName):
         from src.board_crawler import CrawledNotice
