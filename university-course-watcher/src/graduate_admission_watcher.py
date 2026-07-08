@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from bs4 import BeautifulSoup
 
 from .attachment_parser import AttachmentParser
-from .board_crawler import BoardCrawler, CrawledNotice
+from .board_crawler import HTML_PARSER, BoardCrawler, CrawledNotice
 from .http_state import HttpStateCache
 from .storage import GraduateAdmissionStorage
 from .utils import CONFIG_DIR, DATA_DIR, load_json, normalize_space, now_kst
@@ -119,7 +119,7 @@ class GraduateAdmissionWatcher:
                 LOGGER.warning("Direct admission page fetch failed: %s %s", sUrl, exc)
                 continue
 
-            soup = BeautifulSoup(html, "html.parser")
+            soup = BeautifulSoup(html, HTML_PARSER)
             title = self._extract_page_title(soup, board)
             body_text = self.crawler._extract_body_text(soup)
             attachment_urls = self.crawler._extract_attachment_urls(soup, sUrl)

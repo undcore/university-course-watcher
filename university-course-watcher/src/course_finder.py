@@ -8,7 +8,7 @@ from requests.exceptions import SSLError
 
 from .utils import normalize_space, truncate, unique_preserve_order
 
-HTML_PARSER = "html.parser"
+HTML_PARSER = "lxml"
 
 
 class CourseFinder:

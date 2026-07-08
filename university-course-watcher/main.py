@@ -219,19 +219,38 @@ def main() -> int:
     today = date.today()
     items: list[dict] = []
 
+    lstPreliminaries: list[tuple] = []
+    lstAttachmentUrls: list[str] = []
+
     for notice in crawled:
-        university = university_map.get(notice.university_name, {})
         preliminary_dates = parse_notice_dates(notice.title, notice.body_text, notice.notice_date, today)
         preliminary_classification = classify(notice.title, notice.body_text, preliminary_dates, keywords)
         bParseAttachments = should_parse_course_attachments(notice.title, preliminary_classification.grade)
-        attachment_texts = {}
+        lstPreliminaries.append((notice, preliminary_dates, preliminary_classification, bParseAttachments))
 
         if not args.smoke_test and bParseAttachments:
-            attachment_texts = attachment_parser.extract_texts(notice.attachment_urls)
+            lstAttachmentUrls.extend(notice.attachment_urls)
 
-        combined_text = "\n".join([notice.body_text] + list(attachment_texts.values()))
-        dates = parse_notice_dates(notice.title, combined_text, notice.notice_date, today)
-        classification = classify(notice.title, combined_text, dates, keywords)
+    dictAttachmentTexts = attachment_parser.extract_texts(list(dict.fromkeys(lstAttachmentUrls)))
+
+    for notice, preliminary_dates, preliminary_classification, bParseAttachments in lstPreliminaries:
+        university = university_map.get(notice.university_name, {})
+        attachment_texts = {}
+
+        if bParseAttachments:
+            attachment_texts = {
+                sUrl: dictAttachmentTexts[sUrl]
+                for sUrl in notice.attachment_urls
+                if dictAttachmentTexts.get(sUrl)
+            }
+
+        if attachment_texts:
+            combined_text = "\n".join([notice.body_text] + list(attachment_texts.values()))
+            dates = parse_notice_dates(notice.title, combined_text, notice.notice_date, today)
+            classification = classify(notice.title, combined_text, dates, keywords)
+        else:
+            dates = preliminary_dates
+            classification = preliminary_classification
 
         item = {
             "checked_at": checked_at,
