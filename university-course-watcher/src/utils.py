@@ -32,10 +32,13 @@ def load_json(path: Path, default: Any) -> Any:
         return json.load(f)
 
 
-def save_json(path: Path, data: Any) -> None:
+def save_json(path: Path, data: Any, compact: bool = False) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+        if compact:
+            json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
+        else:
+            json.dump(data, f, ensure_ascii=False, indent=2)
 
 
 def now_kst() -> datetime:

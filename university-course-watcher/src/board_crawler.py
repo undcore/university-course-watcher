@@ -2,8 +2,11 @@ from __future__ import annotations
 
 import logging
 import re
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from datetime import timedelta
+from itertools import zip_longest
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -16,10 +19,14 @@ from urllib3.util.retry import Retry
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 from .http_state import HttpStateCache
-from .utils import DATA_DIR, normalize_space
+from .utils import DATA_DIR, normalize_space, now_kst
 
 LOGGER = logging.getLogger(__name__)
-HTML_PARSER = "html.parser"
+HTML_PARSER = "lxml"
+
+BOARD_WORKER_CAP = 8
+DETAIL_WORKER_CAP = 12
+PER_HOST_CONCURRENCY = 2
 
 
 @dataclass
@@ -39,54 +46,74 @@ class BoardCrawler:
         timeout: int = 8,
         max_links_per_board: int = 15,
         state_cache: HttpStateCache | None = None,
+        skip_urls: set[str] | None = None,
+        max_notice_age_days: int | None = None,
     ):
         self.timeout = timeout
         self.max_links_per_board = max_links_per_board
         self.state_cache = state_cache or HttpStateCache(DATA_DIR / "course_http_state.json")
-        self.session = requests.Session()
+        self.skip_urls = set(skip_urls or ())
+        self.max_notice_age_days = max_notice_age_days
         self.last_error = ""
-        self.last_stats = {
+        self.last_stats = self._empty_stats()
+        self._thread_local = threading.local()
+        self._host_semaphores: dict[str, threading.BoundedSemaphore] = {}
+        self._host_semaphore_lock = threading.Lock()
+
+    def _empty_stats(self) -> dict:
+        return {
             "boards_total": 0,
             "boards_succeeded": 0,
             "boards_failed": 0,
             "boards_skipped": 0,
             "details_total": 0,
             "details_failed": 0,
+            "details_skipped": 0,
             "failed_boards": [],
             "failed_details": [],
         }
-        self.session.headers.update(
-            {
-                "User-Agent": "Mozilla/5.0 university-course-watcher/1.0 (official-board-crawler)",
-                "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.7",
-            }
-        )
-        retry = Retry(
-            total=2,
-            connect=1,
-            read=1,
-            status=2,
-            backoff_factor=0.5,
-            status_forcelist=[429, 500, 502, 503, 504],
-            allowed_methods=["GET"],
-            raise_on_status=False,
-        )
-        self.session.mount("http://", HTTPAdapter(max_retries=retry))
-        self.session.mount("https://", HTTPAdapter(max_retries=retry))
+
+    def _session(self) -> requests.Session:
+        session = getattr(self._thread_local, "session", None)
+
+        if session is None:
+            session = requests.Session()
+            session.headers.update(
+                {
+                    "User-Agent": "Mozilla/5.0 university-course-watcher/1.0 (official-board-crawler)",
+                    "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.7",
+                }
+            )
+            retry = Retry(
+                total=2,
+                connect=1,
+                read=1,
+                status=2,
+                backoff_factor=0.5,
+                status_forcelist=[429, 500, 502, 503, 504],
+                allowed_methods=["GET"],
+                raise_on_status=False,
+            )
+            session.mount("http://", HTTPAdapter(max_retries=retry))
+            session.mount("https://", HTTPAdapter(max_retries=retry))
+            self._thread_local.session = session
+
+        return session
+
+    def _host_semaphore(self, url: str) -> threading.BoundedSemaphore:
+        sHost = urlparse(url).netloc
+
+        with self._host_semaphore_lock:
+            semaphore = self._host_semaphores.get(sHost)
+            if semaphore is None:
+                semaphore = threading.BoundedSemaphore(PER_HOST_CONCURRENCY)
+                self._host_semaphores[sHost] = semaphore
+
+        return semaphore
 
     def crawl_boards(self, boards: list[dict], universities: dict[str, dict], keyword_hint: str | None = None) -> list[CrawledNotice]:
-        notices: list[CrawledNotice] = []
+        self.last_stats = self._empty_stats()
         lstActiveBoards: list[dict] = []
-        self.last_stats = {
-            "boards_total": 0,
-            "boards_succeeded": 0,
-            "boards_failed": 0,
-            "boards_skipped": 0,
-            "details_total": 0,
-            "details_failed": 0,
-            "failed_boards": [],
-            "failed_details": [],
-        }
 
         for board in boards:
             self.last_stats["boards_total"] += 1
@@ -104,22 +131,19 @@ class BoardCrawler:
             lstActiveBoards.append(board)
 
         if not lstActiveBoards:
-            return notices
+            return []
 
-        iWorkerCount = min(4, len(lstActiveBoards))
+        iBoardWorkerCount = min(BOARD_WORKER_CAP, len(lstActiveBoards))
 
-        with ThreadPoolExecutor(max_workers=iWorkerCount) as executor:
-            lstResults = list(executor.map(
-                lambda dictBoard: self._crawl_board_worker(dictBoard, keyword_hint),
+        with ThreadPoolExecutor(max_workers=iBoardWorkerCount) as executor:
+            lstCollected = list(executor.map(
+                lambda dictBoard: self._collect_board_candidates(dictBoard, keyword_hint),
                 lstActiveBoards,
             ))
 
-        for dictBoard, tupleResult in zip(lstActiveBoards, lstResults):
-            board_notices, sBoardError, dictBoardStats = tupleResult
-            self.last_stats["details_total"] += dictBoardStats.get("details_total", 0)
-            self.last_stats["details_failed"] += dictBoardStats.get("details_failed", 0)
-            self.last_stats["failed_details"].extend(dictBoardStats.get("failed_details", []))
+        lstJobGroups: list[list[tuple[int, dict, tuple[str, str, str]]]] = []
 
+        for iBoardIndex, (dictBoard, (lstCandidates, sBoardError)) in enumerate(zip(lstActiveBoards, lstCollected)):
             if sBoardError:
                 self.last_stats["boards_failed"] += 1
                 self.last_stats["failed_boards"].append({
@@ -128,83 +152,183 @@ class BoardCrawler:
                     "url": dictBoard.get("url", ""),
                     "error": sBoardError,
                 })
+                continue
+
+            lstJobGroups.append([
+                (iBoardIndex, dictBoard, tupleCandidate)
+                for tupleCandidate in lstCandidates
+            ])
+
+        lstDetailJobs = [
+            tupleJob
+            for tupleRound in zip_longest(*lstJobGroups)
+            for tupleJob in tupleRound
+            if tupleJob is not None
+        ] if lstJobGroups else []
+
+        lstDetailResults: list[tuple[CrawledNotice, bool, str]] = []
+
+        if lstDetailJobs:
+            iDetailWorkerCount = min(DETAIL_WORKER_CAP, len(lstDetailJobs))
+
+            with ThreadPoolExecutor(max_workers=iDetailWorkerCount) as executor:
+                lstDetailResults = list(executor.map(
+                    lambda tupleJob: self._fetch_detail(tupleJob[1], *tupleJob[2]),
+                    lstDetailJobs,
+                ))
+
+        dictBoardNotices: dict[int, list[CrawledNotice]] = {}
+        dictBoardSuccessCounts: dict[int, int] = {}
+
+        for (iBoardIndex, dictBoard, _), (notice, bSucceeded, sDetailError) in zip(lstDetailJobs, lstDetailResults):
+            self.last_stats["details_total"] += 1
+
+            if bSucceeded:
+                dictBoardSuccessCounts[iBoardIndex] = dictBoardSuccessCounts.get(iBoardIndex, 0) + 1
+            else:
+                self.last_stats["details_failed"] += 1
+                self.last_stats["failed_details"].append({
+                    "university_name": dictBoard.get("university_name", ""),
+                    "board_type": dictBoard.get("board_type", ""),
+                    "url": notice.url,
+                    "error": sDetailError,
+                })
+
+            dictBoardNotices.setdefault(iBoardIndex, []).append(notice)
+
+        notices: list[CrawledNotice] = []
+
+        for iBoardIndex, (dictBoard, (lstCandidates, sBoardError)) in enumerate(zip(lstActiveBoards, lstCollected)):
+            if sBoardError:
+                continue
+
+            if lstCandidates and dictBoardSuccessCounts.get(iBoardIndex, 0) == 0:
+                self.last_stats["boards_failed"] += 1
+                self.last_stats["failed_boards"].append({
+                    "university_name": dictBoard.get("university_name", ""),
+                    "board_type": dictBoard.get("board_type", ""),
+                    "url": dictBoard.get("url", ""),
+                    "error": f"All {len(lstCandidates)} detail pages failed.",
+                })
             else:
                 self.last_stats["boards_succeeded"] += 1
 
-            notices.extend(board_notices)
+            notices.extend(dictBoardNotices.get(iBoardIndex, []))
 
         self.state_cache.save()
         return notices
 
     def crawl_board(self, board: dict, keyword_hint: str | None = None) -> list[CrawledNotice]:
-        url = board["url"]
         self.last_error = ""
+        candidates, sBoardError = self._collect_board_candidates(board, keyword_hint)
 
-        try:
-            html = self._get_text(url)
-        except Exception as exc:
-            self.last_error = str(exc)
-            LOGGER.warning("Board fetch failed: %s %s", url, exc)
+        if sBoardError:
+            self.last_error = sBoardError
             return []
 
-        soup = BeautifulSoup(html, HTML_PARSER)
-        candidates = self._extract_candidate_links(soup, url, keyword_hint)
-        candidates = self._select_candidates(candidates)
         notices: list[CrawledNotice] = []
         iDetailSuccessCount = 0
 
-        for title, detail_url, notice_date in candidates[: self.max_links_per_board]:
+        for tupleCandidate in candidates:
             self.last_stats["details_total"] += 1
+            notice, bSucceeded, sDetailError = self._fetch_detail(board, *tupleCandidate)
 
-            try:
-                detail_html = self._get_text(detail_url)
-                detail_soup = BeautifulSoup(detail_html, HTML_PARSER)
-                sDetailNoticeDate = self._extract_notice_date(detail_soup)
-                if sDetailNoticeDate:
-                    notice_date = sDetailNoticeDate
-                body_text = self._extract_body_text(detail_soup)
-                attachments = self._extract_attachment_urls(detail_soup, detail_url)
+            if bSucceeded:
                 iDetailSuccessCount += 1
-            except Exception as exc:
+            else:
                 self.last_stats["details_failed"] += 1
                 self.last_stats["failed_details"].append({
                     "university_name": board.get("university_name", ""),
                     "board_type": board.get("board_type", ""),
-                    "url": detail_url,
-                    "error": str(exc),
+                    "url": notice.url,
+                    "error": sDetailError,
                 })
-                LOGGER.warning("Detail fetch failed: %s %s", detail_url, exc)
-                body_text = ""
-                attachments = []
-            notices.append(
-                CrawledNotice(
-                    university_name=board["university_name"],
-                    board_type=board["board_type"],
-                    title=title,
-                    url=detail_url,
-                    notice_date=notice_date,
-                    body_text=body_text,
-                    attachment_urls=attachments,
-                )
-            )
+
+            notices.append(notice)
 
         if candidates and iDetailSuccessCount == 0:
-            self.last_error = f"All {min(len(candidates), self.max_links_per_board)} detail pages failed."
+            self.last_error = f"All {len(candidates)} detail pages failed."
 
         return notices
 
-    def _crawl_board_worker(
+    def _collect_board_candidates(
         self,
         board: dict,
         keyword_hint: str | None,
-    ) -> tuple[list[CrawledNotice], str, dict]:
-        crawler = BoardCrawler(
-            timeout=self.timeout,
-            max_links_per_board=self.max_links_per_board,
-            state_cache=self.state_cache,
+    ) -> tuple[list[tuple[str, str, str]], str]:
+        url = board["url"]
+
+        try:
+            html = self._get_text(url)
+        except Exception as exc:
+            LOGGER.warning("Board fetch failed: %s %s", url, exc)
+            return [], str(exc)
+
+        soup = BeautifulSoup(html, HTML_PARSER)
+        candidates = self._extract_candidate_links(soup, url, keyword_hint)
+        candidates = self._select_candidates(candidates)
+        candidates = self._filter_candidates(candidates)
+        return candidates[: self.max_links_per_board], ""
+
+    def _filter_candidates(self, candidates: list[tuple[str, str, str]]) -> list[tuple[str, str, str]]:
+        sCutoffDate = ""
+
+        if self.max_notice_age_days is not None:
+            sCutoffDate = (now_kst().date() - timedelta(days=self.max_notice_age_days)).isoformat()
+
+        lstFiltered: list[tuple[str, str, str]] = []
+
+        for tupleCandidate in candidates:
+            sCandidateUrl = tupleCandidate[1]
+            sCandidateDate = tupleCandidate[2]
+
+            if sCandidateUrl in self.skip_urls:
+                self.last_stats["details_skipped"] += 1
+                continue
+
+            if sCutoffDate and sCandidateDate and sCandidateDate < sCutoffDate:
+                self.last_stats["details_skipped"] += 1
+                continue
+
+            lstFiltered.append(tupleCandidate)
+
+        return lstFiltered
+
+    def _fetch_detail(
+        self,
+        board: dict,
+        title: str,
+        detail_url: str,
+        notice_date: str,
+    ) -> tuple[CrawledNotice, bool, str]:
+        bSucceeded = True
+        sDetailError = ""
+
+        try:
+            detail_html = self._get_text(detail_url)
+            detail_soup = BeautifulSoup(detail_html, HTML_PARSER)
+            sDetailNoticeDate = self._extract_notice_date(detail_soup)
+            if sDetailNoticeDate:
+                notice_date = sDetailNoticeDate
+            body_text = self._extract_body_text(detail_soup)
+            attachments = self._extract_attachment_urls(detail_soup, detail_url)
+        except Exception as exc:
+            LOGGER.warning("Detail fetch failed: %s %s", detail_url, exc)
+            bSucceeded = False
+            sDetailError = str(exc)
+            body_text = ""
+            attachments = []
+
+        notice = CrawledNotice(
+            university_name=board["university_name"],
+            board_type=board["board_type"],
+            title=title,
+            url=detail_url,
+            notice_date=notice_date,
+            body_text=body_text,
+            attachment_urls=attachments,
         )
-        lstNotices = crawler.crawl_board(board, keyword_hint=keyword_hint)
-        return lstNotices, crawler.last_error, crawler.last_stats
+        return notice, bSucceeded, sDetailError
 
     def _select_candidates(self, candidates: list[tuple[str, str, str]]) -> list[tuple[str, str, str]]:
         lstDatedCandidates: list[tuple[str, str, str]] = []
@@ -221,19 +345,21 @@ class BoardCrawler:
 
     def _get_text(self, url: str) -> str:
         dictHeaders = self.state_cache.conditional_headers(url)
+        session = self._session()
 
-        try:
-            response = self.session.get(url, headers=dictHeaders, timeout=(4, self.timeout))
-        except SSLError:
-            LOGGER.info("SSL verification failed; retrying without verification: %s", url)
-            response = self.session.get(url, headers=dictHeaders, timeout=(4, self.timeout), verify=False)
+        with self._host_semaphore(url):
+            try:
+                response = session.get(url, headers=dictHeaders, timeout=(4, self.timeout))
+            except SSLError:
+                LOGGER.info("SSL verification failed; retrying without verification: %s", url)
+                response = session.get(url, headers=dictHeaders, timeout=(4, self.timeout), verify=False)
 
-        if response.status_code == 304:
-            sCachedHtml = self.state_cache.cached_value(url, "html")
-            if sCachedHtml:
-                return sCachedHtml
+            if response.status_code == 304:
+                sCachedHtml = self.state_cache.cached_value(url, "html")
+                if sCachedHtml:
+                    return sCachedHtml
 
-            response = self.session.get(url, timeout=(4, self.timeout))
+                response = session.get(url, timeout=(4, self.timeout))
 
         response.raise_for_status()
         if not response.encoding or response.encoding.lower() == "iso-8859-1":
@@ -245,35 +371,25 @@ class BoardCrawler:
     def _extract_candidate_links(self, soup: BeautifulSoup, base_url: str, keyword_hint: str | None) -> list[tuple[str, str, str]]:
         rows: list[tuple[str, str, str]] = []
         seen: set[str] = set()
-        for container in soup.select("table tr, ul li, ol li, div, article"):
-            links = container.find_all("a", href=True)
-            if not links:
-                continue
-            for a in links:
-                sContextText = self._link_context_text(a, container)
-                title = normalize_space(a.get_text(" ") or a.get("title") or sContextText)
-                href = a.get("href", "")
-                full_url = urljoin(base_url, href)
-                if not self._looks_like_notice_link(title, full_url, base_url, keyword_hint):
-                    continue
-                key = full_url.split("#")[0]
-                if key in seen:
-                    continue
-                seen.add(key)
-                sNoticeDate = self._find_date(sContextText)
-                rows.append((title[:250], key, sNoticeDate))
-
-        if rows:
-            return rows
 
         for a in soup.find_all("a", href=True):
-            title = normalize_space(a.get_text(" ") or a.get("title"))
-            full_url = urljoin(base_url, a["href"])
-            if self._looks_like_notice_link(title, full_url, base_url, keyword_hint):
-                rows.append((title[:250], full_url.split("#")[0], ""))
+            full_url = urljoin(base_url, a.get("href", ""))
+            key = full_url.split("#")[0]
+            if key in seen:
+                continue
+
+            sContextText = self._link_context_text(a)
+            title = normalize_space(a.get_text(" ") or a.get("title") or sContextText)
+            if not self._looks_like_notice_link(title, full_url, base_url, keyword_hint):
+                continue
+
+            seen.add(key)
+            sNoticeDate = self._find_date(sContextText)
+            rows.append((title[:250], key, sNoticeDate))
+
         return rows
 
-    def _link_context_text(self, link, container) -> str:
+    def _link_context_text(self, link) -> str:
         nodeContext = link.find_parent(["tr", "li", "article"])
 
         if nodeContext is not None:
@@ -290,9 +406,6 @@ class BoardCrawler:
                 return normalize_space(nodeContext.get_text(" "))
 
             nodeContext = nodeContext.parent
-
-        if container.name != "div" or len(container.find_all("a", href=True)) < 3:
-            return normalize_space(container.get_text(" "))
 
         return ""
 
