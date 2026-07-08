@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 
 from bs4 import BeautifulSoup
@@ -8,6 +9,7 @@ from bs4 import BeautifulSoup
 from .attachment_parser import AttachmentParser
 from .board_crawler import HTML_PARSER, BoardCrawler, CrawledNotice
 from .http_state import HttpStateCache
+from .recency import notice_max_age_days
 from .storage import GraduateAdmissionStorage
 from .utils import CONFIG_DIR, DATA_DIR, load_json, normalize_space, now_kst
 
@@ -59,13 +61,15 @@ class GraduateAdmissionWatcher:
 
         self.smoke_test = smoke_test
         self.http_state = HttpStateCache(DATA_DIR / "graduate_http_state.json")
+        self.storage = GraduateAdmissionStorage()
         self.crawler = BoardCrawler(
             timeout=intTimeout,
             max_links_per_board=intMaxLinks,
             state_cache=self.http_state,
+            skip_urls=self.storage.load_seen(),
+            max_notice_age_days=notice_max_age_days(),
         )
         self.attachment_parser = AttachmentParser(state_cache=self.http_state)
-        self.storage = GraduateAdmissionStorage()
 
     def run(self, region: str | None = None, dry_run: bool = False) -> list[dict]:
         universities = load_json(CONFIG_DIR / "universities.json", [])
@@ -105,38 +109,41 @@ class GraduateAdmissionWatcher:
         return boards
 
     def _scan_direct_pages(self, boards: list[dict]) -> list[CrawledNotice]:
-        notices: list[CrawledNotice] = []
+        lstScanBoards = [board for board in boards if board.get("scan_page")]
 
-        for board in boards:
-            if not board.get("scan_page"):
-                continue
+        if not lstScanBoards:
+            return []
 
-            sUrl = board["url"]
+        iWorkerCount = min(8, len(lstScanBoards))
 
-            try:
-                html = self.crawler._get_text(sUrl)
-            except Exception as exc:
-                LOGGER.warning("Direct admission page fetch failed: %s %s", sUrl, exc)
-                continue
+        with ThreadPoolExecutor(max_workers=iWorkerCount) as executor:
+            lstResults = list(executor.map(self._scan_direct_page, lstScanBoards))
 
-            soup = BeautifulSoup(html, HTML_PARSER)
-            title = self._extract_page_title(soup, board)
-            body_text = self.crawler._extract_body_text(soup)
-            attachment_urls = self.crawler._extract_attachment_urls(soup, sUrl)
+        return [notice for notice in lstResults if notice is not None]
 
-            notices.append(
-                CrawledNotice(
-                    university_name=board["university_name"],
-                    board_type=board["board_type"],
-                    title=title,
-                    url=sUrl,
-                    notice_date="__DIRECT_PAGE__",
-                    body_text=body_text,
-                    attachment_urls=attachment_urls,
-                )
-            )
+    def _scan_direct_page(self, board: dict) -> CrawledNotice | None:
+        sUrl = board["url"]
 
-        return notices
+        try:
+            html = self.crawler._get_text(sUrl)
+        except Exception as exc:
+            LOGGER.warning("Direct admission page fetch failed: %s %s", sUrl, exc)
+            return None
+
+        soup = BeautifulSoup(html, HTML_PARSER)
+        title = self._extract_page_title(soup, board)
+        body_text = self.crawler._extract_body_text(soup)
+        attachment_urls = self.crawler._extract_attachment_urls(soup, sUrl)
+
+        return CrawledNotice(
+            university_name=board["university_name"],
+            board_type=board["board_type"],
+            title=title,
+            url=sUrl,
+            notice_date="__DIRECT_PAGE__",
+            body_text=body_text,
+            attachment_urls=attachment_urls,
+        )
 
     def _extract_page_title(self, soup: BeautifulSoup, board: dict) -> str:
         for selector in ["h1", "h2", ".title", ".tit", "title"]:

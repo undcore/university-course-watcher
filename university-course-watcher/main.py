@@ -19,7 +19,7 @@ from src.date_parser import parse_notice_dates
 from src.graduate_admission_watcher import GraduateAdmissionWatcher
 from src.http_state import HttpStateCache
 from src.notifier import GraduateAdmissionNotifier, TelegramNotifier
-from src.recency import is_recent_notice, is_stale_notice
+from src.recency import is_recent_notice, is_stale_notice, notice_max_age_days
 from src.report_builder import build_report
 from src.storage import Storage
 from src.utils import CONFIG_DIR, DATA_DIR, ensure_dirs, load_json, now_kst, setup_logging
@@ -209,7 +209,13 @@ def main() -> int:
 
     LOGGER.info("Crawling %d boards for %d universities without search APIs.", board_count, university_count)
     httpState = HttpStateCache(DATA_DIR / "course_http_state.json")
-    crawler = BoardCrawler(timeout=5, max_links_per_board=2, state_cache=httpState) if args.smoke_test else BoardCrawler(state_cache=httpState)
+    seen_urls = storage.load_seen()
+    crawler_options = {
+        "state_cache": httpState,
+        "skip_urls": seen_urls,
+        "max_notice_age_days": notice_max_age_days(),
+    }
+    crawler = BoardCrawler(timeout=5, max_links_per_board=2, **crawler_options) if args.smoke_test else BoardCrawler(**crawler_options)
     attachment_parser = AttachmentParser(state_cache=httpState)
     course_finder = CourseFinder(keywords)
     crawled = crawler.crawl_boards(boards, university_map, keyword_hint=args.keyword)
