@@ -19,7 +19,7 @@ from .http_state import HttpStateCache
 from .utils import DATA_DIR, normalize_space
 
 LOGGER = logging.getLogger(__name__)
-HTML_PARSER = "html.parser"
+HTML_PARSER = "lxml"
 
 
 @dataclass
@@ -106,7 +106,7 @@ class BoardCrawler:
         if not lstActiveBoards:
             return notices
 
-        iWorkerCount = min(4, len(lstActiveBoards))
+        iWorkerCount = min(8, len(lstActiveBoards))
 
         with ThreadPoolExecutor(max_workers=iWorkerCount) as executor:
             lstResults = list(executor.map(
