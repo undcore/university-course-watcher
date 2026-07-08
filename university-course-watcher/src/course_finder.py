@@ -17,6 +17,7 @@ class CourseFinder:
         self.timeout = timeout
         self.session = requests.Session()
         self.session.headers.update({"User-Agent": "Mozilla/5.0 university-course-watcher/1.0"})
+        self._evidence_cache: dict[str, tuple[str, str]] = {}
 
     def enrich(self, item: dict, university: dict) -> dict:
         if item.get("grade") not in {"A", "B", "C"}:
@@ -29,38 +30,15 @@ class CourseFinder:
         if not domains:
             return item
         homepage = f"https://www.{domains[0]}"
-        evidence_texts: list[str] = []
+        evidence = ""
         evidence_url = ""
         for page_url in [homepage, item.get("url", "")]:
-            try:
-                response = self._get(page_url)
-                response.raise_for_status()
-                soup = BeautifulSoup(response.text, HTML_PARSER)
-                text = normalize_space(soup.get_text(" "))
-            except Exception:
+            if not page_url:
                 continue
-            if self._has_course_signal(text):
-                evidence_texts.append(text)
-                evidence_url = page_url
-                break
-            for a in soup.find_all("a", href=True):
-                label = normalize_space(a.get_text(" "))
-                if any(k in label for k in self.keywords["course_search"]):
-                    href = urljoin(page_url, a["href"])
-                    try:
-                        sub = self._get(href)
-                        sub.raise_for_status()
-                        sub_text = normalize_space(BeautifulSoup(sub.text, HTML_PARSER).get_text(" "))
-                    except Exception:
-                        continue
-                    if self._has_course_signal(sub_text):
-                        evidence_texts.append(sub_text)
-                        evidence_url = href
-                        break
-            if evidence_texts:
+            evidence, evidence_url = self._find_evidence(page_url)
+            if evidence:
                 break
 
-        evidence = evidence_texts[0] if evidence_texts else ""
         item["possible_departments"] = self._matched_departments(evidence)
         item["possible_computer_courses"] = self._matched_courses(evidence)
         item["course_evidence_url"] = evidence_url
@@ -68,6 +46,41 @@ class CourseFinder:
         if item["possible_computer_courses"] and item.get("computer_course_status") != "가능성 높음":
             item["computer_course_status"] = "확인 필요"
         return item
+
+    def _find_evidence(self, page_url: str) -> tuple[str, str]:
+        if page_url in self._evidence_cache:
+            return self._evidence_cache[page_url]
+
+        tupleEvidence = self._scan_page_for_evidence(page_url)
+        self._evidence_cache[page_url] = tupleEvidence
+        return tupleEvidence
+
+    def _scan_page_for_evidence(self, page_url: str) -> tuple[str, str]:
+        try:
+            response = self._get(page_url)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, HTML_PARSER)
+            text = normalize_space(soup.get_text(" "))
+        except Exception:
+            return "", ""
+
+        if self._has_course_signal(text):
+            return text, page_url
+
+        for a in soup.find_all("a", href=True):
+            label = normalize_space(a.get_text(" "))
+            if any(k in label for k in self.keywords["course_search"]):
+                href = urljoin(page_url, a["href"])
+                try:
+                    sub = self._get(href)
+                    sub.raise_for_status()
+                    sub_text = normalize_space(BeautifulSoup(sub.text, HTML_PARSER).get_text(" "))
+                except Exception:
+                    continue
+                if self._has_course_signal(sub_text):
+                    return sub_text, href
+
+        return "", ""
 
     def _has_course_signal(self, text: str) -> bool:
         return any(name in text for name in self.keywords["course_names"]) or any(key in text for key in self.keywords["course_search"])
