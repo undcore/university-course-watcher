@@ -6,3 +6,4 @@ python-dateutil
 pypdf
 python-docx
 openpyxl
+olefile
