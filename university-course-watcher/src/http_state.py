@@ -6,6 +6,8 @@ from pathlib import Path
 
 from .utils import load_json, now_kst, save_json
 
+MAX_CACHED_HTML_CHARS = 500_000
+
 
 class HttpStateCache:
     def __init__(self, path: Path):
@@ -40,6 +42,9 @@ class HttpStateCache:
             return self.dictState.get(sUrl, {}).get("content_hash") == sContentHash
 
     def update(self, sUrl: str, dictHeaders: dict, bytesContent: bytes, **dictValues: str) -> None:
+        if len(dictValues.get("html", "")) > MAX_CACHED_HTML_CHARS:
+            dictValues["html"] = ""
+
         with self.lock:
             dictEntry = dict(self.dictState.get(sUrl, {}))
             dictEntry.update({
@@ -60,4 +65,4 @@ class HttpStateCache:
             )
             dictSnapshot = dict(lstEntries[:1000])
 
-        save_json(self.path, dictSnapshot)
+        save_json(self.path, dictSnapshot, compact=True)
