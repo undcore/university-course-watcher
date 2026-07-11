@@ -484,8 +484,13 @@ class BoardCrawler:
         noisy = ["로그인", "회원가입", "개인정보", "이메일", "사이트맵", "찾아오시는", "facebook", "instagram"]
         if any(word.lower() in title.lower() for word in noisy):
             return False
+        if re.search(r"rss(list)?\b|/rss", lowered):
+            return False
         if keyword_hint and keyword_hint.lower() in title.lower():
             return True
+        # 목록 페이지의 첨부파일 링크(제목이 파일명)는 본문 공지와 중복
+        if re.search(r"\.(pdf|hwpx?|docx?|xlsx?|zip)\s*$", sNormalizedTitle):
+            return False
         return bool(re.search(r"(notice|board|bbs|article|view|ntt|seq|mode=view|wr_id|공지|모집|학사|입학)", lowered + " " + title))
 
     def _extract_body_text(self, soup: BeautifulSoup) -> str:
