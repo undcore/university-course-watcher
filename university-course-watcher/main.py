@@ -37,8 +37,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dry-run", action="store_true", help="저장과 텔레그램 알림 없이 결과만 출력합니다.")
     parser.add_argument("--debug", action="store_true", help="D등급과 상세 로그를 저장합니다.")
     parser.add_argument("--smoke-test", action="store_true", help="CI용 빠른 동작 확인 모드입니다.")
-    parser.add_argument("--telegram-test-success", action="store_true", help="2026 후기 일반대학원 후보 발견 텔레그램 테스트 메시지를 보냅니다.")
-    parser.add_argument("--telegram-test-empty", action="store_true", help="2026 후기 일반대학원 신규 없음 텔레그램 테스트 메시지를 보냅니다.")
+    parser.add_argument("--telegram-test-success", action="store_true", help="일반대학원 후보 발견 텔레그램 테스트 메시지를 보냅니다.")
+    parser.add_argument("--telegram-test-empty", action="store_true", help="일반대학원 신규 없음 텔레그램 테스트 메시지를 보냅니다.")
     return parser.parse_args()
 
 
