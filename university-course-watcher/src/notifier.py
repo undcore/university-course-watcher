@@ -98,6 +98,10 @@ class TelegramNotifier:
         )
 
     def _daily_report_message(self, summary: dict) -> str:
+        # 신규 후보가 없는 날은 같은 목록을 반복하지 않고 짧은 확인 메시지만 보낸다
+        if not summary.get("candidate_count", 0) and not summary.get("preview_items"):
+            return self._no_news_message(summary)
+
         grade_counts = summary.get("grade_counts", {})
         status_counts = summary.get("status_counts", {})
         sent_count = summary.get("sent_count", 0)
@@ -137,6 +141,21 @@ class TelegramNotifier:
             f"처리 결과: {result_line}\n\n"
             f"보고서 확인: {report_line}\n"
             f"{DISCLAIMER}"
+        )
+
+    def _no_news_message(self, summary: dict) -> str:
+        failed_boards = summary.get("failed_boards", []) + summary.get("failed_details", [])
+        failure_line = ""
+
+        if failed_boards:
+            failure_line = f"\n점검 필요 게시판 {len(failed_boards)}개는 report.html에서 확인하세요."
+
+        return (
+            "[시간제등록 일일 점검 - 신규 없음]\n\n"
+            f"점검 시각: {summary.get('checked_at')}\n"
+            f"게시판 {summary.get('board_success_count')}개 점검, 공지 {summary.get('crawled_count')}건 수집.\n"
+            "새로 발견된 시간제등록/외부 수강 공고는 없습니다."
+            f"{failure_line}"
         )
 
     def _format_counts(self, counts: dict) -> str:
