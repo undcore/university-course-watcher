@@ -336,7 +336,8 @@ def main() -> int:
         report_sent = notifier.send_daily_report(summary, dry_run=False)
         LOGGER.info("Daily Telegram report sent=%s", report_sent)
 
-        if notifier.delivery_failures or not report_sent:
+        # 실제 발송 실패는 delivery_failures에 기록됨; 토큰 미설정은 실패가 아님
+        if notifier.delivery_failures:
             raise RuntimeError(f"Telegram delivery failed {len(notifier.delivery_failures)} time(s).")
     else:
         for item in items:
