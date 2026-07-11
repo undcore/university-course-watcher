@@ -28,17 +28,24 @@ def ensure_dirs() -> None:
 def load_json(path: Path, default: Any) -> Any:
     if not path.exists():
         return default
-    with path.open("r", encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        logging.getLogger(__name__).warning("손상된 JSON 파일 무시: %s", path)
+        return default
 
 
 def save_json(path: Path, data: Any, compact: bool = False) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as f:
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    # ponytail: 잘못 디코딩된 첨부파일 텍스트의 서로게이트 문자가 UTF-8 인코딩을 깨뜨림
+    with tmp.open("w", encoding="utf-8", errors="replace") as f:
         if compact:
             json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
         else:
             json.dump(data, f, ensure_ascii=False, indent=2)
+    tmp.replace(path)
 
 
 def now_kst() -> datetime:
