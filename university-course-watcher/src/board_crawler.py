@@ -464,7 +464,7 @@ class BoardCrawler:
         bHasKeywordHint = bool(keyword_hint and keyword_hint.lower() in sNormalizedTitle)
         bHasTargetTitle = any(sWord in sNormalizedTitle for sWord in lstTargetWords)
         bHasDetailUrl = bool(re.search(
-            r"(article(no)?=|artclview|bbs|board/info|encmenuboardseq|mode=(view|download)|ntt|seq=|wr_id=)",
+            r"(article(no)?=|artclview|bbs|board/info|encmenuboardseq|mode=(view|download)|ntt|seq=|wr_id=|/view\.do)",
             url.lower(),
         ))
 

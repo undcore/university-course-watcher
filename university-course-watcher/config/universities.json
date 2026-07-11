@@ -34,5 +34,6 @@
   {"name": "이화여자대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["ewha.ac.kr"], "priority": 1, "notes": "2026 후기 일반대학원 모집요강 감시"},
   {"name": "국민대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["kookmin.ac.kr"], "priority": 1, "notes": "2026 후기 일반대학원 모집요강 감시"},
   {"name": "숭실대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["ssu.ac.kr"], "priority": 1, "notes": "2026 후기 일반대학원 모집요강 감시"},
-  {"name": "명지대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["mju.ac.kr"], "priority": 1, "notes": "2026 후기 일반대학원 모집요강 감시"}
+  {"name": "명지대학교", "region": "seoul", "region_name": "서울", "city": "서울", "domains": ["mju.ac.kr"], "priority": 1, "notes": "2026 후기 일반대학원 모집요강 감시"},
+  {"name": "가톨릭대학교", "region": "gyeonggi", "region_name": "경기", "city": "부천", "domains": ["catholic.ac.kr"], "priority": 1, "notes": "성심교정(부천) 기준"}
 ]
