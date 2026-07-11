@@ -260,7 +260,7 @@ class GraduateAdmissionNotifier:
         matched = ", ".join(item.get("matched_keywords") or []) or "확인 필요"
 
         return (
-            "[2026 후기 일반대학원 모집요강 알림]\n\n"
+            "[일반대학원 모집 알림]\n\n"
             f"등급: {item.get('grade')}\n"
             f"대학: {item.get('university_name')}\n"
             f"지역: {item.get('region')} {item.get('city')}\n"
@@ -279,13 +279,13 @@ class GraduateAdmissionNotifier:
         checked_at = items[0].get("checked_at") if items else ""
 
         return (
-            "[2026 후기 일반대학원 모집요강 확인 완료]\n\n"
+            "[일반대학원 모집 확인 완료]\n\n"
             "신규 알림 대상: 없음\n"
             f"확인 시각: {checked_at or '확인 필요'}\n"
             f"활성 감시 대상: {active_count}개\n"
             f"보류/비활성 대상: {disabled_count}개\n"
             f"기존/참고 후보 감지: {len(items)}건\n\n"
-            "새로 알릴 2026학년도 후기 일반대학원 모집요강 공고는 발견되지 않았습니다. "
+            "새로 알릴 일반대학원 모집 공고는 발견되지 않았습니다. "
             "보류/비활성 대상은 공식 URL 확인 또는 접근 방식 보정 후 재활성화가 필요합니다."
         )
 

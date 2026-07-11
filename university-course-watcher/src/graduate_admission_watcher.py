@@ -17,8 +17,9 @@ from .utils import CONFIG_DIR, DATA_DIR, load_json, normalize_space, now_kst
 LOGGER = logging.getLogger(__name__)
 
 
-TARGET_YEAR = "2026"
-TARGET_TERM = "후기"
+TARGET_YEARS = ["2026", "2027"]
+# 전기/후기 구분 없이 모집 차수(1차/2차/추가모집 등)를 함께 추적
+TERM_KEYWORDS = ["전기", "후기", "추가모집", "추가 모집", "1차", "2차", "3차"]
 
 
 @dataclass
@@ -82,13 +83,13 @@ class GraduateAdmissionWatcher:
         university_map = {university["name"]: university for university in universities}
         boards = self._select_boards(graduate_boards, university_map)
 
-        LOGGER.info("Crawling %d graduate admission boards for 2026 후기 일반대학원 notices.", len(boards))
+        LOGGER.info("Crawling %d graduate admission boards for 일반대학원 모집 notices.", len(boards))
         notices = self._scan_direct_pages(boards)
         notices.extend(self.crawler.crawl_boards(boards, university_map, keyword_hint="2026"))
         items = self._build_items(notices, university_map)
 
         if not self.smoke_test:
-            portal_items = fetch_portal_items(TARGET_TERM)
+            portal_items = fetch_portal_items()
             for item in portal_items:
                 university = university_map.get(item["university_name"], {})
                 item["region"] = university.get("region_name", university.get("region", ""))
@@ -222,35 +223,39 @@ class GraduateAdmissionWatcher:
         lowered_title = normalized_title.lower()
         lowered_text = normalized_text.lower()
 
-        year_keywords = ["2026", "2026학년도"]
-        term_keywords = ["후기"]
+        year_keywords = TARGET_YEARS + [f"{sYear}학년도" for sYear in TARGET_YEARS]
         school_keywords = ["일반대학원", "대학원"]
-        admission_keywords = ["모집요강", "신입생 모집", "신입생모집", "입학전형", "전형일정", "원서접수", "2차", "특별전형"]
-        negative_keywords = ["학부", "편입", "재외국민", "외국인전형", "특수대학원", "전문대학원", "교육대학원", "경영전문대학원"]
+        admission_keywords = ["모집요강", "신입생 모집", "신입생모집", "입학전형", "전형일정", "원서접수", "특별전형", "추가모집"]
+        negative_keywords = ["학부", "편입", "재외국민", "특수대학원", "전문대학원", "교육대학원", "경영전문대학원"]
 
         matched_keywords: list[str] = []
 
+        # 외국인 전형은 제목에 명시되면 무조건 제외
+        if "외국인" in lowered_title:
+            return "D", matched_keywords, "외국인 전형 공고로 판단되어 제외했습니다."
+
         title_has_year = self._collect_matches(lowered_title, year_keywords, matched_keywords)
-        title_has_term = self._collect_matches(lowered_title, term_keywords, matched_keywords)
+        title_has_admission = any(keyword in lowered_title for keyword in admission_keywords + TERM_KEYWORDS)
         has_year = title_has_year or any(keyword.lower() in lowered_text for keyword in year_keywords)
-        has_term = title_has_term or any(keyword.lower() in lowered_text for keyword in term_keywords)
         has_school = self._collect_matches(lowered_text, school_keywords, matched_keywords)
         has_admission = self._collect_matches(lowered_text, admission_keywords, matched_keywords)
         has_negative = self._collect_matches(lowered_text, negative_keywords, matched_keywords)
+        # 차수(전기/후기/1차/2차/추가모집)는 필터가 아니라 표시용으로 수집
+        self._collect_matches(lowered_title, TERM_KEYWORDS, matched_keywords)
 
-        if strict_title and (not title_has_year or not title_has_term):
-            return "D", matched_keywords, "제목에 2026학년도 후기 모집 신호가 함께 없어 메뉴/상시 안내 페이지로 판단했습니다."
+        if strict_title and (not title_has_year or not title_has_admission):
+            return "D", matched_keywords, "제목에 학년도와 모집 신호가 함께 없어 메뉴/상시 안내 페이지로 판단했습니다."
 
         if has_negative and "일반대학원" not in lowered_text:
             return "D", matched_keywords, "일반대학원보다 특수/전문대학원 또는 학부 전형일 가능성이 높습니다."
 
-        if has_year and has_term and "일반대학원" in lowered_text and has_admission:
-            return "A", matched_keywords, "2026학년도 후기 일반대학원 모집 공고로 판단됩니다."
+        if has_year and "일반대학원" in lowered_text and has_admission:
+            return "A", matched_keywords, "일반대학원 모집 공고로 판단됩니다."
 
-        if has_year and has_term and has_school and has_admission:
-            return "B", matched_keywords, "2026학년도 후기 대학원 모집 공고이며 일반대학원 여부 추가 확인이 필요합니다."
+        if has_year and has_school and has_admission:
+            return "B", matched_keywords, "대학원 모집 공고이며 일반대학원 여부 추가 확인이 필요합니다."
 
-        return "D", matched_keywords, "2026학년도 후기 일반대학원 모집요강 조건을 충족하지 않습니다."
+        return "D", matched_keywords, "일반대학원 모집요강 조건을 충족하지 않습니다."
 
     def _collect_matches(self, text: str, keywords: list[str], matched_keywords: list[str]) -> bool:
         found = False
