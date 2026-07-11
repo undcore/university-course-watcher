@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -15,6 +16,10 @@ CONFIG_DIR = PROJECT_ROOT / "config"
 
 
 def setup_logging(debug: bool = False) -> None:
+    # Windows cp949 콘솔에서 이모지 포함 제목 출력이 깨지지 않도록
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
     logging.basicConfig(
         level=logging.DEBUG if debug else logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
