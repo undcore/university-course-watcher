@@ -161,6 +161,24 @@ jobs:
             university-course-watcher/data/graduate_admission_results.csv
             university-course-watcher/data/graduate_admission_results.json
 
+  notify-failure:
+    needs:
+      - course-check
+      - graduate-admission-check
+    if: failure()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Send failure alert to Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d chat_id="${TELEGRAM_CHAT_ID}" \
+            -d disable_web_page_preview=true \
+            --data-urlencode text="[감시 실행 실패] 오늘 점검 워크플로가 실패해 알림이 누락될 수 있습니다. 로그: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
   publish-results:
     needs:
       - course-check

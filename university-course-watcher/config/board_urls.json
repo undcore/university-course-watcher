@@ -11,5 +11,8 @@
   {"university_name": "수원대학교", "board_type": "공지사항", "url": "https://www.suwon.ac.kr/index.html?menuno=674", "enabled": false},
   {"university_name": "용인대학교", "board_type": "공지사항", "url": "https://www.yongin.ac.kr/cmn/board/SYSTEM_DEFAULT000001/noticeList.do", "enabled": true},
   {"university_name": "인천대학교", "board_type": "공지사항", "url": "https://www.inu.ac.kr/inu/1518/subview.do", "enabled": true},
-  {"university_name": "인하대학교", "board_type": "공지사항", "url": "https://www.inha.ac.kr/kr/950/subview.do", "enabled": true}
+  {"university_name": "인하대학교", "board_type": "공지사항", "url": "https://www.inha.ac.kr/kr/950/subview.do", "enabled": true},
+  {"university_name": "국민대학교", "board_type": "전체공지", "url": "https://www.kookmin.ac.kr/user/kmuNews/notice/index.do", "enabled": true},
+  {"university_name": "명지대학교", "board_type": "일반공지", "url": "https://www.mju.ac.kr/mjukr/255/subview.do", "enabled": true},
+  {"university_name": "가톨릭대학교", "board_type": "공지사항(성심교정)", "url": "https://www.catholic.ac.kr/ko/campuslife/notice.do", "enabled": true}
 ]
