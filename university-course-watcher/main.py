@@ -83,7 +83,8 @@ def report_preview_items(items: list[dict], limit: int = 5) -> list[dict]:
     sorted_items = sorted(items, key=lambda item: rank.get(item.get("grade"), 9))
 
     for item in sorted_items:
-        if item.get("grade") == "D" or not item.get("is_new") or not is_recent_notice(item):
+        # C등급은 참고용 노이즈가 많아 보고서 미리보기에서 제외
+        if item.get("grade") not in {"A", "B"} or not item.get("is_new") or not is_recent_notice(item):
             continue
 
         preview.append({

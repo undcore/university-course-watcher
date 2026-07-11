@@ -26,7 +26,7 @@ class DailyReportTest(unittest.TestCase):
 
         lstPreview = report_preview_items(lstItems)
 
-        self.assertEqual(["new B", "new C"], [dictItem["title"] for dictItem in lstPreview])
+        self.assertEqual(["new B"], [dictItem["title"] for dictItem in lstPreview])
 
     def test_seen_items_include_sent_candidates_and_new_grade_c(self) -> None:
         dictSentB = {"url": "https://example.com/b", "grade": "B", "is_new": True}

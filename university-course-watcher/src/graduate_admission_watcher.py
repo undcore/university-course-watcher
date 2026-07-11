@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 from bs4 import BeautifulSoup
 
+from .apply_portal import fetch_portal_items
 from .attachment_parser import AttachmentParser
 from .board_crawler import HTML_PARSER, BoardCrawler, CrawledNotice
 from .http_state import HttpStateCache
@@ -85,6 +86,14 @@ class GraduateAdmissionWatcher:
         notices = self._scan_direct_pages(boards)
         notices.extend(self.crawler.crawl_boards(boards, university_map, keyword_hint="2026"))
         items = self._build_items(notices, university_map)
+
+        if not self.smoke_test:
+            portal_items = fetch_portal_items(TARGET_TERM)
+            for item in portal_items:
+                university = university_map.get(item["university_name"], {})
+                item["region"] = university.get("region_name", university.get("region", ""))
+                item["city"] = university.get("city", "")
+            items.extend(portal_items)
         items = self.storage.dedupe(items)
         items = self.storage.mark_is_new(items)
 
