@@ -13,7 +13,9 @@ RESULT_FIELDS = [
     "notice_date", "application_start_date", "application_end_date", "deadline_status",
     "registration_score", "external_score", "computer_score", "freshness_score", "grade",
     "external_applicant_status", "computer_course_status", "possible_departments", "possible_computer_courses",
-    "course_evidence_url", "course_evidence_text", "attachment_urls", "matched_keywords", "reason", "is_new"
+    "course_evidence_url", "course_evidence_text", "attachment_urls", "image_urls", "ocr_checked", "ocr_text_found", "ocr_evidence",
+    "date_source", "date_conflict", "matched_keywords", "reason", "content_fingerprint", "change_type",
+    "previous_grade", "is_new"
 ]
 
 GRADUATE_ADMISSION_FIELDS = [
@@ -30,6 +32,7 @@ class Storage:
         self.results_json = data_dir / "results.json"
         self.debug_json = data_dir / "debug_results.json"
         self.history_csv = data_dir / "university_history.csv"
+        self.notice_state_path = data_dir / "notice_state.json"
 
     def load_seen(self) -> set[str]:
         data = load_json(self.seen_path, [])
@@ -50,6 +53,49 @@ class Storage:
         for item in items:
             item["is_new"] = item["url"] not in seen
         return items
+
+    def mark_changes(self, items: list[dict]) -> list[dict]:
+        previous_state = load_json(self.notice_state_path, {})
+        seen_urls = self.load_seen()
+        if not isinstance(previous_state, dict):
+            previous_state = {}
+
+        for item in items:
+            url = item.get("url", "")
+            previous = previous_state.get(url, {}) if url else {}
+            item["previous_grade"] = previous.get("grade", "")
+
+            if not previous and url in seen_urls:
+                item["change_type"] = "unchanged"
+            elif not previous:
+                item["change_type"] = "new"
+            elif previous.get("content_fingerprint") != item.get("content_fingerprint"):
+                item["change_type"] = "content_changed"
+            elif previous.get("grade") != item.get("grade"):
+                item["change_type"] = "grade_changed"
+            elif previous.get("deadline_status") != item.get("deadline_status"):
+                item["change_type"] = "deadline_changed"
+            else:
+                item["change_type"] = "unchanged"
+
+        return items
+
+    def update_notice_state(self, items: list[dict]) -> None:
+        state: dict[str, dict] = {}
+
+        for item in items:
+            url = item.get("url", "")
+            if not url:
+                continue
+
+            state[url] = {
+                "content_fingerprint": item.get("content_fingerprint", ""),
+                "grade": item.get("grade", ""),
+                "deadline_status": item.get("deadline_status", ""),
+                "checked_at": item.get("checked_at", ""),
+            }
+
+        save_json(self.notice_state_path, state)
 
     def update_seen(self, notified_items: list[dict]) -> None:
         seen = self.load_seen()
@@ -88,7 +134,12 @@ class Storage:
                         "university_name", "region", "semester", "notice_date", "application_start_date",
                         "application_end_date", "url", "title", "source"
                     ])
-        for path, default in [(self.results_json, []), (self.seen_path, []), (self.debug_json, [])]:
+        for path, default in [
+            (self.results_json, []),
+            (self.seen_path, []),
+            (self.debug_json, []),
+            (self.notice_state_path, {}),
+        ]:
             if not path.exists():
                 save_json(path, default)
 
@@ -98,6 +149,8 @@ class Storage:
             value = item.get(field, "")
             if isinstance(value, list):
                 value = "; ".join(value)
+            elif isinstance(value, dict):
+                value = " | ".join(f"{key}: {text}" for key, text in value.items())
             out[field] = value
         return out
 

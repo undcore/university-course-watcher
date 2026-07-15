@@ -17,7 +17,7 @@ def build_report(items: list[dict], path: Path = DATA_DIR / "report.html") -> No
         [i for i in items if i.get("grade") != "D"],
         key=lambda i: (GRADE_ORDER.get(i.get("grade"), 9), STATUS_ORDER.get(i.get("deadline_status"), 9), i.get("university_name", "")),
     )
-    rows = "\n".join(_row(item) for item in visible) or "<tr><td colspan='13'>검색 결과가 없습니다.</td></tr>"
+    rows = "\n".join(_row(item) for item in visible) or "<tr><td colspan='15'>검색 결과가 없습니다.</td></tr>"
     content = f"""<!doctype html>
 <html lang="ko">
 <head>
@@ -45,7 +45,7 @@ def build_report(items: list[dict], path: Path = DATA_DIR / "report.html") -> No
   <table>
     <thead>
       <tr>
-        <th>등급</th><th>마감상태</th><th>대학명</th><th>지역</th><th>제목</th><th>모집기간</th>
+        <th>변경</th><th>등급</th><th>마감상태</th><th>날짜 근거</th><th>대학명</th><th>지역</th><th>제목</th><th>모집기간</th>
         <th>외부 신청</th><th>컴퓨터 과목</th><th>학과/과목 후보</th><th>판정 이유</th><th>링크</th><th>첨부</th><th>확인일시</th>
       </tr>
     </thead>
@@ -61,10 +61,17 @@ def _row(item: dict) -> str:
     period = f"{item.get('application_start_date') or '?'} ~ {item.get('application_end_date') or '?'}"
     courses = "; ".join((item.get("possible_departments") or []) + (item.get("possible_computer_courses") or []))
     attachments = "<br>".join(f"<a href='{html.escape(u)}'>첨부</a>" for u in item.get("attachment_urls", []))
+    date_source = item.get("date_source") or "확인 필요"
+    if item.get("date_conflict"):
+        date_source = f"충돌/수동 확인 ({date_source})"
+    elif item.get("ocr_text_found"):
+        date_source = f"OCR 포함 ({date_source})"
     return (
         f"<tr class='grade-{html.escape(item.get('grade', ''))}'>"
+        f"<td>{html.escape(item.get('change_type', '') or ('new' if item.get('is_new') else 'unchanged'))}</td>"
         f"<td>{html.escape(item.get('grade', ''))}</td>"
         f"<td>{html.escape(item.get('deadline_status', ''))}</td>"
+        f"<td>{html.escape(date_source)}</td>"
         f"<td>{html.escape(item.get('university_name', ''))}</td>"
         f"<td>{html.escape(item.get('region', ''))} {html.escape(item.get('city', ''))}</td>"
         f"<td>{html.escape(item.get('title', ''))}</td>"

@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+import json
 import logging
 import re
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import timedelta
 from itertools import zip_longest
-from urllib.parse import urljoin, urlparse
+from urllib.parse import parse_qs, unquote, urlencode, urljoin, urlparse, urlunparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -38,6 +39,7 @@ class CrawledNotice:
     notice_date: str
     body_text: str
     attachment_urls: list[str]
+    image_urls: list[str] = field(default_factory=list)
 
 
 class BoardCrawler:
@@ -312,12 +314,14 @@ class BoardCrawler:
                 notice_date = sDetailNoticeDate
             body_text = self._extract_body_text(detail_soup)
             attachments = self._extract_attachment_urls(detail_soup, detail_url)
+            images = self._extract_image_urls(detail_soup, detail_url)
         except Exception as exc:
             LOGGER.warning("Detail fetch failed: %s %s", detail_url, exc)
             bSucceeded = False
             sDetailError = str(exc)
             body_text = ""
             attachments = []
+            images = []
 
         notice = CrawledNotice(
             university_name=board["university_name"],
@@ -327,6 +331,7 @@ class BoardCrawler:
             notice_date=notice_date,
             body_text=body_text,
             attachment_urls=attachments,
+            image_urls=images,
         )
         return notice, bSucceeded, sDetailError
 
@@ -373,8 +378,8 @@ class BoardCrawler:
         seen: set[str] = set()
 
         for a in soup.find_all("a", href=True):
-            full_url = urljoin(base_url, a.get("href", ""))
-            key = full_url.split("#")[0]
+            full_url = self._link_url(a, base_url)
+            key = self._canonicalize_url(full_url)
             if key in seen:
                 continue
 
@@ -388,6 +393,70 @@ class BoardCrawler:
             rows.append((title[:250], key, sNoticeDate))
 
         return rows
+
+    def _link_url(self, link, base_url: str) -> str:
+        href = link.get("href", "")
+        data_params = link.get("data-params", "")
+        onclick = link.get("onclick", "")
+        detail_match = re.search(r"doDetail\(['\"]?(\d+)['\"]?\)", onclick)
+
+        if detail_match:
+            parsed_url = urlparse(base_url)
+            detail_path = parsed_url.path
+
+            if detail_path.endswith("noticeList.do"):
+                detail_path = detail_path.replace(
+                    "noticeList.do",
+                    f"{detail_match.group(1)}noticeDetail.do",
+                )
+
+            return urlunparse((parsed_url.scheme, parsed_url.netloc, detail_path, "", "", ""))
+
+        submit_match = re.search(r"submitForm\([^,]+,\s*['\"]view['\"]\s*,\s*(\d+)\)", onclick)
+
+        if submit_match:
+            parsed_url = urlparse(base_url)
+            query_values = parse_qs(parsed_url.query)
+            query_values["act"] = ["view"]
+            query_values["bbsno"] = [submit_match.group(1)]
+            detail_query = urlencode(query_values, doseq=True)
+            return urlunparse((parsed_url.scheme, parsed_url.netloc, parsed_url.path, "", detail_query, ""))
+
+        if href == "#" and data_params:
+            try:
+                params = json.loads(data_params)
+            except json.JSONDecodeError:
+                params = {}
+
+            if params.get("encMenuBoardSeq"):
+                parsed_url = urlparse(base_url)
+                board_path = parsed_url.path
+
+                if board_path.startswith("/menu/"):
+                    board_path = board_path.replace("/menu/", "/menu/board/info/", 1)
+
+                query_params = {
+                    key: str(value).lower() if isinstance(value, bool) else str(value)
+                    for key, value in params.items()
+                }
+                detail_query = urlencode(query_params)
+                return urlunparse((parsed_url.scheme, parsed_url.netloc, board_path, "", detail_query, ""))
+
+        return urljoin(base_url, href)
+
+    def _canonicalize_url(self, url: str, redirect_depth: int = 0) -> str:
+        parsed_url = urlparse(url)
+        query_values = parse_qs(parsed_url.query)
+
+        if redirect_depth < 5 and parsed_url.path == "/redirect" and query_values.get("url"):
+            redirected_url = unquote(query_values["url"][0])
+            redirected_full_url = urljoin(url, redirected_url)
+
+            if redirected_full_url != url:
+                return self._canonicalize_url(redirected_full_url, redirect_depth + 1)
+
+        canonical_path = re.sub(r";jsessionid=[^/?#]+", "", parsed_url.path, flags=re.IGNORECASE)
+        return urlunparse((parsed_url.scheme, parsed_url.netloc, canonical_path, "", parsed_url.query, ""))
 
     def _link_context_text(self, link) -> str:
         nodeContext = link.find_parent(["tr", "li", "article"])
@@ -465,8 +534,8 @@ class BoardCrawler:
         bHasTargetTitle = any(sWord in sNormalizedTitle for sWord in lstTargetWords)
         bHasDetailUrl = bool(re.search(
             r"(article(no)?=|artclview|/bbs/(?:[^/?]+/)*\d+(?:$|[/?#])|"
-            r"bbs[^?#]*(?:view|detail)|board/info|encmenuboardseq|mode=(view|download)|"
-            r"ntt|seq=|wr_id=)",
+            r"bbs[^?#]*(?:view|detail)|board/info|noticedetail|encmenuboardseq|"
+            r"mode=(view|download)|act=view|bbsno=|ntt|seq=|wr_id=)",
             url.lower(),
         ))
 
@@ -518,6 +587,28 @@ class BoardCrawler:
                 if urlparse(attachment_url).scheme in {"http", "https"}:
                     urls.append(attachment_url)
         return list(dict.fromkeys(urls))
+
+    def _extract_image_urls(self, soup: BeautifulSoup, base_url: str) -> list[str]:
+        urls: list[str] = []
+        ignored_words = ["logo", "icon", "banner", "button", "sprite", "profile"]
+
+        for image in soup.find_all("img"):
+            source = (
+                image.get("src")
+                or image.get("data-src")
+                or image.get("data-original")
+                or ""
+            ).strip()
+            lowered_source = source.lower()
+
+            if not source or source.startswith("data:"):
+                continue
+            if any(word in lowered_source for word in ignored_words):
+                continue
+
+            urls.append(urljoin(base_url, source))
+
+        return list(dict.fromkeys(urls))[:10]
 
     def _find_date(self, text: str) -> str:
         match = re.search(r"(20\d{2})[.\-/년 ]+\s*(\d{1,2})[.\-/월 ]+\s*(\d{1,2})", text)

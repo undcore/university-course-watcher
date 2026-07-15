@@ -17,16 +17,60 @@ RANGE_RE = re.compile(
 RANGE_CONTEXT_WORDS = ["접수", "신청", "등록", "원서", "모집기간", "수강"]
 
 
-def parse_notice_dates(title: str, body: str, notice_date: str, today: date) -> dict[str, str]:
-    text = f"{title}\n{body}"
-    start, end = _find_range(text)
+def parse_notice_dates(title: str, body: str, notice_date: str, today: date) -> dict[str, str | bool]:
+    return parse_notice_dates_from_sources(
+        title,
+        [("본문", body)],
+        notice_date,
+        today,
+    )
+
+
+def parse_notice_dates_from_sources(
+    title: str,
+    sources: list[tuple[str, str]],
+    notice_date: str,
+    today: date,
+) -> dict[str, str | bool]:
+    source_results: list[tuple[str, Optional[date], Optional[date]]] = []
+
+    for source_name, source_text in sources:
+        start, end = _find_range(f"{title}\n{source_text}")
+
+        if start or end:
+            source_results.append((source_name, start, end))
+
     notice = _normalize_date(notice_date)
+
+    if not source_results:
+        return {
+            "notice_date": notice or "",
+            "application_start_date": "",
+            "application_end_date": "",
+            "deadline_status": deadline_status(None, None, today),
+            "date_source": "",
+            "date_conflict": False,
+        }
+
+    selected_source, selected_start, selected_end = source_results[0]
+    selected_period = (selected_start, selected_end)
+    date_conflict = any(
+        (start, end) != selected_period
+        for _, start, end in source_results[1:]
+    )
+    matching_sources = [
+        source_name
+        for source_name, start, end in source_results
+        if (start, end) == selected_period
+    ]
 
     return {
         "notice_date": notice or "",
-        "application_start_date": start.isoformat() if start else "",
-        "application_end_date": end.isoformat() if end else "",
-        "deadline_status": deadline_status(start, end, today),
+        "application_start_date": selected_start.isoformat() if selected_start else "",
+        "application_end_date": selected_end.isoformat() if selected_end else "",
+        "deadline_status": deadline_status(selected_start, selected_end, today),
+        "date_source": ", ".join(matching_sources) or selected_source,
+        "date_conflict": date_conflict,
     }
 
 

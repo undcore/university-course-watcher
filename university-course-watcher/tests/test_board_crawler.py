@@ -77,6 +77,98 @@ class BoardCrawlerLinkTest(unittest.TestCase):
         self.assertEqual("2026-06-10", lstRows[0][2])
         self.assertEqual("2026-04-03", lstRows[1][2])
 
+    def test_data_params_link_builds_notice_url(self) -> None:
+        soup = BeautifulSoup(
+            '<a href="#" data-params=\'{"scrtWrtiYn":false,"encMenuSeq":"menu1",'
+            '"encMenuBoardSeq":"board1"}\'>시간제등록 신청 안내</a>',
+            "html.parser",
+        )
+
+        url = self.crawler._link_url(soup.find("a"), "https://university.example/menu/notice.do")
+
+        self.assertEqual(
+            "https://university.example/menu/board/info/notice.do?"
+            "scrtWrtiYn=false&encMenuSeq=menu1&encMenuBoardSeq=board1",
+            url,
+        )
+
+    def test_submit_form_onclick_builds_notice_url(self) -> None:
+        soup = BeautifulSoup(
+            '<a href="javascript:void(0);" onclick="return submitForm(this,\'view\',88261);">'
+            "시간제등록 모집 공고</a>",
+            "html.parser",
+        )
+
+        url = self.crawler._link_url(
+            soup.find("a"),
+            "https://university.example/index.html?menuno=674",
+        )
+
+        self.assertEqual(
+            "https://university.example/index.html?menuno=674&act=view&bbsno=88261",
+            url,
+        )
+
+    def test_do_detail_onclick_builds_notice_url(self) -> None:
+        soup = BeautifulSoup(
+            '<a href="javascript:void(0);" onclick="doDetail(\'6728\');">학사 모집 안내</a>',
+            "html.parser",
+        )
+
+        url = self.crawler._link_url(
+            soup.find("a"),
+            "https://university.example/cmn/board/SYSTEM_DEFAULT000001/noticeList.do",
+        )
+
+        self.assertEqual(
+            "https://university.example/cmn/board/SYSTEM_DEFAULT000001/6728noticeDetail.do",
+            url,
+        )
+
+    def test_jsessionid_is_removed_from_notice_url(self) -> None:
+        url = self.crawler._canonicalize_url(
+            "https://university.example/www/selectBbsNttView.do;jsessionid=ABC123?"
+            "key=1&nttNo=2#section"
+        )
+
+        self.assertEqual(
+            "https://university.example/www/selectBbsNttView.do?key=1&nttNo=2",
+            url,
+        )
+
+    def test_redirect_url_is_unwrapped_for_notice_url(self) -> None:
+        url = self.crawler._canonicalize_url(
+            "https://university.example/redirect?"
+            "url=%2Fmenu%2Fboard%2Finfo%2Fnotice.do%3FencMenuBoardSeq%3Dabc"
+        )
+
+        self.assertEqual(
+            "https://university.example/menu/board/info/notice.do?encMenuBoardSeq=abc",
+            url,
+        )
+
+    def test_candidate_extraction_uses_reconstructed_javascript_url(self) -> None:
+        soup = BeautifulSoup(
+            '<a href="javascript:void(0);" onclick="return submitForm(this,\'view\',88261);">'
+            "2026학년도 시간제등록생 모집 공고</a>",
+            "html.parser",
+        )
+
+        candidates = self.crawler._extract_candidate_links(
+            soup,
+            "https://university.example/index.html?menuno=674",
+            None,
+        )
+
+        self.assertEqual(
+            [(
+                "2026학년도 시간제등록생 모집 공고",
+                "https://university.example/index.html?menuno=674&act=view&bbsno=88261",
+                "",
+            )],
+            candidates,
+        )
+
     def test_detail_page_uses_only_explicit_notice_date(self) -> None:
         soupLabeled = BeautifulSoup(
             "<div>등록일: 2026-04-03</div><div>접수기간 2026-06-10 ~ 2026-06-20</div>",
@@ -100,6 +192,26 @@ class BoardCrawlerLinkTest(unittest.TestCase):
         urls = self.crawler._extract_attachment_urls(soup, "https://university.example/notice")
 
         self.assertEqual(["https://university.example/files/guide.pdf"], urls)
+
+    def test_detail_images_are_collected_without_layout_assets(self) -> None:
+        soup = BeautifulSoup(
+            '<div class="content"><img src="/uploads/schedule.jpg">'
+            '<img data-src="/uploads/guide.png"><img src="/images/logo.png"></div>',
+            "html.parser",
+        )
+
+        urls = self.crawler._extract_image_urls(
+            soup,
+            "https://university.example/notice/1",
+        )
+
+        self.assertEqual(
+            [
+                "https://university.example/uploads/schedule.jpg",
+                "https://university.example/uploads/guide.png",
+            ],
+            urls,
+        )
 
     def test_candidates_with_dates_are_sorted_newest_first(self) -> None:
         lstCandidates = [

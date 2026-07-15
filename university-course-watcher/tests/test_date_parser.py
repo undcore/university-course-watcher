@@ -9,7 +9,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.date_parser import parse_notice_dates
+from src.date_parser import parse_notice_dates, parse_notice_dates_from_sources
 
 
 class NoticeDateParserTest(unittest.TestCase):
@@ -45,6 +45,35 @@ class NoticeDateParserTest(unittest.TestCase):
 
         self.assertEqual("", dictDates["application_start_date"])
         self.assertEqual("", dictDates["application_end_date"])
+
+    def test_date_source_is_reported_for_selected_period(self) -> None:
+        dates = parse_notice_dates_from_sources(
+            "시간제등록생 모집",
+            [
+                ("본문", "접수기간 2026-06-24 ~ 2026-07-03"),
+                ("이미지 OCR", "원서접수 2026-06-24 ~ 2026-07-03"),
+            ],
+            "2026-06-20",
+            date(2026, 6, 22),
+        )
+
+        self.assertEqual("본문, 이미지 OCR", dates["date_source"])
+        self.assertFalse(dates["date_conflict"])
+
+    def test_date_conflict_between_body_and_ocr_is_reported(self) -> None:
+        dates = parse_notice_dates_from_sources(
+            "시간제등록생 모집",
+            [
+                ("본문", "접수기간 2026-06-24 ~ 2026-07-03"),
+                ("이미지 OCR", "접수기간 2026-06-25 ~ 2026-07-04"),
+            ],
+            "2026-06-20",
+            date(2026, 6, 22),
+        )
+
+        self.assertEqual("2026-06-24", dates["application_start_date"])
+        self.assertEqual("본문", dates["date_source"])
+        self.assertTrue(dates["date_conflict"])
 
     def test_reversed_application_period_is_rejected(self) -> None:
         dictDates = parse_notice_dates(
