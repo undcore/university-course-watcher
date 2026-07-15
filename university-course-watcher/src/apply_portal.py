@@ -21,7 +21,8 @@ JINHAK_API_URL = "https://apply.jinhakapply.com/WebCommon/Ajax/GetUnivList.aspx/
 
 # 일반대학원이 아닌 특수/전문대학원 판별용
 NEGATIVE_WORDS = ["교육대학원", "경영전문", "경영대학원", "특수대학원", "전문대학원", "신학대학원",
-                  "사회복지대학원", "상담", "외국인", "international", "글로벌", "MBA"]
+                  "사회복지대학원", "상담", "외국인", "international", "글로벌", "MBA",
+                  "학석사", "계약학과"]
 
 
 def fetch_portal_items(target_term: str = "") -> list[dict]:

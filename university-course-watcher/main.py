@@ -20,7 +20,7 @@ from src.graduate_admission_watcher import GraduateAdmissionWatcher
 from src.http_state import HttpStateCache
 from src.notifier import GraduateAdmissionNotifier, TelegramNotifier
 from src.recency import is_recent_notice, is_stale_notice, notice_max_age_days
-from src.report_builder import build_report
+from src.report_builder import build_graduate_admission_report, build_report
 from src.storage import Storage
 from src.utils import CONFIG_DIR, DATA_DIR, ensure_dirs, load_json, now_kst, setup_logging
 
@@ -179,11 +179,19 @@ def main() -> int:
 
         watcher = GraduateAdmissionWatcher(smoke_test=args.smoke_test)
         items = watcher.run(region=args.region, dry_run=args.dry_run)
+        send_empty_summary = watcher.should_send_empty_summary(items, active_count, disabled_count)
         notifier = GraduateAdmissionNotifier()
-        sent = notifier.send_candidates(items, dry_run=args.dry_run)
+        sent = notifier.send_candidates(
+            items,
+            dry_run=args.dry_run,
+            send_empty_summary=send_empty_summary,
+        )
 
         if not args.dry_run:
+            build_graduate_admission_report(items)
             watcher.mark_sent(items_to_mark_seen(items, sent))
+            if notifier.summary_sent:
+                watcher.mark_empty_summary_sent(items, active_count, disabled_count)
         else:
             for item in items:
                 print(f"[{item['grade']}] {item['university_name']} {item['title']} {item['url']}")
@@ -331,7 +339,7 @@ def main() -> int:
             "failed_boards": crawler.last_stats.get("failed_boards", []),
             "failed_details": crawler.last_stats.get("failed_details", []),
             "actions_run_url": github_actions_run_url(),
-            "artifact_name": "university-course-watcher-results",
+            "artifact_name": "course-watcher-results",
             "report_html_url": os.getenv("REPORT_HTML_URL", ""),
         }
         report_sent = notifier.send_daily_report(summary, dry_run=False)

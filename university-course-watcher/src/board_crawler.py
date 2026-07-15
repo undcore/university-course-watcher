@@ -464,7 +464,9 @@ class BoardCrawler:
         bHasKeywordHint = bool(keyword_hint and keyword_hint.lower() in sNormalizedTitle)
         bHasTargetTitle = any(sWord in sNormalizedTitle for sWord in lstTargetWords)
         bHasDetailUrl = bool(re.search(
-            r"(article(no)?=|artclview|bbs|board/info|encmenuboardseq|mode=(view|download)|ntt|seq=|wr_id=|/view\.do)",
+            r"(article(no)?=|artclview|/bbs/(?:[^/?]+/)*\d+(?:$|[/?#])|"
+            r"bbs[^?#]*(?:view|detail)|board/info|encmenuboardseq|mode=(view|download)|"
+            r"ntt|seq=|wr_id=)",
             url.lower(),
         ))
 
@@ -512,7 +514,9 @@ class BoardCrawler:
             text = normalize_space(a.get_text(" "))
             lowered = (href + " " + text).lower()
             if any(ext in lowered for ext in [".pdf", ".hwp", ".hwpx", ".doc", ".docx", ".xls", ".xlsx", ".zip", "download"]):
-                urls.append(urljoin(base_url, href))
+                attachment_url = urljoin(base_url, href)
+                if urlparse(attachment_url).scheme in {"http", "https"}:
+                    urls.append(attachment_url)
         return list(dict.fromkeys(urls))
 
     def _find_date(self, text: str) -> str:
