@@ -32,6 +32,13 @@ try:
 except ImportError:  # pragma: no cover
     PdfReader = None
 
+try:
+    import pytesseract
+    from PIL import Image
+except ImportError:  # pragma: no cover
+    pytesseract = None
+    Image = None
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -73,6 +80,70 @@ class AttachmentParser:
         except Exception as exc:
             LOGGER.info("Attachment parse skipped: %s %s", sUrl, exc)
             return ""
+
+    def extract_image_texts(self, urls: list[str]) -> dict[str, str]:
+        result: dict[str, str] = {}
+
+        if not urls:
+            return result
+
+        worker_count = min(self.max_workers, len(urls))
+
+        with ThreadPoolExecutor(max_workers=worker_count) as executor:
+            extracted_texts = list(executor.map(self._extract_image_safely, urls))
+
+        for url, text in zip(urls, extracted_texts):
+            result[url] = text
+
+        return result
+
+    def _extract_image_safely(self, url: str) -> str:
+        try:
+            return self.extract_image_text(url)
+        except Exception as exc:
+            LOGGER.info("Image OCR skipped: %s %s", url, exc)
+            return ""
+
+    def extract_image_text(self, url: str) -> str:
+        if pytesseract is None or Image is None:
+            return ""
+
+        session = self._session()
+
+        try:
+            response = session.get(url, timeout=(4, self.timeout), stream=True)
+        except SSLError:
+            response = session.get(url, timeout=(4, self.timeout), stream=True, verify=False)
+
+        response.raise_for_status()
+        content = response.raw.read(self.max_bytes + 1, decode_content=True)
+
+        if len(content) > self.max_bytes:
+            LOGGER.info("Image too large, skipped OCR: %s", url)
+            return ""
+
+        image = Image.open(io.BytesIO(content))
+        image.load()
+
+        if image.width < 300 or image.height < 150:
+            return ""
+
+        try:
+            text = pytesseract.image_to_string(image, lang="kor+eng")
+        except Exception as exc:
+            if exc.__class__.__name__ == "TesseractNotFoundError":
+                LOGGER.info("Tesseract executable unavailable; skipped OCR: %s", url)
+                return ""
+            if exc.__class__.__name__ != "TesseractError":
+                raise
+
+            try:
+                text = pytesseract.image_to_string(image, lang="eng")
+            except Exception as fallback_exc:
+                LOGGER.info("English OCR fallback failed: %s %s", url, fallback_exc)
+                return ""
+
+        return text[:12000]
 
     def _session(self) -> requests.Session:
         session = getattr(self.thread_local, "session", None)

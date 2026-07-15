@@ -40,10 +40,13 @@ jobs:
         with:
           path: |
             university-course-watcher/data/seen_urls.json
+            university-course-watcher/data/notice_state.json
             university-course-watcher/data/course_http_state.json
           key: seen-urls-${{ github.run_id }}
           restore-keys: |
             seen-urls-
+      - name: Install Korean OCR
+        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-kor
       - name: Install dependencies
         run: pip install -r university-course-watcher/requirements.txt
       - name: Validate Telegram secrets are configured

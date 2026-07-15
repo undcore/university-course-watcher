@@ -9,7 +9,51 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.storage import GraduateAdmissionStorage
+from src.storage import GraduateAdmissionStorage, Storage
+
+
+class CourseStorageChangeTest(unittest.TestCase):
+    def _item(self, fingerprint: str = "fingerprint-1", grade: str = "A") -> dict:
+        return {
+            "url": "https://example.com/course",
+            "content_fingerprint": fingerprint,
+            "grade": grade,
+            "deadline_status": "모집중",
+            "checked_at": "2026-07-15T20:00:00+09:00",
+        }
+
+    def test_same_url_content_change_is_detected(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            storage = Storage(Path(directory))
+            original = self._item()
+            storage.update_notice_state([original])
+
+            changed = self._item(fingerprint="fingerprint-2")
+            storage.mark_changes([changed])
+
+            self.assertEqual("content_changed", changed["change_type"])
+            self.assertEqual("A", changed["previous_grade"])
+
+    def test_unchanged_item_is_not_realerted(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            storage = Storage(Path(directory))
+            original = self._item()
+            storage.update_notice_state([original])
+
+            current = self._item()
+            storage.mark_changes([current])
+
+            self.assertEqual("unchanged", current["change_type"])
+
+    def test_existing_seen_url_bootstraps_without_duplicate_alert(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            storage = Storage(Path(directory))
+            item = self._item()
+            storage.update_seen([item])
+
+            storage.mark_changes([item])
+
+            self.assertEqual("unchanged", item["change_type"])
 
 
 class GraduateAdmissionStorageTest(unittest.TestCase):

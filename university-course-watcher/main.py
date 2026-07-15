@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import logging
 import os
 from datetime import date
@@ -15,7 +16,7 @@ from src.attachment_parser import AttachmentParser
 from src.board_crawler import BoardCrawler
 from src.classifier import classify
 from src.course_finder import CourseFinder
-from src.date_parser import parse_notice_dates
+from src.date_parser import parse_notice_dates, parse_notice_dates_from_sources
 from src.graduate_admission_watcher import GraduateAdmissionWatcher
 from src.http_state import HttpStateCache
 from src.notifier import GraduateAdmissionNotifier, TelegramNotifier
@@ -52,15 +53,21 @@ def count_by_key(items: list[dict], key: str) -> dict[str, int]:
     return counts
 
 
+def is_changed_candidate(item: dict) -> bool:
+    change_type = item.get("change_type", "")
+    if change_type:
+        return change_type in {"new", "content_changed", "grade_changed", "deadline_changed"}
+    return bool(item.get("is_new"))
+
+
 def count_candidate_targets(items: list[dict]) -> int:
     count = 0
 
     for item in items:
-        is_new = item.get("is_new")
         grade = item.get("grade")
         deadline_status = item.get("deadline_status")
 
-        if is_new and grade in {"A", "B"} and deadline_status != "마감됨" and is_recent_notice(item):
+        if is_changed_candidate(item) and grade in {"A", "B"} and deadline_status != "마감됨" and is_recent_notice(item):
             count += 1
 
     return count
@@ -84,7 +91,8 @@ def report_preview_items(items: list[dict], limit: int = 5) -> list[dict]:
 
     for item in sorted_items:
         # C등급은 참고용 노이즈가 많아 보고서 미리보기에서 제외
-        if item.get("grade") not in {"A", "B"} or not item.get("is_new") or not is_recent_notice(item):
+        change_type = item.get("change_type", "")
+        if item.get("grade") not in {"A", "B"} or not is_changed_candidate(item) or not is_recent_notice(item):
             continue
 
         preview.append({
@@ -94,6 +102,7 @@ def report_preview_items(items: list[dict], limit: int = 5) -> list[dict]:
             "url": item.get("url", ""),
             "reason": item.get("reason", ""),
             "is_new": item.get("is_new", False),
+            "change_type": change_type,
         })
 
         if len(preview) >= limit:
@@ -218,10 +227,8 @@ def main() -> int:
 
     LOGGER.info("Crawling %d boards for %d universities without search APIs.", board_count, university_count)
     httpState = HttpStateCache(DATA_DIR / "course_http_state.json")
-    seen_urls = storage.load_seen()
     crawler_options = {
         "state_cache": httpState,
-        "skip_urls": seen_urls,
         "max_notice_age_days": notice_max_age_days(),
     }
     crawler = BoardCrawler(timeout=5, max_links_per_board=2, **crawler_options) if args.smoke_test else BoardCrawler(**crawler_options)
@@ -251,6 +258,8 @@ def main() -> int:
     for notice, preliminary_dates, preliminary_classification, bParseAttachments in lstPreliminaries:
         university = university_map.get(notice.university_name, {})
         attachment_texts = {}
+        image_texts: dict[str, str] = {}
+        ocr_checked = False
 
         if bParseAttachments:
             attachment_texts = {
@@ -259,13 +268,37 @@ def main() -> int:
                 if dictAttachmentTexts.get(sUrl)
             }
 
-        if attachment_texts:
-            combined_text = "\n".join([notice.body_text] + list(attachment_texts.values()))
-            dates = parse_notice_dates(notice.title, combined_text, notice.notice_date, today)
-            classification = classify(notice.title, combined_text, dates, keywords)
-        else:
-            dates = preliminary_dates
-            classification = preliminary_classification
+        text_sources = [("본문", notice.body_text)]
+        text_sources.extend(
+            (f"첨부:{url}", text)
+            for url, text in attachment_texts.items()
+        )
+        combined_text = "\n".join(text for _, text in text_sources)
+        dates = parse_notice_dates_from_sources(notice.title, text_sources, notice.notice_date, today)
+        classification = classify(notice.title, combined_text, dates, keywords)
+
+        if classification.grade in {"A", "B"} and not args.smoke_test and notice.image_urls:
+            ocr_checked = True
+            image_texts = attachment_parser.extract_image_texts(notice.image_urls)
+            image_sources = [
+                (f"이미지 OCR:{url}", text)
+                for url, text in image_texts.items()
+                if text
+            ]
+
+            if image_sources:
+                text_sources.extend(image_sources)
+                combined_text = "\n".join(text for _, text in text_sources)
+                dates = parse_notice_dates_from_sources(notice.title, text_sources, notice.notice_date, today)
+                classification = classify(notice.title, combined_text, dates, keywords)
+
+        fingerprint_parts = [
+            notice.title,
+            combined_text,
+            *sorted(notice.attachment_urls),
+            *sorted(notice.image_urls),
+        ]
+        content_fingerprint = hashlib.sha256("\n".join(fingerprint_parts).encode("utf-8")).hexdigest()
 
         item = {
             "checked_at": checked_at,
@@ -289,8 +322,15 @@ def main() -> int:
             "course_evidence_url": "",
             "course_evidence_text": "",
             "attachment_urls": notice.attachment_urls,
+            "image_urls": notice.image_urls,
+            "ocr_checked": ocr_checked,
+            "ocr_text_found": any(image_texts.values()),
+            "ocr_evidence": {url: text[:1000] for url, text in image_texts.items() if text},
             "matched_keywords": classification.matched_keywords,
             "reason": classification.reason,
+            "content_fingerprint": content_fingerprint,
+            "change_type": "",
+            "previous_grade": "",
             "is_new": False,
         }
 
@@ -303,6 +343,8 @@ def main() -> int:
 
     items = storage.dedupe(items)
     items = storage.mark_is_new(items)
+    items = storage.mark_changes(items)
+    state_items = list(items)
     deduped_count = len(items)
 
     if args.grade:
@@ -348,6 +390,8 @@ def main() -> int:
         # 실제 발송 실패는 delivery_failures에 기록됨; 토큰 미설정은 실패가 아님
         if notifier.delivery_failures:
             raise RuntimeError(f"Telegram delivery failed {len(notifier.delivery_failures)} time(s).")
+
+        storage.update_notice_state(state_items)
     else:
         for item in items:
             if item.get("grade") != "D" or debug:

@@ -50,6 +50,25 @@ class TelegramNotifierTest(unittest.TestCase):
         self.assertEqual([], lstSentItems)
         notifier._send.assert_not_called()
 
+    def test_changed_content_at_seen_url_is_sent(self) -> None:
+        notifier = TelegramNotifier()
+        notifier.token = "token"
+        notifier.chat_id = "chat"
+        notifier._send = Mock()
+        item = {
+            "url": "https://example.com/changed",
+            "grade": "A",
+            "is_new": False,
+            "change_type": "content_changed",
+            "deadline_status": "모집중",
+            "notice_date": date.today().isoformat(),
+        }
+
+        sent_items = notifier.send_candidates([item])
+
+        self.assertEqual([item], sent_items)
+        notifier._send.assert_called_once()
+
 
 class GraduateAdmissionNotifierTest(unittest.TestCase):
     def test_unchanged_empty_summary_is_not_sent(self) -> None:

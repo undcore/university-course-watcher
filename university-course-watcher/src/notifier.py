@@ -27,7 +27,7 @@ class TelegramNotifier:
     def send_candidates(self, items: list[dict], dry_run: bool = False) -> list[dict]:
         targets = [
             item for item in items
-            if item.get("is_new")
+            if self._is_notifiable_change(item)
             and item.get("grade") in {"A", "B"}
             and item.get("deadline_status") != "마감됨"
             and is_recent_notice(item)
@@ -50,6 +50,12 @@ class TelegramNotifier:
                 self.delivery_failures.append(str(exc))
 
         return sent
+
+    def _is_notifiable_change(self, item: dict) -> bool:
+        change_type = item.get("change_type", "")
+        if change_type:
+            return change_type in {"new", "content_changed", "grade_changed", "deadline_changed"}
+        return bool(item.get("is_new"))
 
     def send_daily_report(self, summary: dict, dry_run: bool = False) -> bool:
         if dry_run:
@@ -84,6 +90,7 @@ class TelegramNotifier:
         return (
             "[시간제등록/외부 수강 공고 후보 발견]\n\n"
             f"등급: {item.get('grade')}\n"
+            f"변경 유형: {item.get('change_type') or ('new' if item.get('is_new') else 'unchanged')}\n"
             f"상태: {item.get('deadline_status')}\n"
             f"대학: {item.get('university_name')}\n"
             f"지역: {item.get('region')} {item.get('city')}\n"

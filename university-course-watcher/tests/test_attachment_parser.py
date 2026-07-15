@@ -70,6 +70,40 @@ class AttachmentParserTest(unittest.TestCase):
         self.assertNotIn("page-6", sText)
         self.assertNotIn("page-7", sText)
 
+    def test_image_ocr_is_skipped_when_tesseract_binary_is_unavailable(self) -> None:
+        class TesseractNotFoundError(Exception):
+            pass
+
+        response = Mock()
+        response.raw.read.return_value = b"image bytes"
+        image = SimpleNamespace(width=800, height=600, load=Mock())
+        session = Mock()
+        session.get.return_value = response
+        fake_tesseract = SimpleNamespace(
+            image_to_string=Mock(side_effect=TesseractNotFoundError("missing binary")),
+        )
+        fake_image_module = SimpleNamespace(open=Mock(return_value=image))
+        self.parser._session = Mock(return_value=session)
+
+        with patch("src.attachment_parser.pytesseract", fake_tesseract), patch(
+            "src.attachment_parser.Image",
+            fake_image_module,
+        ):
+            text = self.parser.extract_image_text("https://example.com/schedule.jpg")
+
+        self.assertEqual("", text)
+
+    def test_image_ocr_batch_contains_failure_without_aborting_other_images(self) -> None:
+        self.parser.extract_image_text = Mock(side_effect=[RuntimeError("bad image"), "접수기간"])
+
+        texts = self.parser.extract_image_texts([
+            "https://example.com/bad.jpg",
+            "https://example.com/good.jpg",
+        ])
+
+        self.assertEqual("", texts["https://example.com/bad.jpg"])
+        self.assertEqual("접수기간", texts["https://example.com/good.jpg"])
+
 
 if __name__ == "__main__":
     unittest.main()
