@@ -259,11 +259,17 @@ class GraduateAdmissionStorage:
     def _content_fingerprint(self, item: dict) -> str:
         attachments = "|".join(sorted(self._list_values(item.get("attachment_urls"))))
         matched_keywords = "|".join(sorted(self._list_values(item.get("matched_keywords"))))
+        notice_date = item.get("notice_date", "")
+
+        if "어플라이" in item.get("board_type", ""):
+            # 접수중 포털 항목은 확인일을 게시일로 사용하므로 날짜가 바뀌어도 같은 공고다.
+            notice_date = ""
+
         raw = "::".join([
             item.get("university_name", ""),
             item.get("board_type", ""),
             self._normalized_title(item.get("title", "")),
-            item.get("notice_date", ""),
+            notice_date,
             matched_keywords,
             attachments,
         ])

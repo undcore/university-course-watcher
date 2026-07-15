@@ -70,6 +70,23 @@ class GraduateAdmissionStorageTest(unittest.TestCase):
             self.assertFalse(storage.should_send_empty_summary(items, 20, 4))
             self.assertTrue(storage.should_send_empty_summary(items, 21, 3))
 
+    def test_portal_item_is_not_new_again_on_the_next_day(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            storage = GraduateAdmissionStorage(Path(directory))
+            original = self._item(
+                board_type="유웨이어플라이 대학원 원서접수",
+                notice_date="2026-07-15",
+            )
+            storage.update_seen([original])
+
+            next_day = self._item(
+                board_type="유웨이어플라이 대학원 원서접수",
+                notice_date="2026-07-16",
+            )
+            storage.mark_is_new([next_day])
+
+            self.assertFalse(next_day["is_new"])
+
 
 if __name__ == "__main__":
     unittest.main()

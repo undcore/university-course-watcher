@@ -466,7 +466,7 @@ class BoardCrawler:
         bHasDetailUrl = bool(re.search(
             r"(article(no)?=|artclview|/bbs/(?:[^/?]+/)*\d+(?:$|[/?#])|"
             r"bbs[^?#]*(?:view|detail)|board/info|encmenuboardseq|mode=(view|download)|"
-            r"ntt|seq=|wr_id=|/view\.do)",
+            r"ntt|seq=|wr_id=)",
             url.lower(),
         ))
 

@@ -168,7 +168,7 @@ jobs:
       - graduate-admission-check
       - publish-course-results
       - publish-graduate-admission-results
-    if: always() && failure()
+    if: always() && (failure() || cancelled())
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -185,7 +185,7 @@ jobs:
   publish-course-results:
     needs: course-check
     concurrency:
-      group: watcher-report-publish-${{ github.ref }}
+      group: watcher-course-report-publish-${{ github.ref }}
       cancel-in-progress: false
     if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[full-run]'))
     runs-on: ubuntu-latest
@@ -234,7 +234,7 @@ jobs:
   publish-graduate-admission-results:
     needs: graduate-admission-check
     concurrency:
-      group: watcher-report-publish-${{ github.ref }}
+      group: watcher-graduate-report-publish-${{ github.ref }}
       cancel-in-progress: false
     if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[full-run]'))
     runs-on: ubuntu-latest

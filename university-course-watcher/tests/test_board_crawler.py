@@ -42,6 +42,17 @@ class BoardCrawlerLinkTest(unittest.TestCase):
             with self.subTest(sTitle=sTitle):
                 self.assertFalse(self.crawler._looks_like_notice_link(sTitle, sUrl, self.sBaseUrl, None))
 
+    def test_generic_view_do_menu_links_are_rejected(self) -> None:
+        lstLinks = [
+            ("대학원 소개", "https://university.example/contents/view.do?menuNo=100001"),
+            ("교육목표", "https://university.example/contents/view.do?menuNo=100002"),
+            ("연구윤리", "https://university.example/contents/view.do?menuNo=100003"),
+        ]
+
+        for sTitle, sUrl in lstLinks:
+            with self.subTest(sTitle=sTitle):
+                self.assertFalse(self.crawler._looks_like_notice_link(sTitle, sUrl, self.sBaseUrl, None))
+
     def test_detail_and_target_notice_links_are_accepted(self) -> None:
         lstLinks = [
             ("2026학년도 2학기 시간제등록생 모집", "https://university.example/file?id=10"),
