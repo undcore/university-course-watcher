@@ -78,3 +78,89 @@ def _row(item: dict) -> str:
         f"<td>{html.escape(item.get('checked_at', ''))}</td>"
         "</tr>"
     )
+
+
+def build_graduate_admission_report(
+    items: list[dict],
+    path: Path = DATA_DIR / "graduate_admission_report.html",
+) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    visible = sorted(
+        items,
+        key=lambda item: (
+            GRADE_ORDER.get(item.get("grade"), 9),
+            item.get("university_name", ""),
+            item.get("title", ""),
+        ),
+    )
+    rows = "\n".join(_graduate_admission_row(item) for item in visible)
+    if not rows:
+        rows = "<tr><td colspan='12'>검색 결과가 없습니다.</td></tr>"
+
+    content = f"""<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>일반대학원 모집 감시 리포트</title>
+  <style>
+    body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 24px; color: #1f2937; }}
+    h1 {{ font-size: 24px; margin-bottom: 6px; }}
+    .meta {{ color: #6b7280; margin-bottom: 18px; }}
+    .notice {{ padding: 12px; background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 6px; margin-bottom: 18px; }}
+    .summary {{ display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }}
+    .summary span {{ padding: 6px 10px; background: #f3f4f6; border-radius: 6px; font-size: 13px; }}
+    table {{ border-collapse: collapse; width: 100%; font-size: 13px; }}
+    th, td {{ border: 1px solid #d1d5db; padding: 8px; vertical-align: top; }}
+    th {{ background: #f3f4f6; position: sticky; top: 0; }}
+    .grade-A {{ background: #ecfdf5; }}
+    .grade-B {{ background: #eff6ff; }}
+    a {{ color: #1d4ed8; }}
+  </style>
+</head>
+<body>
+  <h1>일반대학원 모집 감시 리포트</h1>
+  <div class="meta">확인 일시: {html.escape(now_kst().isoformat(timespec="seconds"))}</div>
+  <div class="notice">A/B 등급의 새 모집 공고만 텔레그램 알림 대상으로 사용합니다.</div>
+  <div class="summary">
+    <span>전체 후보 {len(visible)}건</span>
+    <span>A등급 {sum(1 for item in visible if item.get("grade") == "A")}건</span>
+    <span>B등급 {sum(1 for item in visible if item.get("grade") == "B")}건</span>
+    <span>신규 {sum(1 for item in visible if item.get("is_new"))}건</span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>신규</th><th>등급</th><th>대학명</th><th>지역</th><th>게시판</th><th>제목</th>
+        <th>게시일</th><th>확인 키워드</th><th>판단 근거</th><th>링크</th><th>첨부</th><th>확인일시</th>
+      </tr>
+    </thead>
+    <tbody>{rows}</tbody>
+  </table>
+</body>
+</html>
+"""
+    path.write_text(content, encoding="utf-8")
+
+
+def _graduate_admission_row(item: dict) -> str:
+    matched = "; ".join(item.get("matched_keywords") or [])
+    attachments = "<br>".join(
+        f"<a href='{html.escape(url)}'>첨부</a>" for url in item.get("attachment_urls", [])
+    )
+    return (
+        f"<tr class='grade-{html.escape(item.get('grade', ''))}'>"
+        f"<td>{'신규' if item.get('is_new') else '기존'}</td>"
+        f"<td>{html.escape(item.get('grade', ''))}</td>"
+        f"<td>{html.escape(item.get('university_name', ''))}</td>"
+        f"<td>{html.escape(item.get('region', ''))} {html.escape(item.get('city', ''))}</td>"
+        f"<td>{html.escape(item.get('board_type', ''))}</td>"
+        f"<td>{html.escape(item.get('title', ''))}</td>"
+        f"<td>{html.escape(item.get('notice_date') or '확인 필요')}</td>"
+        f"<td>{html.escape(matched)}</td>"
+        f"<td>{html.escape(item.get('reason', ''))}</td>"
+        f"<td><a href='{html.escape(item.get('url', ''))}'>원문</a></td>"
+        f"<td>{attachments}</td>"
+        f"<td>{html.escape(item.get('checked_at', ''))}</td>"
+        "</tr>"
+    )

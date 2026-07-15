@@ -68,7 +68,8 @@ class GraduateAdmissionWatcher:
             timeout=intTimeout,
             max_links_per_board=intMaxLinks,
             state_cache=self.http_state,
-            skip_urls=self.storage.load_seen(),
+            # 모집요강은 같은 URL에서 학년도와 첨부가 교체되므로 URL만으로 사전 제외하지 않는다.
+            skip_urls=set(),
             max_notice_age_days=notice_max_age_days(),
         )
         self.attachment_parser = AttachmentParser(state_cache=self.http_state)
@@ -91,10 +92,12 @@ class GraduateAdmissionWatcher:
         if not self.smoke_test:
             portal_items = fetch_portal_items()
             for item in portal_items:
+                if region and item["university_name"] not in university_map:
+                    continue
                 university = university_map.get(item["university_name"], {})
                 item["region"] = university.get("region_name", university.get("region", ""))
                 item["city"] = university.get("city", "")
-            items.extend(portal_items)
+                items.append(item)
         items = self.storage.dedupe(items)
         items = self.storage.mark_is_new(items)
 
@@ -105,6 +108,12 @@ class GraduateAdmissionWatcher:
 
     def mark_sent(self, sent_items: list[dict]) -> None:
         self.storage.update_seen(sent_items)
+
+    def should_send_empty_summary(self, items: list[dict], active_count: int, disabled_count: int) -> bool:
+        return self.storage.should_send_empty_summary(items, active_count, disabled_count)
+
+    def mark_empty_summary_sent(self, items: list[dict], active_count: int, disabled_count: int) -> None:
+        self.storage.update_empty_summary_state(items, active_count, disabled_count)
 
     def _select_boards(self, graduate_boards: list[dict], university_map: dict[str, dict]) -> list[dict]:
         boards: list[dict] = []
@@ -195,6 +204,9 @@ class GraduateAdmissionWatcher:
 
             if grade == "D":
                 continue
+            if self._is_direct_page_notice(notice) and not any(year in notice.title for year in TARGET_YEARS):
+                # 상시 안내/메뉴 페이지는 수집원으로만 사용하고 공고 결과로 노출하지 않는다.
+                continue
 
             item = GraduateAdmissionMatch(
                 checked_at=checked_at,
@@ -227,15 +239,16 @@ class GraduateAdmissionWatcher:
         school_keywords = ["일반대학원", "대학원"]
         admission_keywords = ["모집요강", "신입생 모집", "신입생모집", "입학전형", "전형일정", "원서접수", "특별전형", "추가모집"]
         negative_keywords = ["학부", "편입", "재외국민", "특수대학원", "전문대학원", "교육대학원", "경영전문대학원"]
+        excluded_title_keywords = ["합격자", "등록금", "면접", "수험생", "계약학과", "학석사", "외국인"]
 
         matched_keywords: list[str] = []
 
-        # 외국인 전형은 제목에 명시되면 무조건 제외
-        if "외국인" in lowered_title:
-            return "D", matched_keywords, "외국인 전형 공고로 판단되어 제외했습니다."
+        if any(keyword in lowered_title for keyword in excluded_title_keywords):
+            return "D", matched_keywords, "모집 공고가 아닌 합격·등록·면접·별도 전형 안내로 판단되어 제외했습니다."
 
         title_has_year = self._collect_matches(lowered_title, year_keywords, matched_keywords)
-        title_has_admission = any(keyword in lowered_title for keyword in admission_keywords + TERM_KEYWORDS)
+        title_admission_keywords = admission_keywords + ["학생모집", "일반전형"]
+        title_has_admission = any(keyword in lowered_title for keyword in title_admission_keywords)
         has_year = title_has_year or any(keyword.lower() in lowered_text for keyword in year_keywords)
         has_school = self._collect_matches(lowered_text, school_keywords, matched_keywords)
         has_admission = self._collect_matches(lowered_text, admission_keywords, matched_keywords)
