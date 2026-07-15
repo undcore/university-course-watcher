@@ -92,6 +92,19 @@ class BoardCrawlerLinkTest(unittest.TestCase):
             url,
         )
 
+    def test_scalar_data_params_is_ignored_without_aborting(self) -> None:
+        soup = BeautifulSoup(
+            '<a href="#" data-params="123">일반 메뉴</a>',
+            "html.parser",
+        )
+
+        url = self.crawler._link_url(
+            soup.find("a"),
+            "https://university.example/notice/list",
+        )
+
+        self.assertEqual("https://university.example/notice/list", url.split("#")[0])
+
     def test_submit_form_onclick_builds_notice_url(self) -> None:
         soup = BeautifulSoup(
             '<a href="javascript:void(0);" onclick="return submitForm(this,\'view\',88261);">'
