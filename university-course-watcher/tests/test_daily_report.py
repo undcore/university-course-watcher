@@ -10,12 +10,23 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from main import items_to_mark_seen, normalize_weak_candidate, report_preview_items, should_parse_course_attachments
+from main import (
+    build_content_fingerprint,
+    items_to_mark_seen,
+    normalize_weak_candidate,
+    report_preview_items,
+    should_parse_course_attachments,
+)
 from src.report_builder import build_graduate_admission_report
 from src.storage import Storage
 
 
 class DailyReportTest(unittest.TestCase):
+    def test_content_fingerprint_replaces_invalid_unicode_surrogates(self) -> None:
+        fingerprint = build_content_fingerprint(["정상 본문", "손상 문자 \udcff 포함"])
+
+        self.assertEqual(64, len(fingerprint))
+
     def test_preview_contains_only_new_public_items(self) -> None:
         sToday = date.today().isoformat()
         lstItems = [
