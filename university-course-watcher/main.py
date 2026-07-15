@@ -60,6 +60,12 @@ def is_changed_candidate(item: dict) -> bool:
     return bool(item.get("is_new"))
 
 
+def build_content_fingerprint(parts: list[str]) -> str:
+    fingerprint_text = "\n".join(parts)
+    fingerprint_bytes = fingerprint_text.encode("utf-8", errors="replace")
+    return hashlib.sha256(fingerprint_bytes).hexdigest()
+
+
 def count_candidate_targets(items: list[dict]) -> int:
     count = 0
 
@@ -298,7 +304,7 @@ def main() -> int:
             *sorted(notice.attachment_urls),
             *sorted(notice.image_urls),
         ]
-        content_fingerprint = hashlib.sha256("\n".join(fingerprint_parts).encode("utf-8")).hexdigest()
+        content_fingerprint = build_content_fingerprint(fingerprint_parts)
 
         item = {
             "checked_at": checked_at,
