@@ -31,6 +31,17 @@ class BoardCrawlerLinkTest(unittest.TestCase):
             with self.subTest(sTitle=sTitle):
                 self.assertFalse(self.crawler._looks_like_notice_link(sTitle, sUrl, self.sBaseUrl, None))
 
+    def test_bbs_menu_links_without_detail_identity_are_rejected(self) -> None:
+        lstLinks = [
+            ("교육과정", "https://university.example/bbs/graduate/curriculum"),
+            ("등록 및 장학", "https://university.example/bbs/graduate/scholarship"),
+            ("자료실", "https://university.example/bbs/graduate/resources"),
+        ]
+
+        for sTitle, sUrl in lstLinks:
+            with self.subTest(sTitle=sTitle):
+                self.assertFalse(self.crawler._looks_like_notice_link(sTitle, sUrl, self.sBaseUrl, None))
+
     def test_detail_and_target_notice_links_are_accepted(self) -> None:
         lstLinks = [
             ("2026학년도 2학기 시간제등록생 모집", "https://university.example/file?id=10"),
@@ -67,6 +78,17 @@ class BoardCrawlerLinkTest(unittest.TestCase):
 
         self.assertEqual("2026-04-03", self.crawler._extract_notice_date(soupLabeled))
         self.assertEqual("", self.crawler._extract_notice_date(soupUnlabeled))
+
+    def test_javascript_attachment_links_are_not_requested(self) -> None:
+        soup = BeautifulSoup(
+            '<a href="javascript:multi_down(51059);">2027 모집요강.hwp</a>'
+            '<a href="/files/guide.pdf">모집요강 PDF</a>',
+            "html.parser",
+        )
+
+        urls = self.crawler._extract_attachment_urls(soup, "https://university.example/notice")
+
+        self.assertEqual(["https://university.example/files/guide.pdf"], urls)
 
     def test_candidates_with_dates_are_sorted_newest_first(self) -> None:
         lstCandidates = [

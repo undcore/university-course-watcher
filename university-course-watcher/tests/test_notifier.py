@@ -52,6 +52,18 @@ class TelegramNotifierTest(unittest.TestCase):
 
 
 class GraduateAdmissionNotifierTest(unittest.TestCase):
+    def test_unchanged_empty_summary_is_not_sent(self) -> None:
+        notifier = GraduateAdmissionNotifier()
+        notifier.token = "token"
+        notifier.chat_id = "chat"
+        notifier._send = Mock()
+
+        sent = notifier.send_candidates([], send_empty_summary=False)
+
+        self.assertEqual([], sent)
+        self.assertFalse(notifier.summary_sent)
+        notifier._send.assert_not_called()
+
     def test_portal_items_are_bundled_into_digest(self) -> None:
         notifier = GraduateAdmissionNotifier()
         notifier.token = "token"

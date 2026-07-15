@@ -93,7 +93,6 @@ jobs:
           TIMEZONE: Asia/Seoul
           NOTICE_MAX_AGE_DAYS: "7"
           PDF_MAX_PAGES: "8"
-          REPORT_HTML_URL: https://htmlpreview.github.io/?https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/university-course-watcher/data/report.html
         run: |
           cd university-course-watcher
           if [ "${{ github.event.inputs.telegram_test }}" = "success" ]; then
@@ -133,6 +132,7 @@ jobs:
         with:
           path: |
             university-course-watcher/data/seen_graduate_admission_urls.json
+            university-course-watcher/data/graduate_admission_summary_state.json
             university-course-watcher/data/graduate_http_state.json
           key: graduate-admission-seen-${{ github.run_id }}
           restore-keys: |
@@ -160,12 +160,15 @@ jobs:
           path: |
             university-course-watcher/data/graduate_admission_results.csv
             university-course-watcher/data/graduate_admission_results.json
+            university-course-watcher/data/graduate_admission_report.html
 
   notify-failure:
     needs:
       - course-check
       - graduate-admission-check
-    if: failure()
+      - publish-course-results
+      - publish-graduate-admission-results
+    if: always() && failure()
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -179,10 +182,11 @@ jobs:
             -d disable_web_page_preview=true \
             --data-urlencode text="[감시 실행 실패] 오늘 점검 워크플로가 실패해 알림이 누락될 수 있습니다. 로그: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
-  publish-results:
-    needs:
-      - course-check
-      - graduate-admission-check
+  publish-course-results:
+    needs: course-check
+    concurrency:
+      group: watcher-report-publish-${{ github.ref }}
+      cancel-in-progress: false
     if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[full-run]'))
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -193,25 +197,18 @@ jobs:
         with:
           name: course-watcher-results
           path: university-course-watcher/data
-      - name: Download graduate admission results
-        uses: actions/download-artifact@v8
-        with:
-          name: graduate-admission-results
-          path: university-course-watcher/data
-      - name: Commit latest report files
+      - name: Commit latest course report files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add \
             university-course-watcher/data/results.csv \
             university-course-watcher/data/results.json \
-            university-course-watcher/data/report.html \
-            university-course-watcher/data/graduate_admission_results.csv \
-            university-course-watcher/data/graduate_admission_results.json
+            university-course-watcher/data/report.html
           if git diff --cached --quiet; then
             echo "No report changes to commit."
           else
-            git commit -m "Update latest watcher reports [skip ci]"
+            git commit -m "Update latest course watcher report [skip ci]"
             for attempt in 1 2 3; do
               git fetch origin "${GITHUB_REF_NAME}"
               git rebase -X theirs "origin/${GITHUB_REF_NAME}"
@@ -224,14 +221,60 @@ jobs:
             echo "Failed to publish report files after 3 attempts."
             exit 1
           fi
-      - name: Upload combined result artifacts
+      - name: Upload published course result artifacts
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[full-run]')
         uses: actions/upload-artifact@v7
         with:
-          name: university-course-watcher-results
+          name: published-course-watcher-results
           path: |
             university-course-watcher/data/results.csv
             university-course-watcher/data/results.json
             university-course-watcher/data/report.html
+
+  publish-graduate-admission-results:
+    needs: graduate-admission-check
+    concurrency:
+      group: watcher-report-publish-${{ github.ref }}
+      cancel-in-progress: false
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[full-run]'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - name: Download graduate admission results
+        uses: actions/download-artifact@v8
+        with:
+          name: graduate-admission-results
+          path: university-course-watcher/data
+      - name: Commit latest graduate admission report files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            university-course-watcher/data/graduate_admission_results.csv \
+            university-course-watcher/data/graduate_admission_results.json \
+            university-course-watcher/data/graduate_admission_report.html
+          if git diff --cached --quiet; then
+            echo "No graduate admission report changes to commit."
+          else
+            git commit -m "Update latest graduate admission report [skip ci]"
+            for attempt in 1 2 3; do
+              git fetch origin "${GITHUB_REF_NAME}"
+              git rebase -X theirs "origin/${GITHUB_REF_NAME}"
+              if git push origin "HEAD:${GITHUB_REF_NAME}"; then
+                exit 0
+              fi
+              echo "Push attempt ${attempt} failed; retrying after remote refresh."
+              sleep 2
+            done
+            echo "Failed to publish graduate admission report files after 3 attempts."
+            exit 1
+          fi
+      - name: Upload published graduate admission artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: published-graduate-admission-results
+          path: |
             university-course-watcher/data/graduate_admission_results.csv
             university-course-watcher/data/graduate_admission_results.json
+            university-course-watcher/data/graduate_admission_report.html

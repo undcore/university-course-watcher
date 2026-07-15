@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import re
 from pathlib import Path
 
 from .utils import DATA_DIR, load_json, save_json
@@ -145,18 +146,33 @@ class GraduateAdmissionStorage:
     def __init__(self, data_dir: Path = DATA_DIR):
         self.data_dir = data_dir
         self.seen_path = data_dir / "seen_graduate_admission_urls.json"
+        self.summary_state_path = data_dir / "graduate_admission_summary_state.json"
         self.results_csv = data_dir / "graduate_admission_results.csv"
         self.results_json = data_dir / "graduate_admission_results.json"
 
     def load_seen(self) -> set[str]:
         data = load_json(self.seen_path, [])
-        return set(data if isinstance(data, list) else data.keys())
+        if isinstance(data, list):
+            return set(data)
+        if isinstance(data, dict):
+            seen = set(data.keys())
+            for values in data.values():
+                if isinstance(values, list):
+                    seen.update(values)
+            return seen
+        return set()
 
     def mark_is_new(self, items: list[dict]) -> list[dict]:
         seen = self.load_seen()
+        previous_items = load_json(self.results_json, [])
+        previous_by_url = {
+            item.get("url", ""): item
+            for item in previous_items
+            if isinstance(item, dict) and item.get("url")
+        }
 
         for item in items:
-            item["is_new"] = item.get("url", "") not in seen
+            item["is_new"] = not self._has_seen_item(item, seen, previous_by_url)
 
         return items
 
@@ -164,8 +180,7 @@ class GraduateAdmissionStorage:
         seen = self.load_seen()
 
         for item in notified_items:
-            if item.get("url"):
-                seen.add(item["url"])
+            seen.update(self._seen_keys(item))
 
         save_json(self.seen_path, sorted(seen))
 
@@ -174,13 +189,34 @@ class GraduateAdmissionStorage:
         keys: set[str] = set()
 
         for item in items:
-            key = item.get("url") or self._title_key(item)
+            key = self._content_fingerprint(item)
             if key in keys:
                 continue
             keys.add(key)
             result.append(item)
 
         return result
+
+    def should_send_empty_summary(self, items: list[dict], active_count: int, disabled_count: int) -> bool:
+        state = load_json(self.summary_state_path, {})
+        fingerprint = self.empty_summary_fingerprint(items, active_count, disabled_count)
+        return state.get("fingerprint") != fingerprint
+
+    def update_empty_summary_state(self, items: list[dict], active_count: int, disabled_count: int) -> None:
+        save_json(
+            self.summary_state_path,
+            {
+                "fingerprint": self.empty_summary_fingerprint(items, active_count, disabled_count),
+                "candidate_count": len(items),
+                "active_count": active_count,
+                "disabled_count": disabled_count,
+            },
+        )
+
+    def empty_summary_fingerprint(self, items: list[dict], active_count: int, disabled_count: int) -> str:
+        item_keys = sorted(self._content_fingerprint(item) for item in items)
+        raw = "::".join([str(active_count), str(disabled_count), *item_keys])
+        return hashlib.sha1(raw.encode("utf-8")).hexdigest()
 
     def save_results(self, items: list[dict]) -> None:
         serialized_items = [self._serialize_item(item) for item in items]
@@ -199,8 +235,52 @@ class GraduateAdmissionStorage:
         return out
 
     def _title_key(self, item: dict) -> str:
-        raw = f"{item.get('university_name')}::{item.get('title')}"
+        raw = f"{item.get('university_name')}::{self._normalized_title(item.get('title', ''))}"
         return hashlib.sha1(raw.encode("utf-8")).hexdigest()
+
+    def _has_seen_item(self, item: dict, seen: set[str], previous_by_url: dict[str, dict]) -> bool:
+        fingerprint = self._content_fingerprint(item)
+        if fingerprint in seen:
+            return True
+
+        url = item.get("url", "")
+        if not url or url not in seen:
+            return False
+
+        previous_item = previous_by_url.get(url)
+        if previous_item is None:
+            return True
+
+        return self._content_fingerprint(previous_item) == fingerprint
+
+    def _seen_keys(self, item: dict) -> set[str]:
+        return {self._content_fingerprint(item)}
+
+    def _content_fingerprint(self, item: dict) -> str:
+        attachments = "|".join(sorted(self._list_values(item.get("attachment_urls"))))
+        matched_keywords = "|".join(sorted(self._list_values(item.get("matched_keywords"))))
+        raw = "::".join([
+            item.get("university_name", ""),
+            item.get("board_type", ""),
+            self._normalized_title(item.get("title", "")),
+            item.get("notice_date", ""),
+            matched_keywords,
+            attachments,
+        ])
+        return hashlib.sha1(raw.encode("utf-8")).hexdigest()
+
+    def _list_values(self, value: object) -> list[str]:
+        if isinstance(value, list):
+            return [str(item).strip() for item in value if str(item).strip()]
+        if isinstance(value, str):
+            return [item.strip() for item in value.split(";") if item.strip()]
+        return []
+
+    def _normalized_title(self, title: str) -> str:
+        normalized = re.sub(r"\[[^\]]+\]|\([^)]+\)", " ", title.lower())
+        normalized = re.sub(r"20\d{2}|전기|후기|수시|정시|1차|2차|3차", " ", normalized)
+        normalized = re.sub(r"\s+", " ", normalized)
+        return normalized.strip()
 
     def _write_csv(self, path: Path, fields: list[str], rows: list[dict]) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)

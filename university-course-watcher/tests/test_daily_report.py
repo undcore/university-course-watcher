@@ -11,6 +11,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from main import items_to_mark_seen, normalize_weak_candidate, report_preview_items, should_parse_course_attachments
+from src.report_builder import build_graduate_admission_report
 from src.storage import Storage
 
 
@@ -80,6 +81,31 @@ class DailyReportTest(unittest.TestCase):
         self.assertFalse(should_parse_course_attachments("일반 행사 안내", "D"))
         self.assertTrue(should_parse_course_attachments("시간제등록 안내", "D"))
         self.assertTrue(should_parse_course_attachments("관련 내용", "B"))
+
+    def test_graduate_admission_html_report_is_generated(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "graduate_admission_report.html"
+            items = [{
+                "checked_at": "2026-07-15T20:00:00+09:00",
+                "university_name": "테스트대학교",
+                "region": "서울",
+                "city": "서울",
+                "board_type": "모집요강",
+                "title": "2027학년도 전기 일반대학원 모집요강",
+                "url": "https://example.com/admission",
+                "notice_date": "2026-07-15",
+                "grade": "A",
+                "matched_keywords": ["2027", "전기"],
+                "reason": "일반대학원 모집 공고",
+                "attachment_urls": [],
+                "is_new": True,
+            }]
+
+            build_graduate_admission_report(items, path)
+            content = path.read_text(encoding="utf-8")
+
+            self.assertIn("2027학년도 전기 일반대학원 모집요강", content)
+            self.assertIn("전체 후보 1건", content)
 
 
 if __name__ == "__main__":
