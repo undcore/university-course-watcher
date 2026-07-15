@@ -1,6 +1,6 @@
 [
   {
-    "checked_at": "2026-07-15T21:39:46+09:00",
+    "checked_at": "2026-07-15T21:57:14+09:00",
     "university_name": "성균관대학교",
     "region": "서울",
     "city": "서울",
@@ -12,10 +12,10 @@
     "matched_keywords": "2026; 2026학년도; 일반대학원; 대학원; 모집요강; 원서접수; 후기",
     "reason": "일반대학원 모집 공고로 판단됩니다.",
     "attachment_urls": "",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-07-15T21:39:46+09:00",
+    "checked_at": "2026-07-15T21:57:14+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -30,7 +30,7 @@
     "is_new": true
   },
   {
-    "checked_at": "2026-07-15T21:39:46+09:00",
+    "checked_at": "2026-07-15T21:57:14+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -45,7 +45,7 @@
     "is_new": true
   },
   {
-    "checked_at": "2026-07-15T21:39:46+09:00",
+    "checked_at": "2026-07-15T21:57:14+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -60,7 +60,7 @@
     "is_new": true
   },
   {
-    "checked_at": "2026-07-15T21:39:46+09:00",
+    "checked_at": "2026-07-15T21:57:14+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -75,7 +75,7 @@
     "is_new": true
   },
   {
-    "checked_at": "2026-07-15T21:39:46+09:00",
+    "checked_at": "2026-07-15T21:57:14+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -90,7 +90,7 @@
     "is_new": true
   },
   {
-    "checked_at": "2026-07-15T21:39:46+09:00",
+    "checked_at": "2026-07-15T21:57:14+09:00",
     "university_name": "상명대학교",
     "region": "서울",
     "city": "서울",
@@ -105,7 +105,7 @@
     "is_new": true
   },
   {
-    "checked_at": "2026-07-15T21:40:03+09:00",
+    "checked_at": "2026-07-15T21:57:32+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -117,10 +117,10 @@
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 후기' 목록에서 원서접수 확인됨 (상태: 접수중).",
     "attachment_urls": "",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-07-15T21:40:03+09:00",
+    "checked_at": "2026-07-15T21:57:32+09:00",
     "university_name": "건국대학교",
     "region": "서울",
     "city": "서울",
@@ -132,10 +132,10 @@
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 후기' 목록에서 원서접수 확인됨 (상태: 접수마감).",
     "attachment_urls": "",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-07-15T21:40:03+09:00",
+    "checked_at": "2026-07-15T21:57:32+09:00",
     "university_name": "경희대학교",
     "region": "서울",
     "city": "서울",
@@ -147,10 +147,10 @@
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 후기' 목록에서 원서접수 확인됨 (상태: 접수마감).",
     "attachment_urls": "",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-07-15T21:40:03+09:00",
+    "checked_at": "2026-07-15T21:57:32+09:00",
     "university_name": "고려대학교",
     "region": "서울",
     "city": "서울",
@@ -162,10 +162,10 @@
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 후기' 목록에서 원서접수 확인됨 (상태: 접수마감).",
     "attachment_urls": "",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-07-15T21:40:03+09:00",
+    "checked_at": "2026-07-15T21:57:32+09:00",
     "university_name": "국민대학교",
     "region": "서울",
     "city": "서울",
@@ -177,10 +177,10 @@
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 후기' 목록에서 원서접수 확인됨 (상태: 접수마감).",
     "attachment_urls": "",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-07-15T21:40:03+09:00",
+    "checked_at": "2026-07-15T21:57:32+09:00",
     "university_name": "명지대학교",
     "region": "서울",
     "city": "서울",
@@ -192,10 +192,10 @@
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 후기' 목록에서 원서접수 확인됨 (상태: 접수마감).",
     "attachment_urls": "",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-07-15T21:40:03+09:00",
+    "checked_at": "2026-07-15T21:57:32+09:00",
     "university_name": "서울시립대학교",
     "region": "서울",
     "city": "서울",
@@ -207,10 +207,10 @@
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 후기' 목록에서 원서접수 확인됨 (상태: 접수마감).",
     "attachment_urls": "",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-07-15T21:40:03+09:00",
+    "checked_at": "2026-07-15T21:57:32+09:00",
     "university_name": "한국외국어대학교",
     "region": "서울",
     "city": "서울",
@@ -222,10 +222,10 @@
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 후기' 목록에서 원서접수 확인됨 (상태: 접수마감).",
     "attachment_urls": "",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-07-15T21:40:03+09:00",
+    "checked_at": "2026-07-15T21:57:32+09:00",
     "university_name": "한양대학교",
     "region": "서울",
     "city": "서울",
@@ -237,6 +237,6 @@
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 후기' 목록에서 원서접수 확인됨 (상태: 접수마감).",
     "attachment_urls": "",
-    "is_new": true
+    "is_new": false
   }
 ]
