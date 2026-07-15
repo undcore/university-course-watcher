@@ -428,6 +428,9 @@ class BoardCrawler:
             except json.JSONDecodeError:
                 params = {}
 
+            if not isinstance(params, dict):
+                params = {}
+
             if params.get("encMenuBoardSeq"):
                 parsed_url = urlparse(base_url)
                 board_path = parsed_url.path
