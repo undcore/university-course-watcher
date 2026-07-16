@@ -1,6 +1,6 @@
 [
   {
-    "checked_at": "2026-07-15T22:05:17+09:00",
+    "checked_at": "2026-07-16T10:50:27+09:00",
     "university_name": "서울과학기술대학교",
     "region": "서울",
     "city": "서울",
@@ -24,7 +24,7 @@
     "course_evidence_url": "",
     "course_evidence_text": "",
     "attachment_urls": "",
-    "image_urls": "https://m-disciplinary.seoultech.ac.kr/hcm/design/layout2023/a/res/img/search.png; https://m-disciplinary.seoultech.ac.kr/hcm/design/layout2023/a/res/img/print.png; https://m-disciplinary.seoultech.ac.kr/common/images/board/ico_notice_ko.png; https://m-disciplinary.seoultech.ac.kr/common/images/board/ico_new.gif; https://m-disciplinary.seoultech.ac.kr/common/images/board/btn_search_ko.gif; https://m-disciplinary.seoultech.ac.kr/hcm/design/layout2023/a/res/img/top.png",
+    "image_urls": "https://m-disciplinary.seoultech.ac.kr/hcm/design/layout2023/a/res/img/search.png; https://m-disciplinary.seoultech.ac.kr/hcm/design/layout2023/a/res/img/print.png; https://m-disciplinary.seoultech.ac.kr/common/images/board/ico_notice_ko.png; https://m-disciplinary.seoultech.ac.kr/common/images/board/btn_search_ko.gif; https://m-disciplinary.seoultech.ac.kr/hcm/design/layout2023/a/res/img/top.png",
     "ocr_checked": false,
     "ocr_text_found": false,
     "ocr_evidence": "",
@@ -32,9 +32,9 @@
     "date_conflict": false,
     "matched_keywords": "전기; 대학원; 컴퓨터공학; 컴퓨터공학과; AI; 인공지능; 데이터사이언스; IT",
     "reason": "참고 후보입니다. 등록 관련 점수 -25, 외부 신청 확인 필요, 컴퓨터 과목 가능성 높음.",
-    "content_fingerprint": "224ef6eb25cd2813c974a86e86128c441a1e8e50f9282c7b9ce7414ca6c7c794",
-    "change_type": "new",
+    "content_fingerprint": "d1b3e7cf5112cb974c0a52d763a53aed6898525bcd4e13b4b5cea3a32f023937",
+    "change_type": "unchanged",
     "previous_grade": "",
-    "is_new": true
+    "is_new": false
   }
 ]
