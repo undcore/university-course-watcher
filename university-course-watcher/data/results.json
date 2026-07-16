@@ -1,6 +1,6 @@
 [
   {
-    "checked_at": "2026-07-16T10:50:27+09:00",
+    "checked_at": "2026-07-16T20:43:45+09:00",
     "university_name": "서울과학기술대학교",
     "region": "서울",
     "city": "서울",
@@ -34,7 +34,7 @@
     "reason": "참고 후보입니다. 등록 관련 점수 -25, 외부 신청 확인 필요, 컴퓨터 과목 가능성 높음.",
     "content_fingerprint": "d1b3e7cf5112cb974c0a52d763a53aed6898525bcd4e13b4b5cea3a32f023937",
     "change_type": "unchanged",
-    "previous_grade": "",
+    "previous_grade": "C",
     "is_new": false
   }
 ]
