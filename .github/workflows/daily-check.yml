@@ -1,10 +1,6 @@
 name: Daily university notice check
 
 on:
-  push:
-    branches:
-      - main
-      - codex/add-course-watcher-project
   schedule:
     # 09:00 and 19:00 KST, Monday through Friday.
     - cron: "0 0 * * 1-5"
@@ -22,10 +18,32 @@ on:
           - empty
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: university-notice-check-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
+  run-window:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      should_run: ${{ steps.calendar.outputs.should_run }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Enforce the KST weekday run window
+        id: calendar
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          should_run="$(python university-course-watcher/src/schedule_policy.py --event "${EVENT_NAME}")"
+          echo "should_run=${should_run}" >> "${GITHUB_OUTPUT}"
+          echo "Run-window decision for ${EVENT_NAME}: ${should_run}"
+
   course-check:
+    needs: run-window
+    if: needs.run-window.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -67,7 +85,7 @@ jobs:
           print("Telegram secrets are configured and bot token is valid.")
           PY
       - name: Send Telegram smoke test message
-        if: github.event_name == 'push' && contains(github.event.head_commit.message, '[telegram-smoke]')
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test != 'none'
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -102,13 +120,11 @@ jobs:
             python main.py --telegram-test-success
           elif [ "${{ github.event.inputs.telegram_test }}" = "empty" ]; then
             python main.py --telegram-test-empty
-          elif [ "${{ github.event_name }}" = "push" ] && [[ "${{ github.event.head_commit.message }}" != *"[full-run]"* ]]; then
-            python main.py --once --dry-run --region incheon --grade A --smoke-test
           else
             python main.py --once
           fi
       - name: Upload course results
-        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[full-run]'))
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none')
         uses: actions/upload-artifact@v7
         with:
           name: course-watcher-results
@@ -118,7 +134,8 @@ jobs:
             university-course-watcher/data/report.html
 
   graduate-admission-check:
-    if: github.event_name != 'workflow_dispatch' || github.event.inputs.telegram_test == 'none'
+    needs: run-window
+    if: needs.run-window.outputs.should_run == 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.telegram_test == 'none')
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -150,13 +167,9 @@ jobs:
           PDF_MAX_PAGES: "8"
         run: |
           cd university-course-watcher
-          if [ "${{ github.event_name }}" = "push" ] && [[ "${{ github.event.head_commit.message }}" != *"[full-run]"* ]]; then
-            python main.py --once --watch graduate-admission --dry-run --region seoul --smoke-test
-          else
-            python main.py --once --watch graduate-admission --region seoul
-          fi
+          python main.py --once --watch graduate-admission --region seoul
       - name: Upload graduate admission results
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[full-run]')
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v7
         with:
           name: graduate-admission-results
@@ -180,17 +193,19 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+          curl --fail-with-body -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -d chat_id="${TELEGRAM_CHAT_ID}" \
             -d disable_web_page_preview=true \
             --data-urlencode text="[감시 실행 실패] 오늘 점검 워크플로가 실패해 알림이 누락될 수 있습니다. 로그: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
 
   publish-course-results:
     needs: course-check
+    permissions:
+      contents: write
     concurrency:
       group: watcher-report-publish-${{ github.ref }}
       cancel-in-progress: false
-    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[full-run]'))
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -225,7 +240,7 @@ jobs:
             exit 1
           fi
       - name: Upload published course result artifacts
-        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[full-run]')
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v7
         with:
           name: published-course-watcher-results
@@ -236,10 +251,12 @@ jobs:
 
   publish-graduate-admission-results:
     needs: graduate-admission-check
+    permissions:
+      contents: write
     concurrency:
       group: watcher-report-publish-${{ github.ref }}
       cancel-in-progress: false
-    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[full-run]'))
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
