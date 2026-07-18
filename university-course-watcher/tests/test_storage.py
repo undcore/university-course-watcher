@@ -11,6 +11,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.storage import GraduateAdmissionStorage, Storage
+from src.utils import DurableStateError
 
 
 class CourseStorageChangeTest(unittest.TestCase):
@@ -86,6 +87,51 @@ class CourseStorageChangeTest(unittest.TestCase):
             storage.mark_changes([changed])
 
             self.assertEqual("unchanged", changed["change_type"])
+
+    def test_mark_notified_preserves_change_detection_when_seen_write_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            storage = Storage(Path(directory))
+            original = self._item()
+
+            def fail_seen_write(items: list[dict]) -> None:
+                raise RuntimeError("seen write interrupted")
+
+            storage.update_seen = fail_seen_write
+
+            with self.assertRaisesRegex(RuntimeError, "seen write interrupted"):
+                storage.mark_notified([original])
+
+            unchanged = self._item()
+            storage.mark_changes([unchanged])
+            self.assertEqual("unchanged", unchanged["change_type"])
+
+            changed = self._item(fingerprint="fingerprint-2")
+            storage.mark_changes([changed])
+            self.assertEqual("content_changed", changed["change_type"])
+
+    def test_corrupt_seen_state_stops_new_item_classification(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            storage = Storage(Path(directory))
+            storage.seen_path.write_text('["sent",', encoding="utf-8")
+
+            with self.assertRaises(DurableStateError):
+                storage.mark_is_new([self._item()])
+
+    def test_semantically_invalid_seen_state_stops_new_item_classification(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            storage = Storage(Path(directory))
+            storage.seen_path.write_text('["sent", 123]', encoding="utf-8")
+
+            with self.assertRaises(DurableStateError):
+                storage.mark_is_new([self._item()])
+
+    def test_corrupt_notice_state_stops_change_classification(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            storage = Storage(Path(directory))
+            storage.notice_state_path.write_text("[]", encoding="utf-8")
+
+            with self.assertRaises(DurableStateError):
+                storage.mark_changes([self._item()])
 
 
 class CourseStorageHistoryTest(unittest.TestCase):
@@ -172,6 +218,19 @@ class CourseStorageHistoryTest(unittest.TestCase):
                 second_storage.history_csv.read_bytes(),
             )
 
+    def test_external_text_is_neutralized_in_csv_but_preserved_in_json(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            storage = Storage(Path(directory))
+            item = self._item("https://example.com/formula", "=HYPERLINK(\"bad\")")
+
+            storage.save_results([item])
+
+            with storage.results_csv.open("r", encoding="utf-8-sig", newline="") as file:
+                csv_item = next(csv.DictReader(file))
+
+            self.assertEqual("'=HYPERLINK(\"bad\")", csv_item["title"])
+            self.assertIn('"title": "=HYPERLINK', storage.results_json.read_text(encoding="utf-8"))
+
 
 class GraduateAdmissionStorageTest(unittest.TestCase):
     def _item(self, **changes: object) -> dict:
@@ -230,6 +289,14 @@ class GraduateAdmissionStorageTest(unittest.TestCase):
             storage.update_empty_summary_state(items, 20, 4)
             self.assertFalse(storage.should_send_empty_summary(items, 20, 4))
             self.assertTrue(storage.should_send_empty_summary(items, 21, 3))
+
+    def test_corrupt_empty_summary_state_stops_summary_send_decision(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            storage = GraduateAdmissionStorage(Path(directory))
+            storage.summary_state_path.write_text('{"fingerprint":', encoding="utf-8")
+
+            with self.assertRaises(DurableStateError):
+                storage.should_send_empty_summary([], 20, 4)
 
     def test_portal_item_is_not_new_again_on_the_next_day(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

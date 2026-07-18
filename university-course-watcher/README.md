@@ -129,6 +129,8 @@ CSV/JSON 주요 필드는 `checked_at`, `university_name`, `region`, `city`, `ti
 
 ## GitHub Actions
 
+Telegram delivery recovery: [operator procedure](docs/telegram-delivery-recovery.md)
+
 `.github/workflows/daily-check.yml`은 한국시간 월요일부터 금요일까지 오전 9시와 오후 7시에 실행됩니다. 코드 push는 감시 워크플로를 시작하지 않으며, 주말에는 사용자가 직접 요청한 수동 실행만 허용합니다.
 
 GitHub 저장소 Settings → Secrets and variables → Actions에서 다음 Secrets를 설정합니다.

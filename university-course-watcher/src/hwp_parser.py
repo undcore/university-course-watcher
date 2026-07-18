@@ -29,6 +29,9 @@ except ImportError:  # pragma: no cover - optional dependency
 LOGGER = logging.getLogger(__name__)
 
 MAX_TEXT_LENGTH = 12000
+MAX_HWPX_XML_BYTES = 16_000_000
+MAX_HWPX_TOTAL_BYTES = 64_000_000
+MAX_HWP_SECTION_BYTES = 32_000_000
 
 # HWP5 paragraph-text control characters that occupy a single UTF-16 unit.
 _CHAR_CONTROLS = {0, 10, 13, 24, 25, 26, 27, 28, 29, 30, 31}
@@ -50,6 +53,12 @@ def extract_hwpx_text(data: bytes) -> str:
             name for name in archive.namelist()
             if name.startswith("Contents/section") and name.endswith(".xml")
         )
+        section_infos = [archive.getinfo(name) for name in section_names]
+        if any(info.file_size > MAX_HWPX_XML_BYTES for info in section_infos):
+            return ""
+        if sum(info.file_size for info in section_infos) > MAX_HWPX_TOTAL_BYTES:
+            return ""
+
         lines: list[str] = []
         for name in section_names:
             try:
@@ -132,7 +141,11 @@ def _hwp_body_text(ole, compressed: bool) -> str:
         try:
             raw = ole.openstream(entry).read()
             if compressed:
-                raw = zlib.decompress(raw, -15)
+                decompressor = zlib.decompressobj(-15)
+                raw = decompressor.decompress(raw, MAX_HWP_SECTION_BYTES + 1)
+                if len(raw) > MAX_HWP_SECTION_BYTES or decompressor.unconsumed_tail:
+                    LOGGER.debug("HWP section exceeds decompression safety limit: %s", entry)
+                    continue
             lines.extend(_hwp_section_paragraphs(raw))
         except Exception as exc:  # pragma: no cover - defensive
             LOGGER.debug("HWP section parse skipped: %s", exc)

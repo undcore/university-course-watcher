@@ -5,7 +5,7 @@ import hashlib
 import re
 from pathlib import Path
 
-from .utils import DATA_DIR, load_json, save_json
+from .utils import DATA_DIR, DurableStateError, load_durable_json, load_json, save_json
 
 
 RESULT_FIELDS = [
@@ -29,6 +29,42 @@ HISTORY_FIELDS = [
 ]
 
 
+def _csv_safe_value(value: object) -> object:
+    if not isinstance(value, str):
+        return value
+
+    trimmed_value = value.lstrip()
+    if trimmed_value.startswith(("=", "+", "-", "@")):
+        return "'" + value
+
+    return value
+
+
+def _load_seen_values(path: Path) -> set[str]:
+    data = load_durable_json(path, [], (list, dict))
+
+    if isinstance(data, list):
+        if not all(isinstance(value, str) for value in data):
+            raise DurableStateError(f"Durable seen state contains a non-string value: {path}")
+        return set(data)
+
+    values: set[str] = set()
+    for key, nested_values in data.items():
+        if not isinstance(key, str):
+            raise DurableStateError(f"Durable seen state contains a non-string key: {path}")
+        values.add(key)
+
+        if nested_values is None:
+            continue
+        if not isinstance(nested_values, list) or not all(
+            isinstance(value, str) for value in nested_values
+        ):
+            raise DurableStateError(f"Durable seen state contains invalid nested values: {path}")
+        values.update(nested_values)
+
+    return values
+
+
 class Storage:
     def __init__(self, data_dir: Path = DATA_DIR):
         self.data_dir = data_dir
@@ -40,8 +76,7 @@ class Storage:
         self.notice_state_path = data_dir / "notice_state.json"
 
     def load_seen(self) -> set[str]:
-        data = load_json(self.seen_path, [])
-        setSeenUrls = set(data if isinstance(data, list) else data.keys())
+        setSeenUrls = _load_seen_values(self.seen_path)
         lstPreviousItems = load_json(self.results_json, [])
 
         for dictItem in lstPreviousItems:
@@ -60,7 +95,7 @@ class Storage:
         return items
 
     def mark_changes(self, items: list[dict]) -> list[dict]:
-        previous_state = load_json(self.notice_state_path, {})
+        previous_state = load_durable_json(self.notice_state_path, {}, dict)
         seen_urls = self.load_seen()
         if not isinstance(previous_state, dict):
             previous_state = {}
@@ -86,7 +121,7 @@ class Storage:
         return items
 
     def update_notice_state(self, items: list[dict]) -> None:
-        state = load_json(self.notice_state_path, {})
+        state = load_durable_json(self.notice_state_path, {}, dict)
 
         if not isinstance(state, dict):
             state = {}
@@ -110,6 +145,11 @@ class Storage:
         for item in notified_items:
             seen.add(item["url"])
         save_json(self.seen_path, sorted(seen))
+
+    def mark_notified(self, notified_items: list[dict]) -> None:
+        """Persist authoritative change state before the secondary seen index."""
+        self.update_notice_state(notified_items)
+        self.update_seen(notified_items)
 
     def dedupe(self, items: list[dict]) -> list[dict]:
         result: list[dict] = []
@@ -223,7 +263,7 @@ class Storage:
             writer = csv.DictWriter(f, fieldnames=fields)
             writer.writeheader()
             for row in rows:
-                writer.writerow({field: row.get(field, "") for field in fields})
+                writer.writerow({field: _csv_safe_value(row.get(field, "")) for field in fields})
 
 
 class GraduateAdmissionStorage:
@@ -235,16 +275,7 @@ class GraduateAdmissionStorage:
         self.results_json = data_dir / "graduate_admission_results.json"
 
     def load_seen(self) -> set[str]:
-        data = load_json(self.seen_path, [])
-        if isinstance(data, list):
-            return set(data)
-        if isinstance(data, dict):
-            seen = set(data.keys())
-            for values in data.values():
-                if isinstance(values, list):
-                    seen.update(values)
-            return seen
-        return set()
+        return _load_seen_values(self.seen_path)
 
     def mark_is_new(self, items: list[dict]) -> list[dict]:
         seen = self.load_seen()
@@ -282,7 +313,7 @@ class GraduateAdmissionStorage:
         return result
 
     def should_send_empty_summary(self, items: list[dict], active_count: int, disabled_count: int) -> bool:
-        state = load_json(self.summary_state_path, {})
+        state = load_durable_json(self.summary_state_path, {}, dict)
         fingerprint = self.empty_summary_fingerprint(items, active_count, disabled_count)
         return state.get("fingerprint") != fingerprint
 
@@ -379,4 +410,4 @@ class GraduateAdmissionStorage:
             writer = csv.DictWriter(f, fieldnames=fields)
             writer.writeheader()
             for row in rows:
-                writer.writerow({field: row.get(field, "") for field in fields})
+                writer.writerow({field: _csv_safe_value(row.get(field, "")) for field in fields})

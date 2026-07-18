@@ -32,6 +32,8 @@ jobs:
       should_run: ${{ steps.calendar.outputs.should_run }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
       - name: Enforce the KST weekday run window
         id: calendar
         env:
@@ -43,6 +45,8 @@ jobs:
 
   course-check:
     needs: run-window
+    permissions:
+      contents: write
     if: needs.run-window.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -52,8 +56,10 @@ jobs:
         run: |
           git fetch origin "${GITHUB_REF_NAME}"
           git checkout "origin/${GITHUB_REF_NAME}" -- \
+            university-course-watcher/data/university_history.csv \
             university-course-watcher/data/seen_urls.json \
-            university-course-watcher/data/notice_state.json
+            university-course-watcher/data/notice_state.json \
+            university-course-watcher/data/course_delivery_outbox.json
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: "3.11"
@@ -117,6 +123,7 @@ jobs:
           TIMEZONE: Asia/Seoul
           NOTICE_MAX_AGE_DAYS: "7"
           PDF_MAX_PAGES: "8"
+          DELIVERY_STATE_PUSH_ENABLED: "true"
         run: |
           cd university-course-watcher
           if [ "${{ github.event.inputs.telegram_test }}" = "success" ]; then
@@ -131,6 +138,8 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: course-watcher-results
+          if-no-files-found: error
+          retention-days: 14
           path: |
             university-course-watcher/data/results.csv
             university-course-watcher/data/results.json
@@ -138,10 +147,15 @@ jobs:
             university-course-watcher/data/university_history.csv
             university-course-watcher/data/seen_urls.json
             university-course-watcher/data/notice_state.json
+            university-course-watcher/data/course_delivery_outbox.json
 
   graduate-admission-check:
-    needs: run-window
-    if: needs.run-window.outputs.should_run == 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.telegram_test == 'none')
+    needs:
+      - run-window
+      - publish-course-results
+    if: always() && needs.run-window.outputs.should_run == 'true' && (needs.publish-course-results.result == 'success' || needs.publish-course-results.result == 'skipped') && (github.event_name != 'workflow_dispatch' || github.event.inputs.telegram_test == 'none')
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -151,7 +165,8 @@ jobs:
           git fetch origin "${GITHUB_REF_NAME}"
           git checkout "origin/${GITHUB_REF_NAME}" -- \
             university-course-watcher/data/seen_graduate_admission_urls.json \
-            university-course-watcher/data/graduate_admission_summary_state.json
+            university-course-watcher/data/graduate_admission_summary_state.json \
+            university-course-watcher/data/graduate_delivery_outbox.json
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: "3.11"
@@ -174,6 +189,7 @@ jobs:
           TIMEZONE: Asia/Seoul
           NOTICE_MAX_AGE_DAYS: "7"
           PDF_MAX_PAGES: "8"
+          DELIVERY_STATE_PUSH_ENABLED: "true"
         run: |
           cd university-course-watcher
           python main.py --once --watch graduate-admission --region seoul
@@ -182,12 +198,15 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: graduate-admission-results
+          if-no-files-found: error
+          retention-days: 14
           path: |
             university-course-watcher/data/graduate_admission_results.csv
             university-course-watcher/data/graduate_admission_results.json
             university-course-watcher/data/graduate_admission_report.html
             university-course-watcher/data/seen_graduate_admission_urls.json
             university-course-watcher/data/graduate_admission_summary_state.json
+            university-course-watcher/data/graduate_delivery_outbox.json
 
   notify-failure:
     needs:
@@ -204,7 +223,8 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          curl --fail-with-body -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+          curl --fail-with-body -sS --connect-timeout 10 --max-time 30 \
+            -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             -d chat_id="${TELEGRAM_CHAT_ID}" \
             -d disable_web_page_preview=true \
             --data-urlencode text="[감시 실행 실패] 오늘 점검 워크플로가 실패해 알림이 누락될 수 있습니다. 로그: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
@@ -216,7 +236,7 @@ jobs:
     concurrency:
       group: watcher-report-publish-${{ github.ref }}
       cancel-in-progress: false
-    if: always() && needs.course-check.result != 'cancelled' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none'))
+    if: always() && (needs.course-check.result == 'success' || needs.course-check.result == 'failure') && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none'))
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -236,7 +256,8 @@ jobs:
             university-course-watcher/data/report.html \
             university-course-watcher/data/university_history.csv \
             university-course-watcher/data/seen_urls.json \
-            university-course-watcher/data/notice_state.json
+            university-course-watcher/data/notice_state.json \
+            university-course-watcher/data/course_delivery_outbox.json
           if git diff --cached --quiet; then
             echo "No report changes to commit."
           else
@@ -258,6 +279,8 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: published-course-watcher-results
+          if-no-files-found: error
+          retention-days: 14
           path: |
             university-course-watcher/data/results.csv
             university-course-watcher/data/results.json
@@ -265,6 +288,7 @@ jobs:
             university-course-watcher/data/university_history.csv
             university-course-watcher/data/seen_urls.json
             university-course-watcher/data/notice_state.json
+            university-course-watcher/data/course_delivery_outbox.json
 
   publish-graduate-admission-results:
     needs: graduate-admission-check
@@ -273,7 +297,7 @@ jobs:
     concurrency:
       group: watcher-report-publish-${{ github.ref }}
       cancel-in-progress: false
-    if: always() && needs.graduate-admission-check.result != 'cancelled' && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none'))
+    if: always() && (needs.graduate-admission-check.result == 'success' || needs.graduate-admission-check.result == 'failure') && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.telegram_test == 'none'))
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -292,7 +316,8 @@ jobs:
             university-course-watcher/data/graduate_admission_results.json \
             university-course-watcher/data/graduate_admission_report.html \
             university-course-watcher/data/seen_graduate_admission_urls.json \
-            university-course-watcher/data/graduate_admission_summary_state.json
+            university-course-watcher/data/graduate_admission_summary_state.json \
+            university-course-watcher/data/graduate_delivery_outbox.json
           if git diff --cached --quiet; then
             echo "No graduate admission report changes to commit."
           else
@@ -313,9 +338,12 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: published-graduate-admission-results
+          if-no-files-found: error
+          retention-days: 14
           path: |
             university-course-watcher/data/graduate_admission_results.csv
             university-course-watcher/data/graduate_admission_results.json
             university-course-watcher/data/graduate_admission_report.html
             university-course-watcher/data/seen_graduate_admission_urls.json
             university-course-watcher/data/graduate_admission_summary_state.json
+            university-course-watcher/data/graduate_delivery_outbox.json

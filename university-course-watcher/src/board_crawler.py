@@ -16,6 +16,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from .http_state import HttpStateCache
+from .network_safety import SafeHttpSession, is_public_http_url, require_public_http_url
 from .utils import DATA_DIR, normalize_space, now_kst
 
 LOGGER = logging.getLogger(__name__)
@@ -107,7 +108,7 @@ class BoardCrawler:
         session = getattr(self._thread_local, "session", None)
 
         if session is None:
-            session = requests.Session()
+            session = SafeHttpSession()
             session.headers.update(
                 {
                     "User-Agent": "Mozilla/5.0 university-course-watcher/1.0 (official-board-crawler)",
@@ -380,6 +381,7 @@ class BoardCrawler:
         return lstDatedCandidates + lstUndatedCandidates
 
     def _get_text(self, url: str) -> str:
+        require_public_http_url(url)
         dictHeaders = self.state_cache.conditional_headers(url)
         session = self._session()
 
@@ -406,6 +408,8 @@ class BoardCrawler:
 
         for a in soup.find_all("a", href=True):
             full_url = self._link_url(a, base_url)
+            if not is_public_http_url(full_url):
+                continue
             key = self._canonicalize_url(full_url)
             if key in seen:
                 continue
@@ -614,7 +618,7 @@ class BoardCrawler:
             lowered = (href + " " + text).lower()
             if any(ext in lowered for ext in [".pdf", ".hwp", ".hwpx", ".doc", ".docx", ".xls", ".xlsx", ".zip", "download"]):
                 attachment_url = urljoin(base_url, href)
-                if urlparse(attachment_url).scheme in {"http", "https"}:
+                if is_public_http_url(attachment_url):
                     urls.append(attachment_url)
         return list(dict.fromkeys(urls))
 
@@ -636,7 +640,9 @@ class BoardCrawler:
             if any(word in lowered_source for word in ignored_words):
                 continue
 
-            urls.append(urljoin(base_url, source))
+            image_url = urljoin(base_url, source)
+            if is_public_http_url(image_url):
+                urls.append(image_url)
 
         return list(dict.fromkeys(urls))[:10]
 

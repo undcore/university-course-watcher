@@ -207,6 +207,22 @@ class BoardCrawlerLinkTest(unittest.TestCase):
 
         self.assertEqual(["https://university.example/files/guide.pdf"], urls)
 
+    def test_private_network_links_are_not_collected(self) -> None:
+        soup = BeautifulSoup(
+            '<a href="http://127.0.0.1/admin?articleNo=1">2026 모집 공지</a>'
+            '<a href="http://169.254.169.254/guide.pdf">모집 PDF</a>'
+            '<img src="http://[::1]/schedule.jpg">',
+            "html.parser",
+        )
+
+        candidates = self.crawler._extract_candidate_links(soup, self.sBaseUrl, None)
+        attachments = self.crawler._extract_attachment_urls(soup, self.sBaseUrl)
+        images = self.crawler._extract_image_urls(soup, self.sBaseUrl)
+
+        self.assertEqual([], candidates)
+        self.assertEqual([], attachments)
+        self.assertEqual([], images)
+
     def test_detail_images_are_collected_without_layout_assets(self) -> None:
         soup = BeautifulSoup(
             '<div class="content"><img src="/uploads/schedule.jpg">'

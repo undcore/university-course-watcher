@@ -47,7 +47,8 @@ class WorkflowScheduleContractTest(unittest.TestCase):
 
     def test_both_watcher_jobs_depend_on_runtime_guard(self) -> None:
         self.assertIn("python university-course-watcher/src/schedule_policy.py", self.workflow_text)
-        self.assertEqual(2, self.workflow_text.count("needs: run-window"))
+        self.assertIn("course-check:\n    needs: run-window", self.workflow_text)
+        self.assertIn("      - run-window\n      - publish-course-results", self.workflow_text)
         self.assertGreaterEqual(
             self.workflow_text.count("needs.run-window.outputs.should_run == 'true'"),
             2,
@@ -57,9 +58,9 @@ class WorkflowScheduleContractTest(unittest.TestCase):
         self.assertIn("group: university-notice-check-${{ github.ref }}", self.workflow_text)
         self.assertIn("cancel-in-progress: false", self.workflow_text)
 
-    def test_write_permission_is_limited_to_publish_jobs(self) -> None:
+    def test_write_permission_is_limited_to_state_and_publish_jobs(self) -> None:
         self.assertIn("permissions:\n  contents: read", self.workflow_text)
-        self.assertEqual(2, self.workflow_text.count("      contents: write"))
+        self.assertEqual(4, self.workflow_text.count("      contents: write"))
 
     def test_failure_notification_rejects_http_errors(self) -> None:
         self.assertIn("curl --fail-with-body", self.workflow_text)

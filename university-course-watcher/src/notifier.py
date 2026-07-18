@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import hashlib
 import logging
 import os
 from collections.abc import Callable
 
 import requests
 
+from .delivery_outbox import DeliveryOutbox
 from .recency import is_recent_notice
 
 try:
@@ -19,11 +21,12 @@ DISCLAIMER = "※ 결과는 자동 검색 후보이며, 최종 지원 가능 여
 
 
 class TelegramNotifier:
-    def __init__(self):
+    def __init__(self, delivery_outbox: DeliveryOutbox | None = None):
         load_dotenv()
         self.token = os.getenv("TELEGRAM_BOT_TOKEN", "")
         self.chat_id = os.getenv("TELEGRAM_CHAT_ID", "")
         self.delivery_failures: list[str] = []
+        self.delivery_outbox = delivery_outbox
 
     def send_candidates(
         self,
@@ -49,7 +52,10 @@ class TelegramNotifier:
         sent: list[dict] = []
         for item in targets:
             try:
-                self._send(self._candidate_message(item))
+                self._deliver_once(
+                    self._candidate_message(item),
+                    self._candidate_delivery_key("course", item),
+                )
             except Exception as exc:
                 LOGGER.warning("Telegram candidate send failed: %s", exc)
                 self.delivery_failures.append(str(exc))
@@ -76,7 +82,8 @@ class TelegramNotifier:
             return False
 
         try:
-            self._send(self._daily_report_message(summary))
+            report_key = os.getenv("GITHUB_RUN_ID", "") or self._stable_hash(str(summary))
+            self._deliver_once(self._daily_report_message(summary), f"course-report:{report_key}")
             return True
         except Exception as exc:
             LOGGER.warning("Telegram daily report send failed: %s", exc)
@@ -86,11 +93,56 @@ class TelegramNotifier:
     def _is_configured(self) -> bool:
         return bool(self.token and self.chat_id)
 
-    def _send(self, text: str) -> None:
+    def _deliver_once(self, text: str, logical_key: str) -> None:
+        if self.delivery_outbox is None:
+            self._send(text)
+            return
+
+        delivery_id = self.delivery_outbox.delivery_id(self.chat_id, logical_key)
+        should_send = self.delivery_outbox.begin(
+            delivery_id,
+            logical_key=logical_key,
+            message_preview=text,
+        )
+        if not should_send:
+            return
+
+        try:
+            receipt = self._send(text)
+        except Exception as exc:
+            self.delivery_outbox.record_failure(delivery_id, exc)
+            raise
+
+        self.delivery_outbox.confirm(delivery_id, receipt)
+
+    def _candidate_delivery_key(self, namespace: str, item: dict) -> str:
+        include_notice_date = namespace != "graduate-portal"
+        parts = [
+            namespace,
+            str(item.get("url", "")),
+            str(item.get("content_fingerprint", "")),
+            str(item.get("change_type", "")),
+            str(item.get("grade", "")),
+            str(item.get("deadline_status", "")),
+            str(item.get("notice_date", "")) if include_notice_date else "",
+            str(item.get("title", "")),
+            "|".join(sorted(str(value) for value in item.get("attachment_urls", []) or [])),
+        ]
+        return f"{namespace}-candidate:{self._stable_hash(chr(10).join(parts))}"
+
+    def _stable_hash(self, value: str) -> str:
+        return hashlib.sha256(value.encode("utf-8", errors="replace")).hexdigest()
+
+    def _send(self, text: str) -> dict:
         url = f"https://api.telegram.org/bot{self.token}/sendMessage"
         payload = {"chat_id": self.chat_id, "text": text, "disable_web_page_preview": True}
         response = requests.post(url, json=payload, timeout=15)
         response.raise_for_status()
+        body = response.json()
+        if not body.get("ok"):
+            raise RuntimeError("Telegram API returned an unsuccessful response.")
+        result = body.get("result", {})
+        return result if isinstance(result, dict) else {}
 
     def _candidate_message(self, item: dict) -> str:
         courses = ", ".join((item.get("possible_departments") or []) + (item.get("possible_computer_courses") or []))
@@ -227,13 +279,14 @@ class TelegramNotifier:
         return f"{actions_run_url} 에서 Artifacts > {artifact_name} 다운로드 후 report.html 열기"
 
 
-class GraduateAdmissionNotifier:
-    def __init__(self):
+class GraduateAdmissionNotifier(TelegramNotifier):
+    def __init__(self, delivery_outbox: DeliveryOutbox | None = None):
         load_dotenv()
         self.token = os.getenv("TELEGRAM_BOT_TOKEN", "")
         self.chat_id = os.getenv("TELEGRAM_CHAT_ID", "")
         self.delivery_failures: list[str] = []
         self.summary_sent = False
+        self.delivery_outbox = delivery_outbox
 
     def send_candidates(
         self,
@@ -241,6 +294,7 @@ class GraduateAdmissionNotifier:
         dry_run: bool = False,
         send_empty_summary: bool = True,
         on_sent: Callable[[list[dict]], None] | None = None,
+        summary_delivery_key: str | None = None,
     ) -> list[dict]:
         targets = [
             item for item in items
@@ -259,7 +313,9 @@ class GraduateAdmissionNotifier:
                 LOGGER.info("Graduate admission empty summary unchanged; notification skipped.")
                 return sent
             try:
-                self._send(self._summary_message(items))
+                message = self._summary_message(items)
+                logical_key = summary_delivery_key or f"graduate-empty:{self._stable_hash(message)}"
+                self._deliver_once(message, logical_key)
                 self.summary_sent = True
             except Exception as exc:
                 LOGGER.warning("Telegram summary send failed: %s", exc)
@@ -269,10 +325,14 @@ class GraduateAdmissionNotifier:
         # 원서접수 포털(유웨이/진학사) 항목은 수십 건씩 쏟아지므로 요약 한 통으로 묶는다
         portal_targets = [item for item in targets if self._is_portal_item(item)]
         board_targets = [item for item in targets if not self._is_portal_item(item)]
+        portal_targets.sort(key=lambda item: self._candidate_delivery_key("graduate-portal", item))
 
         for item in board_targets:
             try:
-                self._send(self._message(item))
+                self._deliver_once(
+                    self._message(item),
+                    self._candidate_delivery_key("graduate", item),
+                )
             except Exception as exc:
                 LOGGER.warning("Telegram send failed: %s", exc)
                 self.delivery_failures.append(str(exc))
@@ -284,7 +344,9 @@ class GraduateAdmissionNotifier:
 
         for batch_items, message in self._portal_digest_batches(portal_targets):
             try:
-                self._send(message)
+                item_keys = [self._candidate_delivery_key("graduate-portal", item) for item in batch_items]
+                digest_key = f"graduate-portal:{self._stable_hash(chr(10).join(item_keys))}"
+                self._deliver_once(message, digest_key)
             except Exception as exc:
                 LOGGER.warning("Telegram portal digest send failed: %s", exc)
                 self.delivery_failures.append(str(exc))
@@ -325,13 +387,18 @@ class GraduateAdmissionNotifier:
 
         return batches
 
-    def _send(self, text: str) -> None:
+    def _send(self, text: str) -> dict:
         if not self.token or not self.chat_id:
             raise RuntimeError("TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID are required.")
 
         url = f"https://api.telegram.org/bot{self.token}/sendMessage"
         response = requests.post(url, json={"chat_id": self.chat_id, "text": text, "disable_web_page_preview": True}, timeout=15)
         response.raise_for_status()
+        body = response.json()
+        if not body.get("ok"):
+            raise RuntimeError("Telegram API returned an unsuccessful response.")
+        result = body.get("result", {})
+        return result if isinstance(result, dict) else {}
 
     def _message(self, item: dict) -> str:
         matched = ", ".join(item.get("matched_keywords") or []) or "확인 필요"
