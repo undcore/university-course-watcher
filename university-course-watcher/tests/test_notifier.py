@@ -71,6 +71,20 @@ class TelegramNotifierTest(unittest.TestCase):
 
 
 class GraduateAdmissionNotifierTest(unittest.TestCase):
+    def _portal_items(self, count: int) -> list[dict]:
+        today = date.today().isoformat()
+        return [
+            {
+                "url": f"https://apply.example.com/{index}",
+                "grade": "A",
+                "is_new": True,
+                "board_type": "유웨이어플라이 대학원 전기",
+                "title": f"대학 {index} 일반대학원",
+                "notice_date": today,
+            }
+            for index in range(0, count)
+        ]
+
     def test_unchanged_empty_summary_is_not_sent(self) -> None:
         notifier = GraduateAdmissionNotifier()
         notifier.token = "token"
@@ -103,6 +117,53 @@ class GraduateAdmissionNotifierTest(unittest.TestCase):
         # 게시판 1건 개별 + 포털 30건은 다이제스트 2통(25건 단위 분할) = 총 3회 발송
         self.assertEqual(31, len(lstSentItems))
         self.assertEqual(3, notifier._send.call_count)
+
+    def test_only_successful_portal_digest_batch_is_returned(self) -> None:
+        notifier = GraduateAdmissionNotifier()
+        notifier.token = "token"
+        notifier.chat_id = "chat"
+        notifier._send = Mock(side_effect=[None, RuntimeError("second batch failed")])
+        items = self._portal_items(30)
+
+        sent_items = notifier.send_candidates(items)
+
+        self.assertEqual(items[:25], sent_items)
+        self.assertEqual(["second batch failed"], notifier.delivery_failures)
+        self.assertEqual(2, notifier._send.call_count)
+
+    def test_later_portal_digest_batch_continues_after_earlier_failure(self) -> None:
+        notifier = GraduateAdmissionNotifier()
+        notifier.token = "token"
+        notifier.chat_id = "chat"
+        notifier._send = Mock(side_effect=[RuntimeError("first batch failed"), None])
+        items = self._portal_items(30)
+
+        sent_items = notifier.send_candidates(items)
+
+        self.assertEqual(items[25:], sent_items)
+        self.assertEqual(["first batch failed"], notifier.delivery_failures)
+        self.assertEqual(2, notifier._send.call_count)
+
+    def test_failed_portal_digest_batch_can_be_retried_without_resending_successes(self) -> None:
+        items = self._portal_items(30)
+        first_notifier = GraduateAdmissionNotifier()
+        first_notifier.token = "token"
+        first_notifier.chat_id = "chat"
+        first_notifier._send = Mock(side_effect=[None, RuntimeError("temporary failure")])
+
+        first_sent = first_notifier.send_candidates(items)
+        retry_items = [item for item in items if item not in first_sent]
+
+        retry_notifier = GraduateAdmissionNotifier()
+        retry_notifier.token = "token"
+        retry_notifier.chat_id = "chat"
+        retry_notifier._send = Mock()
+        retry_sent = retry_notifier.send_candidates(retry_items)
+
+        self.assertEqual(items[:25], first_sent)
+        self.assertEqual(items[25:], retry_items)
+        self.assertEqual(items[25:], retry_sent)
+        retry_notifier._send.assert_called_once()
 
 
 if __name__ == "__main__":

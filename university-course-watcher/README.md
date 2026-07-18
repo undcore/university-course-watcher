@@ -80,6 +80,9 @@ python main.py --debug
 - `data/results.json`
 - `data/report.html`
 - `data/seen_urls.json`
+- `data/notice_state.json`
+- `data/seen_graduate_admission_urls.json`
+- `data/graduate_admission_summary_state.json`
 - `data/university_history.csv`
 - `data/debug_results.json`
 
@@ -179,4 +182,4 @@ python validate_graduate_admission_boards.py
 
 일부 학교는 공지 게시판이 아니라 상시 입학안내 페이지에 모집요강 PDF를 직접 게시합니다. 이런 경우 `graduate_admission_boards.json`에 `"scan_page": true`를 추가하면 해당 페이지 본문과 첨부 링크까지 직접 검사합니다. URL 상태는 `validate_graduate_admission_boards.py`로 확인하며, `status`가 200이어도 `keyword_hits`가 0이거나 `final_url`이 error/login/SSO 페이지면 설정 보정이 필요합니다.
 
-GitHub Actions는 한국시간 월요일부터 금요일까지 오전 9시와 오후 7시에 실행되도록 `0 0 * * 1-5`, `0 10 * * 1-5` UTC cron을 사용합니다. `data/seen_graduate_admission_urls.json`은 Actions cache로 복원/저장하여 같은 공고를 반복 알림하지 않도록 했습니다.
+GitHub Actions는 한국시간 월요일부터 금요일까지 오전 9시와 오후 7시에 실행되도록 `0 0 * * 1-5`, `0 10 * * 1-5` UTC cron을 사용합니다. 알림 이력과 fingerprint 상태는 결과 보고서와 함께 저장소에 커밋하므로 Actions cache가 만료되어도 같은 공고를 반복 알림하지 않습니다. HTTP 조건부 요청 상태만 재생성 가능한 Actions cache로 관리합니다.

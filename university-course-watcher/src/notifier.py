@@ -267,11 +267,10 @@ class GraduateAdmissionNotifier:
                 LOGGER.warning("Telegram send failed: %s", exc)
                 self.delivery_failures.append(str(exc))
 
-        if portal_targets:
+        for batch_items, message in self._portal_digest_batches(portal_targets):
             try:
-                for sMessage in self._portal_digest_messages(portal_targets):
-                    self._send(sMessage)
-                sent.extend(portal_targets)
+                self._send(message)
+                sent.extend(batch_items)
             except Exception as exc:
                 LOGGER.warning("Telegram portal digest send failed: %s", exc)
                 self.delivery_failures.append(str(exc))
@@ -282,21 +281,30 @@ class GraduateAdmissionNotifier:
         return "어플라이" in str(item.get("board_type", ""))
 
     def _portal_digest_messages(self, items: list[dict], max_lines: int = 25) -> list[str]:
+        return [message for _, message in self._portal_digest_batches(items, max_lines)]
+
+    def _portal_digest_batches(
+        self,
+        items: list[dict],
+        max_lines: int = 25,
+    ) -> list[tuple[list[dict], str]]:
         lstLines = [
             f"- {item.get('title')}\n  {item.get('url')}"
             for item in items
         ]
-        lstMessages: list[str] = []
+        batches: list[tuple[list[dict], str]] = []
 
         for iStart in range(0, len(lstLines), max_lines):
             chunk = lstLines[iStart:iStart + max_lines]
-            lstMessages.append(
+            batch_items = items[iStart:iStart + max_lines]
+            message = (
                 f"[원서접수 포털 - 접수중인 일반대학원 {len(items)}건]\n\n"
                 + "\n".join(chunk)
                 + "\n\n유웨이어플라이/진학사어플라이 접수 목록에서 확인된 신규 항목입니다."
             )
+            batches.append((batch_items, message))
 
-        return lstMessages
+        return batches
 
     def _send(self, text: str) -> None:
         if not self.token or not self.chat_id:

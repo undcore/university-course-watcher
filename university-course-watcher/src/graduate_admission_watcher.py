@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 
 from .apply_portal import fetch_portal_items
 from .attachment_parser import AttachmentParser
-from .board_crawler import HTML_PARSER, BoardCrawler, CrawledNotice
+from .board_crawler import HTML_PARSER, BoardCrawler, CrawledNotice, validate_crawl_health
 from .http_state import HttpStateCache
 from .recency import notice_max_age_days
 from .storage import GraduateAdmissionStorage
@@ -86,7 +86,8 @@ class GraduateAdmissionWatcher:
 
         LOGGER.info("Crawling %d graduate admission boards for 일반대학원 모집 notices.", len(boards))
         notices = self._scan_direct_pages(boards)
-        notices.extend(self.crawler.crawl_boards(boards, university_map, keyword_hint="2026"))
+        board_notices = self.crawler.crawl_boards(boards, university_map, keyword_hint="2026")
+        notices.extend(self._trusted_board_notices(board_notices))
         items = self._build_items(notices, university_map)
 
         if not self.smoke_test:
@@ -105,6 +106,10 @@ class GraduateAdmissionWatcher:
             self.storage.save_results(items)
 
         return items
+
+    def _trusted_board_notices(self, notices: list[CrawledNotice]) -> list[CrawledNotice]:
+        validate_crawl_health(self.crawler.last_stats)
+        return [notice for notice in notices if notice.detail_succeeded]
 
     def mark_sent(self, sent_items: list[dict]) -> None:
         self.storage.update_seen(sent_items)
