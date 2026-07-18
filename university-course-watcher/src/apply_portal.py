@@ -5,10 +5,10 @@ import json
 import logging
 import re
 
-import requests
 from bs4 import BeautifulSoup
 
 from .board_crawler import HTML_PARSER
+from .network_safety import SafeHttpSession
 from .utils import normalize_space, now_kst
 
 LOGGER = logging.getLogger(__name__)
@@ -71,7 +71,8 @@ def _item(sPortal: str, sName: str, sUrl: str, sBoardType: str, sReason: str) ->
 
 
 def _fetch_uway(target_term: str) -> list[dict]:
-    response = requests.get(UWAY_LIST_URL, headers=HEADERS, timeout=TIMEOUT)
+    session = SafeHttpSession()
+    response = session.get(UWAY_LIST_URL, headers=HEADERS, timeout=TIMEOUT)
     response.raise_for_status()
     soup = BeautifulSoup(response.content.decode("utf-8", errors="replace"), HTML_PARSER)
     items: list[dict] = []
@@ -105,7 +106,7 @@ def _fetch_uway(target_term: str) -> list[dict]:
 
 
 def _fetch_jinhak(target_term: str) -> list[dict]:
-    session = requests.Session()
+    session = SafeHttpSession()
     session.headers.update(HEADERS)
     response = session.get(JINHAK_PAGE_URL, timeout=TIMEOUT)
     response.raise_for_status()

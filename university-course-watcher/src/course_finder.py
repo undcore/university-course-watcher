@@ -6,6 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from .utils import normalize_space, truncate, unique_preserve_order
+from .network_safety import SafeHttpSession, require_public_http_url
 
 HTML_PARSER = "lxml"
 
@@ -14,7 +15,7 @@ class CourseFinder:
     def __init__(self, keywords: dict, timeout: int = 12):
         self.keywords = keywords
         self.timeout = timeout
-        self.session = requests.Session()
+        self.session = SafeHttpSession()
         self.session.headers.update({"User-Agent": "Mozilla/5.0 university-course-watcher/1.0"})
         self._evidence_cache: dict[str, tuple[str, str]] = {}
 
@@ -92,4 +93,5 @@ class CourseFinder:
         return unique_preserve_order([name for name in candidates if name in text])
 
     def _get(self, url: str) -> requests.Response:
+        require_public_http_url(url)
         return self.session.get(url, timeout=self.timeout)

@@ -9,7 +9,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.utils import load_json, save_json
+from src.utils import DurableStateError, load_durable_json, load_json, save_json
 
 
 class JsonStateTest(unittest.TestCase):
@@ -29,6 +29,22 @@ class JsonStateTest(unittest.TestCase):
             loaded = load_json(path, {})
             self.assertIn("broken-", loaded["text"])
             self.assertFalse(path.with_suffix(".json.tmp").exists())
+
+    def test_corrupt_durable_state_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "seen_urls.json"
+            path.write_text('["sent",', encoding="utf-8")
+
+            with self.assertRaisesRegex(DurableStateError, "unreadable"):
+                load_durable_json(path, [], list)
+
+    def test_invalid_durable_state_structure_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "notice_state.json"
+            path.write_text("[]", encoding="utf-8")
+
+            with self.assertRaisesRegex(DurableStateError, "invalid structure"):
+                load_durable_json(path, {}, dict)
 
 
 if __name__ == "__main__":

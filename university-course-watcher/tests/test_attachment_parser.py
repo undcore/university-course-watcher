@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 import tempfile
 import unittest
+import zipfile
 from io import BytesIO
 from pathlib import Path
 from types import SimpleNamespace
@@ -139,6 +140,50 @@ class AttachmentParserTest(unittest.TestCase):
             timeout=(4, self.parser.timeout),
             stream=True,
         )
+
+    def test_private_network_attachment_is_rejected_before_request(self) -> None:
+        session = Mock()
+        self.parser._session = Mock(return_value=session)
+
+        with self.assertRaisesRegex(ValueError, "Non-public IP"):
+            self.parser.extract_text("http://169.254.169.254/latest/meta-data.pdf")
+
+        session.get.assert_not_called()
+
+    def test_oversized_archive_entry_is_rejected_before_docx_parser(self) -> None:
+        buffer = BytesIO()
+        with zipfile.ZipFile(buffer, "w") as archive:
+            archive.writestr("word/document.xml", b"x")
+
+        with zipfile.ZipFile(BytesIO(buffer.getvalue())) as archive:
+            entry = archive.getinfo("word/document.xml")
+
+        entry.file_size = 20_000_000
+        fake_archive = Mock()
+        fake_archive.__enter__ = Mock(return_value=fake_archive)
+        fake_archive.__exit__ = Mock(return_value=False)
+        fake_archive.infolist.return_value = [entry]
+
+        with patch("src.attachment_parser.zipfile.ZipFile", return_value=fake_archive):
+            self.assertFalse(self.parser._is_safe_zip_archive(buffer.getvalue()))
+
+    def test_oversized_image_is_rejected_before_pixels_are_loaded(self) -> None:
+        response = Mock()
+        response.raw.read.return_value = b"image bytes"
+        image = SimpleNamespace(width=10_000, height=10_000, load=Mock())
+        session = Mock()
+        session.get.return_value = response
+        fake_image_module = SimpleNamespace(open=Mock(return_value=image))
+        self.parser._session = Mock(return_value=session)
+
+        with patch("src.attachment_parser.pytesseract", Mock()), patch(
+            "src.attachment_parser.Image",
+            fake_image_module,
+        ):
+            text = self.parser.extract_image_text("https://example.com/schedule.jpg")
+
+        self.assertEqual("", text)
+        image.load.assert_not_called()
 
 
 if __name__ == "__main__":

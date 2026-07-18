@@ -15,11 +15,15 @@ DATA_DIR = PROJECT_ROOT / "data"
 CONFIG_DIR = PROJECT_ROOT / "config"
 
 
+class DurableStateError(RuntimeError):
+    """Raised when persisted notification state cannot be trusted."""
+
+
 def setup_logging(debug: bool = False) -> None:
-    # Windows cp949 콘솔에서 이모지 포함 제목 출력이 깨지지 않도록
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8", errors="replace")
+
     logging.basicConfig(
         level=logging.DEBUG if debug else logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
@@ -33,29 +37,48 @@ def ensure_dirs() -> None:
 def load_json(path: Path, default: Any) -> Any:
     if not path.exists():
         return default
+
     try:
-        with path.open("r", encoding="utf-8") as f:
-            return json.load(f)
+        with path.open("r", encoding="utf-8") as file:
+            return json.load(file)
     except (json.JSONDecodeError, UnicodeDecodeError):
-        logging.getLogger(__name__).warning("손상된 JSON 파일 무시: %s", path)
+        logging.getLogger(__name__).warning("Invalid JSON file ignored: %s", path)
         return default
+
+
+def load_durable_json(path: Path, default: Any, expected_type: type | tuple[type, ...]) -> Any:
+    """Load notification state without treating corruption as empty state."""
+    if not path.exists():
+        return default
+
+    try:
+        with path.open("r", encoding="utf-8") as file:
+            data = json.load(file)
+    except (json.JSONDecodeError, UnicodeDecodeError, OSError) as exc:
+        raise DurableStateError(f"Durable state is unreadable: {path}") from exc
+
+    if not isinstance(data, expected_type):
+        raise DurableStateError(f"Durable state has an invalid structure: {path}")
+
+    return data
 
 
 def save_json(path: Path, data: Any, compact: bool = False) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    # ponytail: 잘못 디코딩된 첨부파일 텍스트의 서로게이트 문자가 UTF-8 인코딩을 깨뜨림
-    with tmp.open("w", encoding="utf-8", errors="replace") as f:
+    temporary_path = path.with_suffix(path.suffix + ".tmp")
+
+    with temporary_path.open("w", encoding="utf-8", errors="replace") as file:
         if compact:
-            json.dump(data, f, ensure_ascii=False, separators=(",", ":"))
+            json.dump(data, file, ensure_ascii=False, separators=(",", ":"))
         else:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-    tmp.replace(path)
+            json.dump(data, file, ensure_ascii=False, indent=2)
+
+    temporary_path.replace(path)
 
 
 def now_kst() -> datetime:
-    tz = ZoneInfo(os.getenv("TIMEZONE", "Asia/Seoul"))
-    return datetime.now(tz)
+    timezone = ZoneInfo(os.getenv("TIMEZONE", "Asia/Seoul"))
+    return datetime.now(timezone)
 
 
 def normalize_space(text: str | None) -> str:
@@ -65,15 +88,19 @@ def normalize_space(text: str | None) -> str:
 
 
 def truncate(text: str, limit: int = 500) -> str:
-    text = normalize_space(text)
-    return text if len(text) <= limit else text[: limit - 1] + "…"
+    normalized_text = normalize_space(text)
+    if len(normalized_text) <= limit:
+        return normalized_text
+    return normalized_text[: limit - 1] + "…"
 
 
 def unique_preserve_order(values: list[str]) -> list[str]:
     seen: set[str] = set()
-    out: list[str] = []
+    result: list[str] = []
+
     for value in values:
         if value and value not in seen:
-            out.append(value)
+            result.append(value)
             seen.add(value)
-    return out
+
+    return result

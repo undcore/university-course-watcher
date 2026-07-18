@@ -5,6 +5,7 @@ import logging
 import os
 import re
 import threading
+import zipfile
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urlparse
 
@@ -14,6 +15,7 @@ from urllib3.util.retry import Retry
 
 from .http_state import HttpStateCache
 from .hwp_parser import extract_hwp_text, extract_hwpx_text
+from .network_safety import SafeHttpSession, require_public_http_url
 from .utils import DATA_DIR
 
 try:
@@ -39,6 +41,9 @@ except ImportError:  # pragma: no cover
     Image = None
 
 LOGGER = logging.getLogger(__name__)
+MAX_ARCHIVE_UNCOMPRESSED_BYTES = 64_000_000
+MAX_ARCHIVE_ENTRY_BYTES = 16_000_000
+MAX_IMAGE_PIXELS = 40_000_000
 
 
 class AttachmentParser:
@@ -107,6 +112,7 @@ class AttachmentParser:
         if pytesseract is None or Image is None:
             return ""
 
+        require_public_http_url(url)
         session = self._session()
         response = session.get(url, timeout=(4, self.timeout), stream=True)
 
@@ -118,6 +124,11 @@ class AttachmentParser:
             return ""
 
         image = Image.open(io.BytesIO(content))
+
+        if image.width * image.height > MAX_IMAGE_PIXELS:
+            LOGGER.info("Image pixel count exceeds OCR safety limit: %s", url)
+            return ""
+
         image.load()
 
         if image.width < 300 or image.height < 150:
@@ -144,7 +155,7 @@ class AttachmentParser:
         session = getattr(self.thread_local, "session", None)
 
         if session is None:
-            session = requests.Session()
+            session = SafeHttpSession()
             session.headers.update({"User-Agent": "Mozilla/5.0 university-course-watcher/1.0"})
             retry = Retry(
                 total=2,
@@ -163,6 +174,7 @@ class AttachmentParser:
         return session
 
     def extract_text(self, url: str) -> str:
+        require_public_http_url(url)
         sSuffix = self._suffix(url)
         if sSuffix == ".zip":
             return ""
@@ -194,8 +206,12 @@ class AttachmentParser:
         if sSuffix == ".pdf" and PdfReader is not None:
             sExtractedText = self._pdf_text(data)
         elif sSuffix == ".docx" and Document is not None:
+            if not self._is_safe_zip_archive(bytesContent):
+                return ""
             sExtractedText = self._docx_text(data)
         elif sSuffix == ".xlsx" and load_workbook is not None:
+            if not self._is_safe_zip_archive(bytesContent):
+                return ""
             sExtractedText = self._xlsx_text(data)
         elif sSuffix == ".hwpx":
             sExtractedText = extract_hwpx_text(bytesContent)
@@ -204,6 +220,23 @@ class AttachmentParser:
 
         self.state_cache.update(url, response.headers, bytesContent, extracted_text=sExtractedText)
         return sExtractedText
+
+    def _is_safe_zip_archive(self, content: bytes) -> bool:
+        try:
+            with zipfile.ZipFile(io.BytesIO(content)) as archive:
+                total_size = 0
+
+                for entry in archive.infolist():
+                    if entry.file_size > MAX_ARCHIVE_ENTRY_BYTES:
+                        return False
+
+                    total_size += entry.file_size
+                    if total_size > MAX_ARCHIVE_UNCOMPRESSED_BYTES:
+                        return False
+        except (zipfile.BadZipFile, OSError):
+            return False
+
+        return True
 
     def _detect_suffix(self, url: str, response: requests.Response) -> str:
         sUrlSuffix = self._suffix(url)

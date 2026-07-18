@@ -17,7 +17,9 @@ from src.board_crawler import BoardCrawler, CrawledNotice, validate_crawl_health
 from src.classifier import classify
 from src.course_finder import CourseFinder
 from src.date_parser import parse_notice_dates, parse_notice_dates_from_sources
+from src.delivery_outbox import DeliveryOutbox
 from src.graduate_admission_watcher import GraduateAdmissionWatcher
+from src.git_state_publisher import GitStatePublisher
 from src.http_state import HttpStateCache
 from src.notifier import GraduateAdmissionNotifier, TelegramNotifier
 from src.recency import is_recent_notice, is_stale_notice, notice_max_age_days
@@ -26,6 +28,13 @@ from src.storage import Storage
 from src.utils import CONFIG_DIR, DATA_DIR, ensure_dirs, load_json, now_kst, setup_logging
 
 LOGGER = logging.getLogger(__name__)
+
+
+def build_delivery_outbox(filename: str) -> DeliveryOutbox:
+    repository_root = DATA_DIR.parent.parent
+    state_publisher = GitStatePublisher.from_actions_environment(repository_root)
+    publish_callback = state_publisher.publish if state_publisher is not None else None
+    return DeliveryOutbox(DATA_DIR / filename, state_publisher=publish_callback)
 
 
 def parse_args() -> argparse.Namespace:
@@ -221,12 +230,16 @@ def main() -> int:
         watcher = GraduateAdmissionWatcher(smoke_test=args.smoke_test)
         items = watcher.run(region=args.region, dry_run=args.dry_run)
         send_empty_summary = watcher.should_send_empty_summary(items, active_count, disabled_count)
-        notifier = GraduateAdmissionNotifier()
+        summary_fingerprint = watcher.storage.empty_summary_fingerprint(items, active_count, disabled_count)
+        notifier = GraduateAdmissionNotifier(
+            delivery_outbox=build_delivery_outbox("graduate_delivery_outbox.json")
+        )
         sent = notifier.send_candidates(
             items,
             dry_run=args.dry_run,
             send_empty_summary=send_empty_summary,
             on_sent=watcher.mark_sent if not args.dry_run else None,
+            summary_delivery_key=f"graduate-empty:{summary_fingerprint}",
         )
 
         if not args.dry_run:
@@ -391,11 +404,12 @@ def main() -> int:
     if not args.dry_run:
         storage.save_results([item for item in items if item.get("grade") != "D"], debug_items=items if debug else None)
         build_report(items)
-        notifier = TelegramNotifier()
+        notifier = TelegramNotifier(
+            delivery_outbox=build_delivery_outbox("course_delivery_outbox.json")
+        )
 
         def persist_sent_candidates(sent_batch: list[dict]) -> None:
-            storage.update_seen(sent_batch)
-            storage.update_notice_state(sent_batch)
+            storage.mark_notified(sent_batch)
 
         sent = notifier.send_candidates(
             items,

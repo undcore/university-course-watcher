@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import tempfile
 import unittest
 from datetime import date
 from pathlib import Path
@@ -11,6 +12,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.notifier import GraduateAdmissionNotifier, TelegramNotifier
+from src.delivery_outbox import DeliveryOutbox
 
 
 class TelegramNotifierTest(unittest.TestCase):
@@ -107,6 +109,37 @@ class TelegramNotifierTest(unittest.TestCase):
 
         self.assertEqual([], notifier.delivery_failures)
 
+    def test_confirmed_delivery_repairs_state_without_resending_after_callback_crash(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            outbox_path = Path(temp_dir) / "course_delivery_outbox.json"
+            item = {
+                "url": "https://example.com/recover",
+                "grade": "A",
+                "is_new": True,
+                "deadline_status": "open",
+                "notice_date": date.today().isoformat(),
+            }
+            first_notifier = TelegramNotifier(DeliveryOutbox(outbox_path))
+            first_notifier.token = "token"
+            first_notifier.chat_id = "chat"
+            first_notifier._send = Mock(return_value={"message_id": 42})
+            failed_persistence = Mock(side_effect=RuntimeError("state write interrupted"))
+
+            with self.assertRaisesRegex(RuntimeError, "state write interrupted"):
+                first_notifier.send_candidates([item], on_sent=failed_persistence)
+
+            repaired_persistence = Mock()
+            recovered_notifier = TelegramNotifier(DeliveryOutbox(outbox_path))
+            recovered_notifier.token = "token"
+            recovered_notifier.chat_id = "chat"
+            recovered_notifier._send = Mock()
+
+            sent_items = recovered_notifier.send_candidates([item], on_sent=repaired_persistence)
+
+            self.assertEqual([item], sent_items)
+            recovered_notifier._send.assert_not_called()
+            repaired_persistence.assert_called_once_with([item])
+
 
 class GraduateAdmissionNotifierTest(unittest.TestCase):
     def _portal_items(self, count: int) -> list[dict]:
@@ -122,6 +155,16 @@ class GraduateAdmissionNotifierTest(unittest.TestCase):
             }
             for index in range(0, count)
         ]
+
+    def _sorted_portal_items(
+        self,
+        notifier: GraduateAdmissionNotifier,
+        items: list[dict],
+    ) -> list[dict]:
+        return sorted(
+            items,
+            key=lambda item: notifier._candidate_delivery_key("graduate-portal", item),
+        )
 
     def test_unchanged_empty_summary_is_not_sent(self) -> None:
         notifier = GraduateAdmissionNotifier()
@@ -165,7 +208,8 @@ class GraduateAdmissionNotifierTest(unittest.TestCase):
 
         sent_items = notifier.send_candidates(items)
 
-        self.assertEqual(items[:25], sent_items)
+        expected_items = self._sorted_portal_items(notifier, items)
+        self.assertEqual(expected_items[:25], sent_items)
         self.assertEqual(["second batch failed"], notifier.delivery_failures)
         self.assertEqual(2, notifier._send.call_count)
 
@@ -178,7 +222,8 @@ class GraduateAdmissionNotifierTest(unittest.TestCase):
 
         sent_items = notifier.send_candidates(items)
 
-        self.assertEqual(items[25:], sent_items)
+        expected_items = self._sorted_portal_items(notifier, items)
+        self.assertEqual(expected_items[25:], sent_items)
         self.assertEqual(["first batch failed"], notifier.delivery_failures)
         self.assertEqual(2, notifier._send.call_count)
 
@@ -192,10 +237,101 @@ class GraduateAdmissionNotifierTest(unittest.TestCase):
 
         sent_items = notifier.send_candidates(items, on_sent=on_sent)
 
-        self.assertEqual(items, sent_items)
+        expected_items = self._sorted_portal_items(notifier, items)
+        self.assertEqual(expected_items, sent_items)
         self.assertEqual(2, on_sent.call_count)
-        self.assertEqual(items[:25], on_sent.call_args_list[0].args[0])
-        self.assertEqual(items[25:], on_sent.call_args_list[1].args[0])
+        self.assertEqual(expected_items[:25], on_sent.call_args_list[0].args[0])
+        self.assertEqual(expected_items[25:], on_sent.call_args_list[1].args[0])
+
+    def test_portal_delivery_key_ignores_volatile_notice_date(self) -> None:
+        notifier = GraduateAdmissionNotifier()
+        first_item = self._portal_items(1)[0]
+        second_item = dict(first_item)
+        second_item["notice_date"] = "2099-12-31"
+
+        first_key = notifier._candidate_delivery_key("graduate-portal", first_item)
+        second_key = notifier._candidate_delivery_key("graduate-portal", second_item)
+
+        self.assertEqual(first_key, second_key)
+
+    def test_portal_digest_batching_is_independent_of_source_order(self) -> None:
+        items = self._portal_items(30)
+        forward_notifier = GraduateAdmissionNotifier()
+        forward_notifier.token = "token"
+        forward_notifier.chat_id = "chat"
+        forward_notifier._deliver_once = Mock()
+        reverse_notifier = GraduateAdmissionNotifier()
+        reverse_notifier.token = "token"
+        reverse_notifier.chat_id = "chat"
+        reverse_notifier._deliver_once = Mock()
+
+        forward_notifier.send_candidates(items)
+        reverse_notifier.send_candidates(list(reversed(items)))
+
+        self.assertEqual(
+            forward_notifier._deliver_once.call_args_list,
+            reverse_notifier._deliver_once.call_args_list,
+        )
+
+    def test_confirmed_portal_digest_repairs_state_without_resending(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            outbox_path = Path(temp_dir) / "graduate_delivery_outbox.json"
+            items = self._portal_items(2)
+            first_notifier = GraduateAdmissionNotifier(DeliveryOutbox(outbox_path))
+            first_notifier.token = "token"
+            first_notifier.chat_id = "chat"
+            first_notifier._send = Mock(return_value={"message_id": 77})
+
+            with self.assertRaisesRegex(RuntimeError, "state write interrupted"):
+                first_notifier.send_candidates(
+                    items,
+                    on_sent=Mock(side_effect=RuntimeError("state write interrupted")),
+                )
+
+            recovered_items = [dict(item) for item in items]
+            repaired_persistence = Mock()
+            recovered_notifier = GraduateAdmissionNotifier(DeliveryOutbox(outbox_path))
+            recovered_notifier.token = "token"
+            recovered_notifier.chat_id = "chat"
+            recovered_notifier._send = Mock()
+
+            sent_items = recovered_notifier.send_candidates(
+                recovered_items,
+                on_sent=repaired_persistence,
+            )
+
+            self.assertEqual(recovered_items, sent_items)
+            recovered_notifier._send.assert_not_called()
+            repaired_persistence.assert_called_once_with(recovered_items)
+
+    def test_empty_summary_uses_stable_external_fingerprint(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            outbox_path = Path(temp_dir) / "graduate_delivery_outbox.json"
+            item = {
+                "url": "https://example.com/reference",
+                "grade": "C",
+                "is_new": False,
+                "checked_at": "2026-07-18T09:00:00+09:00",
+            }
+            first_notifier = GraduateAdmissionNotifier(DeliveryOutbox(outbox_path))
+            first_notifier.token = "token"
+            first_notifier.chat_id = "chat"
+            first_notifier._send = Mock(return_value={"message_id": 88})
+            first_notifier.send_candidates([item], summary_delivery_key="graduate-empty:stable")
+
+            recovered_item = dict(item, checked_at="2026-07-19T09:00:00+09:00")
+            recovered_notifier = GraduateAdmissionNotifier(DeliveryOutbox(outbox_path))
+            recovered_notifier.token = "token"
+            recovered_notifier.chat_id = "chat"
+            recovered_notifier._send = Mock()
+
+            recovered_notifier.send_candidates(
+                [recovered_item],
+                summary_delivery_key="graduate-empty:stable",
+            )
+
+            recovered_notifier._send.assert_not_called()
+            self.assertTrue(recovered_notifier.summary_sent)
 
     def test_failed_portal_digest_batch_can_be_retried_without_resending_successes(self) -> None:
         items = self._portal_items(30)
@@ -213,9 +349,12 @@ class GraduateAdmissionNotifierTest(unittest.TestCase):
         retry_notifier._send = Mock()
         retry_sent = retry_notifier.send_candidates(retry_items)
 
-        self.assertEqual(items[:25], first_sent)
-        self.assertEqual(items[25:], retry_items)
-        self.assertEqual(items[25:], retry_sent)
+        expected_items = self._sorted_portal_items(first_notifier, items)
+        self.assertEqual(expected_items[:25], first_sent)
+        expected_retry_urls = {item["url"] for item in expected_items[25:]}
+        actual_retry_urls = {item["url"] for item in retry_items}
+        self.assertEqual(expected_retry_urls, actual_retry_urls)
+        self.assertEqual(expected_items[25:], retry_sent)
         retry_notifier._send.assert_called_once()
 
 
