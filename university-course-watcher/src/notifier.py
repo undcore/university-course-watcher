@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+from collections.abc import Callable
 
 import requests
 
@@ -24,7 +25,12 @@ class TelegramNotifier:
         self.chat_id = os.getenv("TELEGRAM_CHAT_ID", "")
         self.delivery_failures: list[str] = []
 
-    def send_candidates(self, items: list[dict], dry_run: bool = False) -> list[dict]:
+    def send_candidates(
+        self,
+        items: list[dict],
+        dry_run: bool = False,
+        on_sent: Callable[[list[dict]], None] | None = None,
+    ) -> list[dict]:
         targets = [
             item for item in items
             if self._is_notifiable_change(item)
@@ -44,10 +50,14 @@ class TelegramNotifier:
         for item in targets:
             try:
                 self._send(self._candidate_message(item))
-                sent.append(item)
             except Exception as exc:
                 LOGGER.warning("Telegram candidate send failed: %s", exc)
                 self.delivery_failures.append(str(exc))
+                continue
+
+            sent.append(item)
+            if on_sent is not None:
+                on_sent([item])
 
         return sent
 
@@ -230,6 +240,7 @@ class GraduateAdmissionNotifier:
         items: list[dict],
         dry_run: bool = False,
         send_empty_summary: bool = True,
+        on_sent: Callable[[list[dict]], None] | None = None,
     ) -> list[dict]:
         targets = [
             item for item in items
@@ -262,18 +273,26 @@ class GraduateAdmissionNotifier:
         for item in board_targets:
             try:
                 self._send(self._message(item))
-                sent.append(item)
             except Exception as exc:
                 LOGGER.warning("Telegram send failed: %s", exc)
                 self.delivery_failures.append(str(exc))
+                continue
+
+            sent.append(item)
+            if on_sent is not None:
+                on_sent([item])
 
         for batch_items, message in self._portal_digest_batches(portal_targets):
             try:
                 self._send(message)
-                sent.extend(batch_items)
             except Exception as exc:
                 LOGGER.warning("Telegram portal digest send failed: %s", exc)
                 self.delivery_failures.append(str(exc))
+                continue
+
+            sent.extend(batch_items)
+            if on_sent is not None:
+                on_sent(batch_items)
 
         return sent
 

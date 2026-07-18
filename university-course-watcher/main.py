@@ -226,6 +226,7 @@ def main() -> int:
             items,
             dry_run=args.dry_run,
             send_empty_summary=send_empty_summary,
+            on_sent=watcher.mark_sent if not args.dry_run else None,
         )
 
         if not args.dry_run:
@@ -391,7 +392,16 @@ def main() -> int:
         storage.save_results([item for item in items if item.get("grade") != "D"], debug_items=items if debug else None)
         build_report(items)
         notifier = TelegramNotifier()
-        sent = notifier.send_candidates(items, dry_run=False)
+
+        def persist_sent_candidates(sent_batch: list[dict]) -> None:
+            storage.update_seen(sent_batch)
+            storage.update_notice_state(sent_batch)
+
+        sent = notifier.send_candidates(
+            items,
+            dry_run=False,
+            on_sent=persist_sent_candidates,
+        )
         lstSeenItems = items_to_mark_seen(items, sent)
         storage.update_seen(lstSeenItems)
         storage.update_notice_state(items_to_update_notice_state(state_items, sent))

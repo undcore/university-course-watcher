@@ -3,10 +3,6 @@ from __future__ import annotations
 import sys
 
 import requests
-from urllib3.exceptions import InsecureRequestWarning
-
-
-requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 
 def main() -> int:
@@ -15,7 +11,7 @@ def main() -> int:
 
     for sUrl in sys.argv[1:]:
         try:
-            response = session.get(sUrl, timeout=10, allow_redirects=True, verify=False)
+            response = session.get(sUrl, timeout=10, allow_redirects=True)
             sText = response.text[:20000]
             intHits = 0
 

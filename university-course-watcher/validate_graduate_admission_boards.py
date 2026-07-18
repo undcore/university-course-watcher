@@ -4,14 +4,10 @@ import json
 from pathlib import Path
 
 import requests
-from urllib3.exceptions import InsecureRequestWarning
 
 
 CONFIG_PATH = Path("config") / "graduate_admission_boards.json"
 KEYWORDS = ["대학원", "입학", "모집", "전형", "공지"]
-
-requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
-
 
 def main() -> int:
     session = requests.Session()
@@ -31,7 +27,7 @@ def main() -> int:
             continue
 
         try:
-            response = session.get(sUrl, timeout=10, allow_redirects=True, verify=False)
+            response = session.get(sUrl, timeout=10, allow_redirects=True)
             sText = response.text[:20000]
             intKeywordHits = 0
 

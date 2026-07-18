@@ -23,6 +23,11 @@ GRADUATE_ADMISSION_FIELDS = [
     "grade", "matched_keywords", "reason", "attachment_urls", "is_new"
 ]
 
+HISTORY_FIELDS = [
+    "university_name", "region", "semester", "notice_date", "application_start_date",
+    "application_end_date", "url", "title", "source",
+]
+
 
 class Storage:
     def __init__(self, data_dir: Path = DATA_DIR):
@@ -133,10 +138,7 @@ class Storage:
             if not path.exists():
                 with path.open("w", encoding="utf-8-sig", newline="") as f:
                     writer = csv.writer(f)
-                    writer.writerow(RESULT_FIELDS if path == self.results_csv else [
-                        "university_name", "region", "semester", "notice_date", "application_start_date",
-                        "application_end_date", "url", "title", "source"
-                    ])
+                    writer.writerow(RESULT_FIELDS if path == self.results_csv else HISTORY_FIELDS)
         for path, default in [
             (self.results_json, []),
             (self.seen_path, []),
@@ -158,12 +160,14 @@ class Storage:
         return out
 
     def _save_history(self, items: list[dict]) -> None:
-        rows = []
+        existing_rows = self._load_history()
+        current_rows = []
+
         for item in items:
             if item.get("registration_score", 0) < 40:
                 continue
             semester = "2학기" if "2학기" in item.get("title", "") else "1학기" if "1학기" in item.get("title", "") else ""
-            rows.append({
+            current_rows.append({
                 "university_name": item.get("university_name", ""),
                 "region": item.get("region", ""),
                 "semester": semester,
@@ -174,16 +178,40 @@ class Storage:
                 "title": item.get("title", ""),
                 "source": item.get("source_type", ""),
             })
-        if rows:
-            unique_rows = []
-            seen = set()
-            for row in rows:
-                key = (row["url"], row["title"])
-                if key in seen:
-                    continue
-                seen.add(key)
-                unique_rows.append(row)
-            self._write_csv(self.history_csv, list(unique_rows[0].keys()), unique_rows)
+
+        merged_rows: dict[tuple[str, ...], dict] = {}
+        for row in sorted(existing_rows, key=self._history_row_sort_key):
+            merged_rows[self._history_key(row)] = row
+        for row in sorted(current_rows, key=self._history_row_sort_key):
+            merged_rows[self._history_key(row)] = row
+
+        rows = sorted(merged_rows.values(), key=self._history_row_sort_key)
+        self._write_csv(self.history_csv, HISTORY_FIELDS, rows)
+
+    def _load_history(self) -> list[dict]:
+        if not self.history_csv.exists():
+            return []
+
+        with self.history_csv.open("r", encoding="utf-8-sig", newline="") as file:
+            reader = csv.DictReader(file)
+            return [
+                {field: row.get(field, "") or "" for field in HISTORY_FIELDS}
+                for row in reader
+            ]
+
+    def _history_key(self, row: dict) -> tuple[str, ...]:
+        url = str(row.get("url", "")).strip()
+        title = str(row.get("title", "")).strip()
+        university_name = str(row.get("university_name", "")).strip()
+
+        if url:
+            return ("url", url)
+        if title:
+            return ("title", university_name, title)
+        return ("row", *(str(row.get(field, "")) for field in HISTORY_FIELDS))
+
+    def _history_row_sort_key(self, row: dict) -> tuple[str, ...]:
+        return tuple(str(row.get(field, "")) for field in HISTORY_FIELDS)
 
     def _title_key(self, item: dict) -> str:
         raw = f"{item.get('university_name')}::{item.get('title')}"

@@ -13,11 +13,7 @@ from urllib.parse import parse_qs, unquote, urlencode, urljoin, urlparse, urlunp
 import requests
 from bs4 import BeautifulSoup
 from requests.adapters import HTTPAdapter
-from requests.exceptions import SSLError
-from urllib3.exceptions import InsecureRequestWarning
 from urllib3.util.retry import Retry
-
-requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 from .http_state import HttpStateCache
 from .utils import DATA_DIR, normalize_space, now_kst
@@ -388,11 +384,7 @@ class BoardCrawler:
         session = self._session()
 
         with self._host_semaphore(url):
-            try:
-                response = session.get(url, headers=dictHeaders, timeout=(4, self.timeout))
-            except SSLError:
-                LOGGER.info("SSL verification failed; retrying without verification: %s", url)
-                response = session.get(url, headers=dictHeaders, timeout=(4, self.timeout), verify=False)
+            response = session.get(url, headers=dictHeaders, timeout=(4, self.timeout))
 
             if response.status_code == 304:
                 sCachedHtml = self.state_cache.cached_value(url, "html")
