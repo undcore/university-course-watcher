@@ -126,7 +126,7 @@ CSV/JSON 주요 필드는 `checked_at`, `university_name`, `region`, `city`, `ti
 
 ## GitHub Actions
 
-`.github/workflows/daily-check.yml`은 매일 00:00 UTC에 실행됩니다. 이는 한국시간 오전 9시입니다.
+`.github/workflows/daily-check.yml`은 한국시간 월요일부터 금요일까지 오전 9시와 오후 7시에 실행됩니다. 코드 push는 감시 워크플로를 시작하지 않으며, 주말에는 사용자가 직접 요청한 수동 실행만 허용합니다.
 
 GitHub 저장소 Settings → Secrets and variables → Actions에서 다음 Secrets를 설정합니다.
 
@@ -137,7 +137,7 @@ GitHub 저장소 Settings → Secrets and variables → Actions에서 다음 Sec
 
 정기 실행 후 텔레그램 일일 점검 보고의 `보고서 확인`에 바로보기 링크가 포함됩니다. 보통은 이 링크를 열면 되고, zip artifact를 직접 받을 필요는 없습니다.
 
-`report.html`은 GitHub Actions의 정기 실행(`schedule`) 또는 수동 실행(`workflow_dispatch`, `telegram_test=none`) 결과에서 확인합니다. 코드 push로 자동 실행되는 smoke-test는 `--dry-run`으로만 동작하므로 실제 결과 artifact를 업로드하지 않습니다.
+`report.html`은 GitHub Actions의 정기 실행(`schedule`) 또는 수동 실행(`workflow_dispatch`, `telegram_test=none`) 결과에서 확인합니다.
 
 artifact로 직접 확인해야 할 때의 경로:
 
@@ -146,7 +146,7 @@ artifact로 직접 확인해야 할 때의 경로:
 3. 화면 하단 `Artifacts`에서 `university-course-watcher-results`를 다운로드합니다.
 4. 압축을 풀고 `report.html`을 엽니다.
 
-기본 실행 주기는 하루 1회입니다. 모집철에는 수동으로 cron을 늘릴 수 있습니다.
+기본 실행 주기는 평일 하루 2회입니다. 예약 실행이 지연되더라도 실제 시작 시점의 한국 요일이 토요일 또는 일요일이면 감시 작업을 건너뜁니다.
 
 - 5월~8월: 하루 2회
 - 9월~11월: 하루 2회
@@ -179,4 +179,4 @@ python validate_graduate_admission_boards.py
 
 일부 학교는 공지 게시판이 아니라 상시 입학안내 페이지에 모집요강 PDF를 직접 게시합니다. 이런 경우 `graduate_admission_boards.json`에 `"scan_page": true`를 추가하면 해당 페이지 본문과 첨부 링크까지 직접 검사합니다. URL 상태는 `validate_graduate_admission_boards.py`로 확인하며, `status`가 200이어도 `keyword_hits`가 0이거나 `final_url`이 error/login/SSO 페이지면 설정 보정이 필요합니다.
 
-GitHub Actions는 한국시간 오전 9시와 오후 7시에 실행되도록 `0 0 * * *`, `0 10 * * *` UTC cron을 사용합니다. `data/seen_graduate_admission_urls.json`은 Actions cache로 복원/저장하여 같은 공고를 반복 알림하지 않도록 했습니다.
+GitHub Actions는 한국시간 월요일부터 금요일까지 오전 9시와 오후 7시에 실행되도록 `0 0 * * 1-5`, `0 10 * * 1-5` UTC cron을 사용합니다. `data/seen_graduate_admission_urls.json`은 Actions cache로 복원/저장하여 같은 공고를 반복 알림하지 않도록 했습니다.
