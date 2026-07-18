@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import sys
 import tempfile
 import unittest
@@ -85,6 +86,91 @@ class CourseStorageChangeTest(unittest.TestCase):
             storage.mark_changes([changed])
 
             self.assertEqual("unchanged", changed["change_type"])
+
+
+class CourseStorageHistoryTest(unittest.TestCase):
+    def _item(self, url: str, title: str, **changes: object) -> dict:
+        item = {
+            "university_name": "테스트대학교",
+            "region": "서울",
+            "title": title,
+            "url": url,
+            "notice_date": "2026-07-18",
+            "application_start_date": "2026-07-20",
+            "application_end_date": "2026-07-25",
+            "source_type": "board",
+            "registration_score": 80,
+            "grade": "A",
+        }
+        item.update(changes)
+        return item
+
+    def _read_history(self, storage: Storage) -> list[dict]:
+        with storage.history_csv.open("r", encoding="utf-8-sig", newline="") as file:
+            return list(csv.DictReader(file))
+
+    def test_history_accumulates_across_runs(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            storage = Storage(Path(directory))
+            first = self._item("https://example.com/first", "2026학년도 1학기 모집")
+            second = self._item("https://example.com/second", "2026학년도 2학기 모집")
+
+            storage.save_results([first])
+            storage.save_results([second])
+
+            rows = self._read_history(storage)
+            self.assertEqual(2, len(rows))
+            self.assertEqual(
+                ["https://example.com/first", "https://example.com/second"],
+                [row["url"] for row in rows],
+            )
+
+    def test_existing_url_is_updated_instead_of_duplicated(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            storage = Storage(Path(directory))
+            original = self._item("https://example.com/course", "기존 제목")
+            updated = self._item(
+                "https://example.com/course",
+                "수정된 제목",
+                application_end_date="2026-07-31",
+            )
+
+            storage.save_results([original])
+            storage.save_results([updated])
+
+            rows = self._read_history(storage)
+            self.assertEqual(1, len(rows))
+            self.assertEqual("수정된 제목", rows[0]["title"])
+            self.assertEqual("2026-07-31", rows[0]["application_end_date"])
+
+    def test_title_key_updates_url_less_history_and_empty_run_preserves_it(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            storage = Storage(Path(directory))
+            original = self._item("", "URL 없는 공고", region="서울")
+            updated = self._item("", "URL 없는 공고", region="경기")
+
+            storage.save_results([original])
+            storage.save_results([updated])
+            storage.save_results([])
+
+            rows = self._read_history(storage)
+            self.assertEqual(1, len(rows))
+            self.assertEqual("경기", rows[0]["region"])
+
+    def test_history_serialization_is_deterministic(self) -> None:
+        with tempfile.TemporaryDirectory() as first_directory, tempfile.TemporaryDirectory() as second_directory:
+            first_storage = Storage(Path(first_directory))
+            second_storage = Storage(Path(second_directory))
+            alpha = self._item("https://example.com/a", "A 공고")
+            beta = self._item("https://example.com/b", "B 공고")
+
+            first_storage.save_results([beta, alpha, beta])
+            second_storage.save_results([alpha, beta])
+
+            self.assertEqual(
+                first_storage.history_csv.read_bytes(),
+                second_storage.history_csv.read_bytes(),
+            )
 
 
 class GraduateAdmissionStorageTest(unittest.TestCase):

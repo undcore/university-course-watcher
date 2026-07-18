@@ -4,7 +4,6 @@ from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
-from requests.exceptions import SSLError
 
 from .utils import normalize_space, truncate, unique_preserve_order
 
@@ -93,7 +92,4 @@ class CourseFinder:
         return unique_preserve_order([name for name in candidates if name in text])
 
     def _get(self, url: str) -> requests.Response:
-        try:
-            return self.session.get(url, timeout=self.timeout)
-        except SSLError:
-            return self.session.get(url, timeout=self.timeout, verify=False)
+        return self.session.get(url, timeout=self.timeout)

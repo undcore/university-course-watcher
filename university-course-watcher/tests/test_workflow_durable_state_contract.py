@@ -27,7 +27,8 @@ class WorkflowDurableStateContractTest(unittest.TestCase):
     def setUp(self) -> None:
         self.workflow_text = WORKFLOW_PATH.read_text(encoding="utf-8")
         self.cache_blocks = re.findall(
-            r"uses: actions/cache@v5\n(?P<block>(?:\s{8,}.*\n)+)",
+            r"uses: actions/cache@[^\s]+(?:\s+#\s+v[^\s]+)?\n"
+            r"(?P<block>(?:\s{8,}.*\n)+)",
             self.workflow_text,
         )
 
@@ -43,6 +44,11 @@ class WorkflowDurableStateContractTest(unittest.TestCase):
     def test_course_state_is_uploaded_and_committed_with_course_results(self) -> None:
         for state_path in DURABLE_COURSE_STATE:
             self.assertGreaterEqual(self.workflow_text.count(state_path), 3)
+
+        self.assertGreaterEqual(
+            self.workflow_text.count("university-course-watcher/data/university_history.csv"),
+            3,
+        )
 
     def test_graduate_state_is_uploaded_and_committed_with_results(self) -> None:
         for state_path in DURABLE_GRADUATE_STATE:

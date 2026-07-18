@@ -8,6 +8,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
+from requests.exceptions import SSLError
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -103,6 +105,40 @@ class AttachmentParserTest(unittest.TestCase):
 
         self.assertEqual("", texts["https://example.com/bad.jpg"])
         self.assertEqual("접수기간", texts["https://example.com/good.jpg"])
+
+    def test_attachment_ssl_verification_failure_is_not_retried_insecurely(self) -> None:
+        sUrl = "https://example.com/schedule.pdf"
+        session = Mock()
+        session.get.side_effect = SSLError("certificate verify failed")
+        self.parser._session = Mock(return_value=session)
+
+        with self.assertRaisesRegex(SSLError, "certificate verify failed"):
+            self.parser.extract_text(sUrl)
+
+        session.get.assert_called_once_with(
+            sUrl,
+            headers={},
+            timeout=(4, self.parser.timeout),
+            stream=True,
+        )
+
+    def test_image_ssl_verification_failure_is_not_retried_insecurely(self) -> None:
+        sUrl = "https://example.com/schedule.jpg"
+        session = Mock()
+        session.get.side_effect = SSLError("certificate verify failed")
+        self.parser._session = Mock(return_value=session)
+
+        with patch("src.attachment_parser.pytesseract", Mock()), patch(
+            "src.attachment_parser.Image",
+            Mock(),
+        ), self.assertRaisesRegex(SSLError, "certificate verify failed"):
+            self.parser.extract_image_text(sUrl)
+
+        session.get.assert_called_once_with(
+            sUrl,
+            timeout=(4, self.parser.timeout),
+            stream=True,
+        )
 
 
 if __name__ == "__main__":

@@ -83,7 +83,7 @@ python main.py --debug
 - `data/notice_state.json`
 - `data/seen_graduate_admission_urls.json`
 - `data/graduate_admission_summary_state.json`
-- `data/university_history.csv`
+- `data/university_history.csv` (실행 간 누적되며, 같은 URL 또는 URL이 없는 경우 같은 대학명·제목의 기록은 최신 값으로 갱신)
 - `data/debug_results.json`
 
 CSV/JSON 주요 필드는 `checked_at`, `university_name`, `region`, `city`, `title`, `url`, `notice_date`, `application_start_date`, `application_end_date`, `deadline_status`, `registration_score`, `external_score`, `computer_score`, `freshness_score`, `grade`, `external_applicant_status`, `computer_course_status`, `possible_departments`, `possible_computer_courses`, `attachment_urls`, `matched_keywords`, `reason`, `is_new`입니다.
@@ -136,7 +136,7 @@ GitHub 저장소 Settings → Secrets and variables → Actions에서 다음 Sec
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_CHAT_ID`
 
-워크플로 실행 결과로 `data/report.html`, `data/results.csv`, `data/results.json`이 저장소에 최신 파일로 커밋되고 artifact에도 업로드됩니다.
+워크플로 실행 결과로 `data/report.html`, `data/results.csv`, `data/results.json`, `data/university_history.csv`가 저장소에 커밋되고 artifact에도 업로드됩니다. `university_history.csv`는 과거 기록을 보존하는 누적 파일입니다.
 
 정기 실행 후 텔레그램 일일 점검 보고의 `보고서 확인`에 바로보기 링크가 포함됩니다. 보통은 이 링크를 열면 되고, zip artifact를 직접 받을 필요는 없습니다.
 

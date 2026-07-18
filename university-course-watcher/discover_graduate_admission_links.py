@@ -6,14 +6,10 @@ from urllib.parse import urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
-from urllib3.exceptions import InsecureRequestWarning
 
 
 CONFIG_PATH = Path("config") / "graduate_admission_boards.json"
 MATCH_WORDS = ["입학", "모집", "전형", "공지", "notice", "admission", "board"]
-
-requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
-
 
 def main() -> int:
     session = requests.Session()
@@ -59,7 +55,7 @@ def main() -> int:
 
 def _fetch(session: requests.Session, sUrl: str):
     try:
-        return session.get(sUrl, timeout=10, allow_redirects=True, verify=False)
+        return session.get(sUrl, timeout=10, allow_redirects=True)
     except Exception as exc:
         print(f"  fetch failed: {type(exc).__name__}: {exc}")
         return None

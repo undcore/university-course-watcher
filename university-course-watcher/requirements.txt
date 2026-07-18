@@ -1,3 +1,6 @@
+# Direct dependency inputs for requirements.lock.
+# Regenerate the deploy lock for Python 3.11 with:
+# uv pip compile requirements.txt --python-version 3.11 --generate-hashes --output-file requirements.lock
 requests
 beautifulsoup4
 python-dotenv

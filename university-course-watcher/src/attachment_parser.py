@@ -10,7 +10,6 @@ from urllib.parse import urlparse
 
 import requests
 from requests.adapters import HTTPAdapter
-from requests.exceptions import SSLError
 from urllib3.util.retry import Retry
 
 from .http_state import HttpStateCache
@@ -109,11 +108,7 @@ class AttachmentParser:
             return ""
 
         session = self._session()
-
-        try:
-            response = session.get(url, timeout=(4, self.timeout), stream=True)
-        except SSLError:
-            response = session.get(url, timeout=(4, self.timeout), stream=True, verify=False)
+        response = session.get(url, timeout=(4, self.timeout), stream=True)
 
         response.raise_for_status()
         content = response.raw.read(self.max_bytes + 1, decode_content=True)
@@ -174,11 +169,7 @@ class AttachmentParser:
 
         session = self._session()
         dictHeaders = self.state_cache.conditional_headers(url)
-
-        try:
-            response = session.get(url, headers=dictHeaders, timeout=(4, self.timeout), stream=True)
-        except SSLError:
-            response = session.get(url, headers=dictHeaders, timeout=(4, self.timeout), stream=True, verify=False)
+        response = session.get(url, headers=dictHeaders, timeout=(4, self.timeout), stream=True)
 
         if response.status_code == 304:
             return self.state_cache.cached_value(url, "extracted_text")

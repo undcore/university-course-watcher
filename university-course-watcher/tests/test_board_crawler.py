@@ -6,6 +6,7 @@ from pathlib import Path
 from unittest.mock import Mock
 
 from bs4 import BeautifulSoup
+from requests.exceptions import SSLError
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -250,6 +251,20 @@ class BoardCrawlerLinkTest(unittest.TestCase):
 
         self.assertEqual(1, self.crawler.last_stats["details_failed"])
         self.assertIn("All 1 detail pages failed", self.crawler.last_error)
+
+    def test_ssl_verification_failure_is_not_retried_insecurely(self) -> None:
+        session = Mock()
+        session.get.side_effect = SSLError("certificate verify failed")
+        self.crawler._session = Mock(return_value=session)
+
+        with self.assertRaisesRegex(SSLError, "certificate verify failed"):
+            self.crawler._get_text(self.sBaseUrl)
+
+        session.get.assert_called_once_with(
+            self.sBaseUrl,
+            headers={},
+            timeout=(4, self.crawler.timeout),
+        )
 
     def test_parallel_board_results_preserve_order_and_merge_stats(self) -> None:
         lstBoards = [

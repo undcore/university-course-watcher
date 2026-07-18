@@ -69,6 +69,44 @@ class TelegramNotifierTest(unittest.TestCase):
         self.assertEqual([item], sent_items)
         notifier._send.assert_called_once()
 
+    def test_successful_candidate_is_persisted_immediately(self) -> None:
+        notifier = TelegramNotifier()
+        notifier.token = "token"
+        notifier.chat_id = "chat"
+        notifier._send = Mock()
+        on_sent = Mock()
+        item = {
+            "url": "https://example.com/new",
+            "grade": "A",
+            "is_new": True,
+            "deadline_status": "open",
+            "notice_date": date.today().isoformat(),
+        }
+
+        sent_items = notifier.send_candidates([item], on_sent=on_sent)
+
+        self.assertEqual([item], sent_items)
+        on_sent.assert_called_once_with([item])
+
+    def test_persistence_failure_is_not_recorded_as_delivery_failure(self) -> None:
+        notifier = TelegramNotifier()
+        notifier.token = "token"
+        notifier.chat_id = "chat"
+        notifier._send = Mock()
+        on_sent = Mock(side_effect=RuntimeError("state write failed"))
+        item = {
+            "url": "https://example.com/new",
+            "grade": "A",
+            "is_new": True,
+            "deadline_status": "open",
+            "notice_date": date.today().isoformat(),
+        }
+
+        with self.assertRaisesRegex(RuntimeError, "state write failed"):
+            notifier.send_candidates([item], on_sent=on_sent)
+
+        self.assertEqual([], notifier.delivery_failures)
+
 
 class GraduateAdmissionNotifierTest(unittest.TestCase):
     def _portal_items(self, count: int) -> list[dict]:
@@ -143,6 +181,21 @@ class GraduateAdmissionNotifierTest(unittest.TestCase):
         self.assertEqual(items[25:], sent_items)
         self.assertEqual(["first batch failed"], notifier.delivery_failures)
         self.assertEqual(2, notifier._send.call_count)
+
+    def test_successful_portal_batches_are_persisted_individually(self) -> None:
+        notifier = GraduateAdmissionNotifier()
+        notifier.token = "token"
+        notifier.chat_id = "chat"
+        notifier._send = Mock()
+        on_sent = Mock()
+        items = self._portal_items(30)
+
+        sent_items = notifier.send_candidates(items, on_sent=on_sent)
+
+        self.assertEqual(items, sent_items)
+        self.assertEqual(2, on_sent.call_count)
+        self.assertEqual(items[:25], on_sent.call_args_list[0].args[0])
+        self.assertEqual(items[25:], on_sent.call_args_list[1].args[0])
 
     def test_failed_portal_digest_batch_can_be_retried_without_resending_successes(self) -> None:
         items = self._portal_items(30)
