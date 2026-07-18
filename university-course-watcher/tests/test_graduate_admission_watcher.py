@@ -3,11 +3,13 @@ from __future__ import annotations
 import sys
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from src.board_crawler import CrawledNotice, CrawlHealthError
 from src.graduate_admission_watcher import GraduateAdmissionWatcher
 
 
@@ -39,6 +41,34 @@ class GraduateAdmissionClassificationTest(unittest.TestCase):
                     "일반대학원 모집요강 원서접수 입학전형",
                 )
                 self.assertEqual("D", grade)
+
+    def test_unhealthy_board_crawl_is_rejected(self) -> None:
+        self.watcher.crawler = SimpleNamespace(
+            last_stats={"boards_succeeded": 0, "boards_failed": 2}
+        )
+
+        with self.assertRaises(CrawlHealthError):
+            self.watcher._trusted_board_notices([])
+
+    def test_failed_detail_is_excluded_from_graduate_results(self) -> None:
+        successful = CrawledNotice("A", "board", "ok", "https://example.com/ok", "", "body", [])
+        failed = CrawledNotice(
+            "B",
+            "board",
+            "failed",
+            "https://example.com/failed",
+            "",
+            "",
+            [],
+            detail_succeeded=False,
+        )
+        self.watcher.crawler = SimpleNamespace(
+            last_stats={"boards_succeeded": 2, "boards_failed": 0}
+        )
+
+        trusted = self.watcher._trusted_board_notices([successful, failed])
+
+        self.assertEqual([successful], trusted)
 
 
 if __name__ == "__main__":

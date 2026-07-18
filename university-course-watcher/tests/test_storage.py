@@ -55,6 +55,37 @@ class CourseStorageChangeTest(unittest.TestCase):
 
             self.assertEqual("unchanged", item["change_type"])
 
+    def test_notice_state_preserves_temporarily_unobserved_items(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            storage = Storage(Path(directory))
+            first = self._item()
+            first["url"] = "https://example.com/first"
+            second = self._item(fingerprint="fingerprint-2")
+            second["url"] = "https://example.com/second"
+            storage.update_notice_state([first, second])
+
+            refreshed_first = self._item(fingerprint="fingerprint-3")
+            refreshed_first["url"] = first["url"]
+            storage.update_notice_state([refreshed_first])
+
+            recovered_second = self._item(fingerprint="fingerprint-2")
+            recovered_second["url"] = second["url"]
+            storage.mark_changes([recovered_second])
+
+            self.assertEqual("unchanged", recovered_second["change_type"])
+
+    def test_notice_state_merge_updates_observed_item(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            storage = Storage(Path(directory))
+            original = self._item()
+            storage.update_notice_state([original])
+
+            changed = self._item(fingerprint="fingerprint-2")
+            storage.update_notice_state([changed])
+            storage.mark_changes([changed])
+
+            self.assertEqual("unchanged", changed["change_type"])
+
 
 class GraduateAdmissionStorageTest(unittest.TestCase):
     def _item(self, **changes: object) -> dict:

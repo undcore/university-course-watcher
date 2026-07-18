@@ -13,7 +13,7 @@ except ImportError:  # pragma: no cover - dependency is still listed for normal 
         return None
 
 from src.attachment_parser import AttachmentParser
-from src.board_crawler import BoardCrawler
+from src.board_crawler import BoardCrawler, CrawledNotice, validate_crawl_health
 from src.classifier import classify
 from src.course_finder import CourseFinder
 from src.date_parser import parse_notice_dates, parse_notice_dates_from_sources
@@ -66,14 +66,25 @@ def build_content_fingerprint(parts: list[str]) -> str:
     return hashlib.sha256(fingerprint_bytes).hexdigest()
 
 
+def trusted_crawled_notices(notices: list[CrawledNotice], stats: dict) -> list[CrawledNotice]:
+    validate_crawl_health(stats)
+    return [notice for notice in notices if notice.detail_succeeded]
+
+
+def is_course_candidate_target(item: dict) -> bool:
+    return (
+        is_changed_candidate(item)
+        and item.get("grade") in {"A", "B"}
+        and item.get("deadline_status") != "마감됨"
+        and is_recent_notice(item)
+    )
+
+
 def count_candidate_targets(items: list[dict]) -> int:
     count = 0
 
     for item in items:
-        grade = item.get("grade")
-        deadline_status = item.get("deadline_status")
-
-        if is_changed_candidate(item) and grade in {"A", "B"} and deadline_status != "마감됨" and is_recent_notice(item):
+        if is_course_candidate_target(item):
             count += 1
 
     return count
@@ -137,6 +148,21 @@ def items_to_mark_seen(items: list[dict], sent_items: list[dict]) -> list[dict]:
         setSeenUrls.add(sUrl)
 
     return lstSeenItems
+
+
+def items_to_update_notice_state(items: list[dict], sent_items: list[dict]) -> list[dict]:
+    sent_urls = {item.get("url", "") for item in sent_items}
+    state_items: list[dict] = []
+
+    for item in items:
+        item_url = item.get("url", "")
+
+        if is_course_candidate_target(item) and item_url not in sent_urls:
+            continue
+
+        state_items.append(item)
+
+    return state_items
 
 
 def normalize_weak_candidate(item: dict) -> dict:
@@ -241,6 +267,7 @@ def main() -> int:
     attachment_parser = AttachmentParser(state_cache=httpState)
     course_finder = CourseFinder(keywords)
     crawled = crawler.crawl_boards(boards, university_map, keyword_hint=args.keyword)
+    crawled = trusted_crawled_notices(crawled, crawler.last_stats)
     crawled_count = len(crawled)
 
     checked_at = now_kst().isoformat(timespec="seconds")
@@ -367,6 +394,7 @@ def main() -> int:
         sent = notifier.send_candidates(items, dry_run=False)
         lstSeenItems = items_to_mark_seen(items, sent)
         storage.update_seen(lstSeenItems)
+        storage.update_notice_state(items_to_update_notice_state(state_items, sent))
         summary = {
             "checked_at": checked_at,
             "university_count": university_count,
@@ -397,7 +425,6 @@ def main() -> int:
         if notifier.delivery_failures:
             raise RuntimeError(f"Telegram delivery failed {len(notifier.delivery_failures)} time(s).")
 
-        storage.update_notice_state(state_items)
     else:
         for item in items:
             if item.get("grade") != "D" or debug:

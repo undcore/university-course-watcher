@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.board_crawler import BoardCrawler
+from src.board_crawler import BoardCrawler, CrawlHealthError, validate_crawl_health
 from src.utils import now_kst
 
 
@@ -292,6 +292,29 @@ class BoardCrawlerLinkTest(unittest.TestCase):
         self.assertEqual(1, self.crawler.last_stats["boards_failed"])
         self.assertEqual(1, self.crawler.last_stats["details_failed"])
         self.assertIn("All 1 detail pages failed", self.crawler.last_stats["failed_boards"][0]["error"])
+        self.assertFalse(lstNotices[0].detail_succeeded)
+
+    def test_crawl_health_rejects_total_failure(self) -> None:
+        stats = {"boards_succeeded": 0, "boards_failed": 3}
+
+        with self.assertRaisesRegex(CrawlHealthError, "All 3 attempted boards failed"):
+            validate_crawl_health(stats)
+
+    def test_crawl_health_rejects_run_without_successful_majority(self) -> None:
+        stats = {"boards_succeeded": 2, "boards_failed": 2}
+
+        with self.assertRaisesRegex(CrawlHealthError, "safe majority threshold"):
+            validate_crawl_health(stats)
+
+    def test_crawl_health_allows_isolated_partial_failure(self) -> None:
+        stats = {"boards_succeeded": 3, "boards_failed": 1}
+
+        validate_crawl_health(stats)
+
+    def test_crawl_health_ignores_all_skipped_configuration(self) -> None:
+        stats = {"boards_succeeded": 0, "boards_failed": 0, "boards_skipped": 4}
+
+        validate_crawl_health(stats)
 
     def test_seen_and_stale_candidates_are_skipped_before_fetch(self) -> None:
         crawler = BoardCrawler(skip_urls={"https://example.com/seen"}, max_notice_age_days=7)

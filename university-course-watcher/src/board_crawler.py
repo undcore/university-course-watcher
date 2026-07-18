@@ -30,6 +30,37 @@ DETAIL_WORKER_CAP = 12
 PER_HOST_CONCURRENCY = 2
 
 
+class CrawlHealthError(RuntimeError):
+    """Raised when crawl coverage is too low to trust an empty/partial result."""
+
+
+def validate_crawl_health(stats: dict) -> None:
+    """Reject untrustworthy runs while allowing isolated board failures.
+
+    Skipped boards are configuration decisions, not network attempts.  Among
+    attempted boards, a run is unhealthy when none succeeded or when failures
+    are at least half of all attempts.  A strict successful majority therefore
+    remains usable as a partial crawl.
+    """
+    succeeded_count = int(stats.get("boards_succeeded", 0))
+    failed_count = int(stats.get("boards_failed", 0))
+    attempted_count = succeeded_count + failed_count
+
+    if attempted_count == 0:
+        return
+
+    if succeeded_count == 0:
+        raise CrawlHealthError(
+            f"All {attempted_count} attempted boards failed; crawl results are unusable."
+        )
+
+    if failed_count >= succeeded_count:
+        raise CrawlHealthError(
+            "Crawl coverage is below the safe majority threshold: "
+            f"{succeeded_count} succeeded, {failed_count} failed."
+        )
+
+
 @dataclass
 class CrawledNotice:
     university_name: str
@@ -40,6 +71,7 @@ class CrawledNotice:
     body_text: str
     attachment_urls: list[str]
     image_urls: list[str] = field(default_factory=list)
+    detail_succeeded: bool = True
 
 
 class BoardCrawler:
@@ -184,6 +216,7 @@ class BoardCrawler:
 
         for (iBoardIndex, dictBoard, _), (notice, bSucceeded, sDetailError) in zip(lstDetailJobs, lstDetailResults):
             self.last_stats["details_total"] += 1
+            notice.detail_succeeded = bSucceeded
 
             if bSucceeded:
                 dictBoardSuccessCounts[iBoardIndex] = dictBoardSuccessCounts.get(iBoardIndex, 0) + 1
@@ -234,6 +267,7 @@ class BoardCrawler:
         for tupleCandidate in candidates:
             self.last_stats["details_total"] += 1
             notice, bSucceeded, sDetailError = self._fetch_detail(board, *tupleCandidate)
+            notice.detail_succeeded = bSucceeded
 
             if bSucceeded:
                 iDetailSuccessCount += 1
@@ -332,6 +366,7 @@ class BoardCrawler:
             body_text=body_text,
             attachment_urls=attachments,
             image_urls=images,
+            detail_succeeded=bSucceeded,
         )
         return notice, bSucceeded, sDetailError
 

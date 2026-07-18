@@ -13,10 +13,13 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from main import (
     build_content_fingerprint,
     items_to_mark_seen,
+    items_to_update_notice_state,
     normalize_weak_candidate,
     report_preview_items,
     should_parse_course_attachments,
+    trusted_crawled_notices,
 )
+from src.board_crawler import CrawledNotice, CrawlHealthError
 from src.report_builder import build_graduate_admission_report
 from src.storage import Storage
 
@@ -26,6 +29,30 @@ class DailyReportTest(unittest.TestCase):
         fingerprint = build_content_fingerprint(["정상 본문", "손상 문자 \udcff 포함"])
 
         self.assertEqual(64, len(fingerprint))
+
+    def test_unhealthy_crawl_is_rejected_before_result_processing(self) -> None:
+        stats = {"boards_succeeded": 0, "boards_failed": 2}
+
+        with self.assertRaises(CrawlHealthError):
+            trusted_crawled_notices([], stats)
+
+    def test_failed_detail_fallback_is_not_processed_as_complete_notice(self) -> None:
+        successful = CrawledNotice("A", "board", "ok", "https://example.com/ok", "", "body", [])
+        failed = CrawledNotice(
+            "B",
+            "board",
+            "incomplete",
+            "https://example.com/failed",
+            "",
+            "",
+            [],
+            detail_succeeded=False,
+        )
+        stats = {"boards_succeeded": 2, "boards_failed": 0}
+
+        trusted = trusted_crawled_notices([successful, failed], stats)
+
+        self.assertEqual([successful], trusted)
 
     def test_preview_contains_only_new_public_items(self) -> None:
         sToday = date.today().isoformat()
@@ -55,6 +82,39 @@ class DailyReportTest(unittest.TestCase):
         self.assertEqual(
             ["https://example.com/b", "https://example.com/c"],
             [dictItem["url"] for dictItem in lstSeenItems],
+        )
+
+    def test_notice_state_excludes_failed_candidates_but_keeps_successes(self) -> None:
+        today = date.today().isoformat()
+        sent_candidate = {
+            "url": "https://example.com/sent",
+            "grade": "A",
+            "change_type": "content_changed",
+            "deadline_status": "접수중",
+            "notice_date": today,
+        }
+        failed_candidate = {
+            "url": "https://example.com/failed",
+            "grade": "B",
+            "change_type": "new",
+            "deadline_status": "접수중",
+            "notice_date": today,
+        }
+        unchanged_item = {
+            "url": "https://example.com/unchanged",
+            "grade": "C",
+            "change_type": "unchanged",
+            "notice_date": today,
+        }
+
+        state_items = items_to_update_notice_state(
+            [sent_candidate, failed_candidate, unchanged_item],
+            [sent_candidate],
+        )
+
+        self.assertEqual(
+            ["https://example.com/sent", "https://example.com/unchanged"],
+            [item["url"] for item in state_items],
         )
 
     def test_previous_grade_c_results_are_used_as_seen_fallback(self) -> None:

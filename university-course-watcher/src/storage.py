@@ -81,7 +81,10 @@ class Storage:
         return items
 
     def update_notice_state(self, items: list[dict]) -> None:
-        state: dict[str, dict] = {}
+        state = load_json(self.notice_state_path, {})
+
+        if not isinstance(state, dict):
+            state = {}
 
         for item in items:
             url = item.get("url", "")
