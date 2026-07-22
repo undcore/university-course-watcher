@@ -14,5 +14,12 @@
     "message_preview": "[일반대학원 모집 알림] 등급: A 대학: 성균관대학교 지역: 서울 서울 게시판: 대학원 입학 제목: 2026학년도 후기 일반대학원 학생모집 안내 게시일: 2026-07-22 확인 키워드: 2026, 2026학년도, 일반대학원, 대학원, 모집요강, 원서접수, 편입, 후기 판단 근거: 일반대학원 모집 공고로 판단됩니다. 링크: https://gradschool.skku.edu/grad/mojip/regul.htm?bbsid=gr",
     "updated_at": "2026-07-22T11:52:18+00:00",
     "message_id": 177
+  },
+  "00858ca41e2e4b87139d2b73cc04d1563fb4b68ac7cb14aa5ac137827a4208a8": {
+    "status": "sending",
+    "attempt_count": 1,
+    "logical_key": "graduate-candidate:ba63b8bcf94a2fd6e2d2b099af1bb2721e680d8655cdcccd642c13228bae0b7c",
+    "message_preview": "[일반대학원 모집 알림] 등급: A 대학: 성균관대학교 지역: 서울 서울 게시판: 대학원 입학 제목: 일반 2026학년도 후기 일반대학원 수시2차전형 모집요강 게시일: 2026-07-22 확인 키워드: 2026, 2026학년도, 일반대학원, 대학원, 모집요강, 원서접수, 편입, 후기, 2차 판단 근거: 일반대학원 모집 공고로 판단됩니다. 링크: https://gradschool.skku.edu/grad/mojip/regul.h",
+    "updated_at": "2026-07-22T11:52:20+00:00"
   }
 }
