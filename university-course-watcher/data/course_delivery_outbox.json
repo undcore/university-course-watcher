@@ -160,10 +160,11 @@
     "message_id": 192
   },
   "b482fbde44d6dccfd419e4966f9e1f36f511e455cf6a5d45712340bd90453fc5": {
-    "status": "sending",
+    "status": "delivered",
     "attempt_count": 1,
     "logical_key": "course-report:30629166232",
     "message_preview": "[시간제등록 일일 점검 - 신규 없음] 점검 시각: 2026-07-31T21:04:09+09:00 게시판 14개 점검, 공지 103건 수집. 새로 발견된 시간제등록/외부 수강 공고는 없습니다. 점검 필요 게시판 2개는 report.html에서 확인하세요.",
-    "updated_at": "2026-07-31T12:04:34+00:00"
+    "updated_at": "2026-07-31T12:04:37+00:00",
+    "message_id": 193
   }
 }
