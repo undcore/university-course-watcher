@@ -192,10 +192,11 @@
     "message_id": 197
   },
   "e7750f81c2e808d6dd8eec364b71aebc2d34c5a91e1b82eb91dff55dad49b951": {
-    "status": "sending",
+    "status": "delivered",
     "attempt_count": 1,
     "logical_key": "course-candidate:4c92f299f12d584ed8e317f60498b75a15bc549cb397602727db7034fefc9da1",
     "message_preview": "[시간제등록/외부 수강 공고 후보 발견] 등급: B 변경 유형: content_changed 상태: 날짜확인필요 대학: 가톨릭대학교 지역: 경기 부천 제목: [학생지원팀]2026학년도 2학기 국가근로장학생 선발 관련 희망근로지 신청 안내(8/7~8/13) 모집기간: ? ~ ? 외부 신청 가능성: 가능성 높음 컴퓨터 관련 과목: 가능성 높음 가능 학과/과목 후보: 확인 필요 링크: https://www.catholic.ac.kr",
-    "updated_at": "2026-08-04T01:59:16+00:00"
+    "updated_at": "2026-08-04T01:59:18+00:00",
+    "message_id": 198
   }
 }
