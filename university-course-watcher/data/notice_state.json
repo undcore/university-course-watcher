@@ -3,7 +3,7 @@
     "content_fingerprint": "d1b3e7cf5112cb974c0a52d763a53aed6898525bcd4e13b4b5cea3a32f023937",
     "grade": "C",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=364834&article.offset=0&articleLimit=10": {
     "content_fingerprint": "b64dcc1fca46388b63d9cb6bc2df01ca4930e7f3dc59a7ade0f87595249171d5",
@@ -81,7 +81,7 @@
     "content_fingerprint": "8ae5363fefb4b92e09fcb18ced4fcc2b1aae9bfc7d73d6be75a8ac830d38ecf0",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=download&articleNo=372270&attachNo=330198": {
     "content_fingerprint": "dfa68a56af8eaac1983c36e6d2e9a779e2bbc793e7a9c52365b04919c1c1dad4",
@@ -210,10 +210,10 @@
     "checked_at": "2026-07-21T20:50:09+09:00"
   },
   "https://web.kangnam.ac.kr/menu/board/info/f19069e6134f8f8aa7f689a4a675e66f.do?encMenuSeq=41c4ba211ab06cbc003455e07441b4f8&encMenuBoardSeq=c6ac978082524b2e435daf215a070ffc": {
-    "content_fingerprint": "d9e9820dea59ab33058511dcd9521f261fff363e43806816a98aa9aedeb505a2",
+    "content_fingerprint": "a31384ef356edc076473def2e50125025aec659b8d9238542bd96826e40ac245",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://web.kangnam.ac.kr/menu/board/info/f19069e6134f8f8aa7f689a4a675e66f.do?encMenuSeq=c5dc4b1d7b4dd402e5e6a7a8471eb55c&encMenuBoardSeq=7b0e87006790ad0520c24c16a46e0325": {
     "content_fingerprint": "feb962cb784f571b53c2c910240de352ba31f461d85af74709fa14c6b3f0eb60",
@@ -282,22 +282,22 @@
     "checked_at": "2026-07-20T12:25:57+09:00"
   },
   "https://www.kyonggi.ac.kr/www/selectBbsNttList.do?key=7520&bbsNo=1073&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888&pageIndex=1": {
-    "content_fingerprint": "5a000b6daaf8b62ff63967900a95cf00123d5beb1d8e68b3dc3d71b7e19ba58f",
+    "content_fingerprint": "5d3a3d10dbc37ca575667de88c2ebab78047fc9bea52cca5359b4956ab0a217f",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.kyonggi.ac.kr/www/selectBbsNttList.do?key=7520&bbsNo=1073&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888&pageIndex=2": {
-    "content_fingerprint": "85b7fb4d45d93bb25dd2b7f975cc9c67950ae7bb814848fb1a63110b7fd939c7",
+    "content_fingerprint": "30f8bade227a7933fe00246be08ac38cb517ecb7d68c554d5ac4880e794e9f06",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.kyonggi.ac.kr/www/selectBbsNttList.do?key=7520&bbsNo=1073&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888&pageIndex=11": {
-    "content_fingerprint": "79b843cbeaccb7fb521d5c05e1d0222b75ea54f5e5c978b07d56294564d326ab",
+    "content_fingerprint": "a69fdd4e51bc880f72e321a327149a9d7b4952383cdc18ecbf394f9252c877fd",
     "grade": "D",
-    "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "deadline_status": "마감됨",
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.kyonggi.ac.kr/www/selectBbsNttList.do?key=7520&bbsNo=1073&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888&pageIndex=1308": {
     "content_fingerprint": "a004cb47d635cc7fd1dbc642f52e9fab656b7a2780669eef08d42e46b9476b57",
@@ -363,7 +363,7 @@
     "content_fingerprint": "f1babf83b30a308289a86b7fb75db7df8b195bfa6c87fe5eb548160c9c1ac543",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.yongin.ac.kr/cmn/board/SYSTEM_DEFAULT000001/6748noticeDetail.do": {
     "content_fingerprint": "5cf9dfd0191f01ac8fded98d6de4dc032b31ddb57374d5e862747b4edec57141",
@@ -441,7 +441,7 @@
     "content_fingerprint": "9a4aed62433ce5339a94b643424d51593d4b8bb6871112aecec4864f9948be7f",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.mju.ac.kr/bbs/mjukr/141/233523/artclView.do": {
     "content_fingerprint": "4cfbc6732cf3920a0950e7135cf9f0d8b0425af96ab85da96d45dc6997daa96a",
@@ -483,7 +483,7 @@
     "content_fingerprint": "e93771e9f98ee962eee89bf079dcb441484fc3faa4e96bf3ada5529523190cc0",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=273895&article.offset=0&articleLimit=10": {
     "content_fingerprint": "c1dc11133cddd70083c99d9e34be5e579a4fd58b96666d99418ec6258aed8c6f",
@@ -1134,10 +1134,10 @@
     "checked_at": "2026-07-29T21:04:49+09:00"
   },
   "https://web.kangnam.ac.kr/menu/board/info/f19069e6134f8f8aa7f689a4a675e66f.do?encMenuSeq=41c4ba211ab06cbc003455e07441b4f8&encMenuBoardSeq=71dc6e8571234c8d096047c231466d97": {
-    "content_fingerprint": "b3eda22a34fe6029bfd38a0a348b6af19861800e867092aabd04b05a6161fe09",
+    "content_fingerprint": "514e2c2d67979b58ed7237b28ed0129662ab55f8230b60ca99fb07fed6c0ce1a",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.yongin.ac.kr/cmn/board/SYSTEM_DEFAULT000001/6753noticeDetail.do": {
     "content_fingerprint": "2af0f5f841e0948b045c9b7bdcab754a245e3340ba805a9474f84169bc7f5be4",
@@ -1338,10 +1338,10 @@
     "checked_at": "2026-07-27T11:06:06+09:00"
   },
   "https://web.kangnam.ac.kr/menu/board/info/f19069e6134f8f8aa7f689a4a675e66f.do?encMenuSeq=c5dc4b1d7b4dd402e5e6a7a8471eb55c&encMenuBoardSeq=20a7f032e843da27054a72122bb237f1": {
-    "content_fingerprint": "35c14d838044a7f9dc2b41729e57910522b6845b2c91a53a6d67a5277582c16c",
+    "content_fingerprint": "99f47e868ab86a82462c13a4d8dce17e2d3ca1c43c74f4554b91f0cd6138f88d",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.kyonggi.ac.kr/www/selectBbsNttView.do?key=7520&bbsNo=1073&nttNo=624991&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888": {
     "content_fingerprint": "b71373e7dcd1962a10e02934667f5e17b05ac364924d76156c75a8f4dd83f205",
@@ -1704,10 +1704,10 @@
     "checked_at": "2026-07-27T11:06:06+09:00"
   },
   "https://web.kangnam.ac.kr/menu/board/info/f19069e6134f8f8aa7f689a4a675e66f.do?encMenuSeq=41c4ba211ab06cbc003455e07441b4f8&encMenuBoardSeq=482a69d8c1274c0f8ecb3d5b0f8894a7": {
-    "content_fingerprint": "09c5e1ccc11e592640bb5c00a8bd39c8484a616ff3cd8a45c669d1cc008d7b41",
+    "content_fingerprint": "f3d4cbeea64e5ade0cf340d9fbd7dabbcd2cb4d1d6308fb420e7bee33d096f2e",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=274128&article.offset=0&articleLimit=10": {
     "content_fingerprint": "603fd61badca09f3956e7e3602f72293d9a3b964388315793ae6b0e24ab6b2f5",
@@ -1830,10 +1830,10 @@
     "checked_at": "2026-07-28T21:00:42+09:00"
   },
   "https://web.kangnam.ac.kr/menu/board/info/f19069e6134f8f8aa7f689a4a675e66f.do?encMenuSeq=c5dc4b1d7b4dd402e5e6a7a8471eb55c&encMenuBoardSeq=ec96b268dd0567e4e2b1ee7aa5117f82": {
-    "content_fingerprint": "14d0d36bacbfbc6c9d2ea954603e8bb89c450e45e2d649d5985711b060468a02",
+    "content_fingerprint": "f7f71844685a8d853e10a23431d9a92e534c9624ae49ce911eac21b5c56886bd",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://web.kangnam.ac.kr/menu/board/info/f19069e6134f8f8aa7f689a4a675e66f.do?encMenuSeq=ea2c9f2a785ae43e520c322896013dfe&encMenuBoardSeq=88acf11e562b7c465e575ee5f89cf3e2": {
     "content_fingerprint": "737ac3b5aa54b4da153b63dec6e9b5697077bbb41a6f90c98074cd86d96ebb5c",
@@ -1995,7 +1995,7 @@
     "content_fingerprint": "be63f998a8e01ba9ede5d09a0ce642ee71211a444e2b8089f004547209e12486",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.hansung.ac.kr/bbs/hansung/2127/223609/artclView.do": {
     "content_fingerprint": "2b200225937314d640c5c6e6c6f85ccd6fc15fbd9c329ae34306bc9d566e62b8",
@@ -2034,16 +2034,16 @@
     "checked_at": "2026-07-29T21:04:49+09:00"
   },
   "https://web.kangnam.ac.kr/menu/board/info/f19069e6134f8f8aa7f689a4a675e66f.do?encMenuSeq=c5dc4b1d7b4dd402e5e6a7a8471eb55c&encMenuBoardSeq=eb2e2dd6de7e62e28e91b7a45780aaec": {
-    "content_fingerprint": "622052be3116210ac7fd553cfd3f52b623e69b40f4d0193c7e15d06e41a21072",
+    "content_fingerprint": "6fd25e61afb34543e743861d4982a0815e84b7c95480519d3f74d7130df6e32c",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://web.kangnam.ac.kr/menu/board/info/f19069e6134f8f8aa7f689a4a675e66f.do?encMenuSeq=c5dc4b1d7b4dd402e5e6a7a8471eb55c&encMenuBoardSeq=6431c8d0fae3893d4f102a465a35cb5c": {
-    "content_fingerprint": "29e2d23472bebe1bd27ab9dac11698cea151498f220dc2486f8ebfcc719a42fd",
+    "content_fingerprint": "54f7aa95fc8fe6f636bb22bfcc89037dd9efd71db6e305af431745ba3439aed0",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.kyonggi.ac.kr/www/selectBbsNttView.do?key=7520&bbsNo=1073&nttNo=625060&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888": {
     "content_fingerprint": "42105db8f0dda2948ee229c86b8e4f7d1f7fe2b1d2adee9f78d6ab789cab3b56",
@@ -2124,16 +2124,16 @@
     "checked_at": "2026-08-04T21:04:15+09:00"
   },
   "https://web.kangnam.ac.kr/menu/board/info/f19069e6134f8f8aa7f689a4a675e66f.do?encMenuSeq=41c4ba211ab06cbc003455e07441b4f8&encMenuBoardSeq=1beb876bfa94dbe32370664f304d1e81": {
-    "content_fingerprint": "643472748f23cf2d4f0d06a92c7b59a543057e9f289959e3ab8611985261d649",
+    "content_fingerprint": "959915581d1dc75af0b4ab7885a35632ef21cfbfacaf5fb0fda588f2f6e11c61",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://web.kangnam.ac.kr/menu/board/info/f19069e6134f8f8aa7f689a4a675e66f.do?encMenuSeq=41c4ba211ab06cbc003455e07441b4f8&encMenuBoardSeq=65d13268641cd2e8720862a04187a9d2": {
-    "content_fingerprint": "e0f594ac1a65479ad7cb46726a32893d04defdb20a1ffc5448c99a03cdd5977f",
+    "content_fingerprint": "7c851d72692a2c8f07f0cb7b78ac34f22945ca0a4e6c295293ee81d23c69985c",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.kyonggi.ac.kr/www/selectBbsNttView.do?key=7520&bbsNo=1073&nttNo=625071&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888": {
     "content_fingerprint": "0eee972fbee48414506d60deed082519ac68b70440171495c78cb6a687cd6963",
@@ -2160,10 +2160,10 @@
     "checked_at": "2026-07-30T20:54:40+09:00"
   },
   "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=372926&article.offset=0&articleLimit=10": {
-    "content_fingerprint": "ee879cfff359df0a7606c32c12c121270835608f43fdf3cec28cd4112f783283",
+    "content_fingerprint": "464f81dbd45714b42f23b2d00ace824f07302347d14658bb72743ad3a813f9f3",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=372929&article.offset=0&articleLimit=10": {
     "content_fingerprint": "45a85861b084612eaa9965748ca51ea5a0678b70773369bf612f7404c3e5d1dd",
@@ -2238,22 +2238,22 @@
     "checked_at": "2026-07-31T21:04:09+09:00"
   },
   "https://web.kangnam.ac.kr/menu/board/info/f19069e6134f8f8aa7f689a4a675e66f.do?encMenuSeq=c5dc4b1d7b4dd402e5e6a7a8471eb55c&encMenuBoardSeq=f54900b093a7ee8b7220e4103b3e5df3": {
-    "content_fingerprint": "0a6427f2b663ff621a499117f9f1545809b6b6f62debc7b0d0563f85e76646c2",
+    "content_fingerprint": "ba105bc29c5170a9f1edc39d17d5ff6085717eb9ea891d0fefddf19a030d5fb7",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://web.kangnam.ac.kr/menu/board/info/f19069e6134f8f8aa7f689a4a675e66f.do?encMenuSeq=ea2c9f2a785ae43e520c322896013dfe&encMenuBoardSeq=c50e911da340d80f4b40c0cd65fe7149": {
-    "content_fingerprint": "33a0463cdf16d408827ead7f63e2a93dc4f77f5bf32174400ee599d1be6c08bd",
+    "content_fingerprint": "6e02cb4d0885b575b6c70b5486767662631e9a73bfdab57828d6616eb0c63b63",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://web.kangnam.ac.kr/menu/board/info/f19069e6134f8f8aa7f689a4a675e66f.do?encMenuSeq=ea2c9f2a785ae43e520c322896013dfe&encMenuBoardSeq=e7711b7514f1e49d9193e75ac53ea6ae": {
-    "content_fingerprint": "08c7d62d9be67d9a0a767de46c1ca5eb65b7b6f27bd7f3c1db89d26089ca1663",
+    "content_fingerprint": "6a2a6ddca9e1ff7fd06aef1d4594231baaf66e9b7b3725b7d15ad930da1fc1a5",
     "grade": "D",
     "deadline_status": "긴급",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.kyonggi.ac.kr/www/selectBbsNttView.do?key=7520&bbsNo=1073&nttNo=625078&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888": {
     "content_fingerprint": "6d22007d3927fed181b638fa5c305b2d2dc38431aad137a7a88ab895d889810a",
@@ -2454,16 +2454,16 @@
     "checked_at": "2026-08-03T10:59:34+09:00"
   },
   "https://web.kangnam.ac.kr/menu/board/info/f19069e6134f8f8aa7f689a4a675e66f.do?encMenuSeq=c5dc4b1d7b4dd402e5e6a7a8471eb55c&encMenuBoardSeq=114bbf273aac2c31f49a2db1c093cec0": {
-    "content_fingerprint": "df38ff7349c3aa324e4599f0c992e885320f4b583736d866fb0e26aabfa44258",
+    "content_fingerprint": "7946759f864fbfe448b399b45b84c0c7237894cc264c98498ff2a32f75246cb0",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://web.kangnam.ac.kr/menu/board/info/f19069e6134f8f8aa7f689a4a675e66f.do?encMenuSeq=c5dc4b1d7b4dd402e5e6a7a8471eb55c&encMenuBoardSeq=e6942730ce6e4cc714f9510303578d59": {
-    "content_fingerprint": "e006306720f766c713c797a04856484bebefb7e1875606bb388cd5e122e5f502",
+    "content_fingerprint": "2ebd675726334f21d6600d932c760f1acb6eca026da9b913717cdc980cc8c78c",
     "grade": "D",
     "deadline_status": "긴급",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.kyonggi.ac.kr/www/selectBbsNttView.do?key=7520&bbsNo=1073&nttNo=625094&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888": {
     "content_fingerprint": "e2b993ba3fd46cc92eebcbf04016685d9dca9f188d02765a751082e8887ae5a2",
@@ -2532,16 +2532,16 @@
     "checked_at": "2026-08-03T10:59:34+09:00"
   },
   "https://www.inu.ac.kr/bbs/inu/2611/427784/artclView.do": {
-    "content_fingerprint": "22c4c07276d9c1bd26ca8653d0adc548fc0778387eaa62fc5d17f7428485e8a1",
+    "content_fingerprint": "26566917ebd58b6cb1857ecc3e9f250cdd8456fe8b2d43e4df9e0a46ad829a11",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.inu.ac.kr/bbs/inu/2611/427776/artclView.do": {
-    "content_fingerprint": "31959edcfb80b4783f944ff92f99275a5e58bd88368fe798e7779a5c34a392f8",
+    "content_fingerprint": "f1625b5c2b3404130b27ef1c6c59214aa9de0cd6cf11f7d44c28466c88778484",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=274314&article.offset=0&articleLimit=10": {
     "content_fingerprint": "c41bffbea9e0fd2eb5d41ce287d33f4abe07a3db43cbf0caa792183a8ba8e088",
@@ -2556,10 +2556,10 @@
     "checked_at": "2026-08-03T10:59:34+09:00"
   },
   "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=373044&article.offset=0&articleLimit=10": {
-    "content_fingerprint": "87fa6740d80262b92f709c56489f38b39bf86829a44b23a85b25fd253d0f592b",
+    "content_fingerprint": "2b2ca9a2e85f87f3abf5bb123a547e86560488d8ad9282da24bb078433b73bff",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=373079&article.offset=0&articleLimit=10": {
     "content_fingerprint": "edf3cb609d7b297098aa117805a4ccdd8c4be7dd1bceb53780b4bee1af686ccb",
@@ -2634,10 +2634,10 @@
     "checked_at": "2026-08-04T10:45:29+09:00"
   },
   "https://web.kangnam.ac.kr/menu/board/info/f19069e6134f8f8aa7f689a4a675e66f.do?encMenuSeq=b46b6e20bc53a0234ac9fc9a238b113a&encMenuBoardSeq=3384507512afd693b0c5e86dca202bb7": {
-    "content_fingerprint": "7ff90482dc81e966ff341c4c653e938abdebb4c0a901a2f34c6b42b0858d3a2e",
+    "content_fingerprint": "0457ab3d462bf18ff77f83e2e704f1d204a9b7e0feea2c63d54d04a3d205f074",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.kyonggi.ac.kr/www/selectBbsNttView.do?key=7520&bbsNo=1073&nttNo=625109&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888": {
     "content_fingerprint": "40c160791a23a4162598edfbb1883adba0072c3d74ce6bf4891a138eceaf58ef",
@@ -2670,16 +2670,16 @@
     "checked_at": "2026-08-03T10:59:34+09:00"
   },
   "https://www.inu.ac.kr/bbs/inu/2611/427842/artclView.do": {
-    "content_fingerprint": "9ac7315e6f0ee682d8a8506f1250eb36f0b30be15ae7eed1019a944f35b58de3",
+    "content_fingerprint": "3810687aea7f890b99aec52a9cf46f4d4304d16af3203d1ef8ae00ec88f6b5c7",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.inu.ac.kr/bbs/inu/2611/427802/artclView.do": {
-    "content_fingerprint": "c9bc44e7c87d6fc17180b2c9ee864d236c5103ff254853117de5a9e61fcaf379",
+    "content_fingerprint": "44f18a00554c6ce9fc1287f31a6708f710d0ccb0647c80fc22465708764160b2",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=274358&article.offset=0&articleLimit=10": {
     "content_fingerprint": "3a76f4864dca31219663ddb9299851f185a79a90ac347c6f0ada0658bf7b7b47",
@@ -2784,28 +2784,28 @@
     "checked_at": "2026-08-03T10:59:34+09:00"
   },
   "https://www.yongin.ac.kr/cmn/board/SYSTEM_DEFAULT000001/6760noticeDetail.do": {
-    "content_fingerprint": "44080d76ac4c3adb5f48dbc3d84fbfc194edf4c7ee1a707d08c4d5d3d9e72129",
+    "content_fingerprint": "0ffbd0fd2f215b30d46a26f05b89d7066bad6908f8b9b1c5117ffa5080e46015",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.yongin.ac.kr/cmn/board/SYSTEM_DEFAULT000001/6759noticeDetail.do": {
-    "content_fingerprint": "9a7708cc915fa8eb63ecf4bfed839c18a513f7446762e75239af34bc4e5b62e0",
+    "content_fingerprint": "9f8d8115a29d003caa059243fded5d196661e271cf780da0f1e1b3c4c2888a8a",
     "grade": "D",
     "deadline_status": "마감임박",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.inu.ac.kr/bbs/inu/2611/427892/artclView.do": {
-    "content_fingerprint": "ca17e878ccd771495753581834d360ee1e16e968403f39d2b0d71a3a8eef5b38",
+    "content_fingerprint": "15096b0b2b9e3ad589f68e87a71cde1aa527e8180615dbbe3e69607ae8e9e00d",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.mju.ac.kr/bbs/mjukr/141/233903/artclView.do": {
-    "content_fingerprint": "8face2d96be2d026a6746ee9853e7472b5f26149f2c69fd85dbb50cc3814084f",
+    "content_fingerprint": "8ce878ea0f8c773917a6f67979b03875e310e0a349c07d64aac5b9d003759c00",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=274352&article.offset=0&articleLimit=10": {
     "content_fingerprint": "288f082ec0ad9439e1b5d64148569a46ef5116db634aae792c16595cfae8e66c",
@@ -2862,34 +2862,34 @@
     "checked_at": "2026-08-04T10:45:29+09:00"
   },
   "https://www.hansung.ac.kr/bbs/hansung/2127/223745/artclView.do": {
-    "content_fingerprint": "b2541a9c941631cfe7969dad72add9d3bcb5871b9c9fd774c0fd12640c13d563",
+    "content_fingerprint": "37c2c3898f2ec1c61f0bd4b2060363325675bca9207a91a89e3cdf13f0a4da1b",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.hansung.ac.kr/bbs/hansung/2127/223743/artclView.do": {
-    "content_fingerprint": "da0f2c84094d19bf5777093676b481c4e0da896a256b152adaf1f8416e905122",
+    "content_fingerprint": "fd47ce5709a9e21e8317d8f47bfad7e9a1499271c254b9823d0e15d37d584508",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.hansung.ac.kr/bbs/hansung/2127/223739/artclView.do": {
-    "content_fingerprint": "58f741579d60c3d264801639ed8b3ce8b59639fb84ab919bf480fdee660c26d5",
+    "content_fingerprint": "fc9e2dfa37618248c30ed9d6e9e45de44a94a3e8953cbac24f8d860a4f786261",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.hansung.ac.kr/bbs/hansung/2127/223736/artclView.do": {
-    "content_fingerprint": "80c1550e911f67a9a8b50f5ff4d63096a08c6c3660c803e4ac0f1fc8928787d3",
+    "content_fingerprint": "145ddc3559d74a107fbc2a4edf8ce0ce12ae2d503dbfe651cd1a710f9596e203",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.hansung.ac.kr/bbs/hansung/2127/223731/artclView.do": {
-    "content_fingerprint": "73ed45768973c29655e78ac00409334593bdaaf604b9451cb2c03efbd4bca2ad",
+    "content_fingerprint": "13c822c2f84947011552b4e8193a982af71d8a0534b7c70690d05b1217dc2454",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.hansung.ac.kr/bbs/hansung/2127/223728/artclView.do": {
     "content_fingerprint": "a8fb71b9e17666f1ef1ee82c74e3e1ab709d8d22e9ea17c14f1f39325531e28c",
@@ -2958,16 +2958,16 @@
     "checked_at": "2026-08-04T10:45:29+09:00"
   },
   "https://www.inu.ac.kr/bbs/inu/2611/427989/artclView.do": {
-    "content_fingerprint": "1977953dd7bee991e039e289856e033d1a985c64f156c8d85bab49e87757b04d",
+    "content_fingerprint": "bad32966afca4351a3fd5425a9866ff1249d295f793fc238674dc14c41c268f4",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.inu.ac.kr/bbs/inu/2611/427943/artclView.do": {
-    "content_fingerprint": "6480a3287c6a7a1ddbbe42ee621325ea0a0286477e8b87877945db42113d93e9",
+    "content_fingerprint": "f6b9ef150cac17b3093773d20f00c38a2893af6fbe5bd7e3cb55565704cac135",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.kookmin.ac.kr/user/kmuNews/notice/4/12168/view.do?currentPageNo=1": {
     "content_fingerprint": "998c6197966fb3c3f7f6f9079e39739883ebdba9a72be97d427ec6b0398f7787",
@@ -2976,34 +2976,34 @@
     "checked_at": "2026-08-05T10:47:23+09:00"
   },
   "https://www.mju.ac.kr/bbs/mjukr/141/233932/artclView.do": {
-    "content_fingerprint": "d75fbd580d45bf6ded5644513f3f566b45040b6caccea6da25d4debc95245e25",
+    "content_fingerprint": "50c20cddb528e0d12b00b3d0c2a694159df63c5b486997cfb8e73196eba0652c",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.mju.ac.kr/bbs/mjukr/141/233915/artclView.do": {
-    "content_fingerprint": "6daa89cfaf0a89d3dfd0ce05c4ed731d07802eb17b0b6dda035b4be30d8703d3",
+    "content_fingerprint": "c31ca9353a7497a2a2c3c7433be04d29f6242e65ebff96530f6ea6e258260721",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.mju.ac.kr/bbs/mjukr/141/233913/artclView.do": {
-    "content_fingerprint": "5fe647e82a1b2d68fd8d20a451b75c84d61c9fb971505d021483f5bf3978c12c",
+    "content_fingerprint": "0f890f360848ab8e9346e1fcedacc81dd0fc27c6e9705d628e018a715920df1c",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.mju.ac.kr/bbs/mjukr/141/233911/artclView.do": {
-    "content_fingerprint": "fadb719131afbabc4930e85cc5c817d57bb1243b26baae2c48cf8dc424f74faf",
+    "content_fingerprint": "fc2426c384e198879d69ca090088aaec607fe24da069e71be98dbd70de7b2e6c",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.mju.ac.kr/bbs/mjukr/141/233910/artclView.do": {
-    "content_fingerprint": "65719b955ae9022986a17f35ff2a3da6f54992616183fe1940aba77330f24e4c",
+    "content_fingerprint": "47fcd36cbbcbf89353cedda8a8ad1184fc00ff6d330c4924c0b217a13af3047e",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=274402&article.offset=0&articleLimit=10": {
     "content_fingerprint": "4f1998f167d3daf211be27f2f8d61c467d01788852a943ce0f89e8eb77a4736a",
@@ -3036,16 +3036,16 @@
     "checked_at": "2026-08-04T10:45:29+09:00"
   },
   "https://www.hansung.ac.kr/bbs/hansung/2127/223749/artclView.do": {
-    "content_fingerprint": "9245b3ec807e8e5f7dc5d5a598b170aba2e99ad144174ab723ea1dc474c77d15",
+    "content_fingerprint": "9e4fd6c90ecf62763917862b54c347817d60893b9f5036cd73c2240f989fa25f",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.hansung.ac.kr/bbs/hansung/2127/223721/artclView.do": {
-    "content_fingerprint": "44058b65388e215d2f4395f2811332d03d3b8b596e9a7155884342c1d3550304",
+    "content_fingerprint": "a300eb90c0bf03714403292168f86659bb3f22c2cc25b507461595f604947d30",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.kyonggi.ac.kr/www/selectBbsNttView.do?key=7520&bbsNo=1073&nttNo=625159&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888": {
     "content_fingerprint": "e23de3f7b6bd14be0942ebea7110e695757f47b9c7c98dfa111f0ed8d2df7c09",
@@ -3078,34 +3078,34 @@
     "checked_at": "2026-08-04T21:04:15+09:00"
   },
   "https://www.mju.ac.kr/bbs/mjukr/141/233948/artclView.do": {
-    "content_fingerprint": "54ab0d63ab7b1265a608192ecd5e4e9df9949bc6cfd70c58a895814681808414",
+    "content_fingerprint": "f8aac8d6bb05bcc93ee1d15590e83f81d89b76a5b921e1afdddb6a6049398449",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.mju.ac.kr/bbs/mjukr/141/233945/artclView.do": {
-    "content_fingerprint": "8a7724fe97b358f887a5e778b3cad9453ebc6498b8e150948e63bf56f710e6f5",
+    "content_fingerprint": "233c05740dcef1c2bc52e39189fc04b6ef3a08567043e88158327378cd33fff1",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=274475&article.offset=0&articleLimit=10": {
-    "content_fingerprint": "0564944f4b762239c2630d67a222ba467c7934290f28f956dce4902b56f4c86c",
+    "content_fingerprint": "7f567b764753734db634ce4c16b8e25845e921cd6ea77a834d62e95e80143e7a",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=274469&article.offset=0&articleLimit=10": {
-    "content_fingerprint": "7b6c3a390de35e1f2abe7b7d1bdab7352eb104c92309dd52fb6a0a63fbc83650",
+    "content_fingerprint": "21d70e3cbfb0d506a397f5ad3235263a98251ec85f85decd7d61b4e5ea408d7a",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=274478&article.offset=0&articleLimit=10": {
-    "content_fingerprint": "0c3f1e5a8ed638792bee0e90d67a941fc815c90cdbc25963f5106ce70ae92a92",
+    "content_fingerprint": "6cf6212f948a52a6001afc6eaf0dfd08e3eb4c67c34008364c71170114d7fa73",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=274451&article.offset=0&articleLimit=10": {
     "content_fingerprint": "24d0f1e1cec2292a7ea706b76f0d819c96b1ea8e762cb2de86e034f588f622b5",
@@ -3174,22 +3174,22 @@
     "checked_at": "2026-08-04T21:04:15+09:00"
   },
   "https://www.hansung.ac.kr/bbs/hansung/2127/223768/artclView.do": {
-    "content_fingerprint": "ed2b385e112ed6d8e4ce73b59ae81a13ac6bfb009e89b0bacb14cc924becad4a",
+    "content_fingerprint": "c75a189a99f396271e8465197a56982aff837688c097a0f7fde502dc375ab148",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.hansung.ac.kr/bbs/hansung/2127/223766/artclView.do": {
-    "content_fingerprint": "7ddaf2f80d0d8d1a15f7ad2d595d655b3579710b93c77928a1e41847147e9ff0",
+    "content_fingerprint": "e1b126e00e87315f5a5804e1ab11a196218b31878b7160bcdd8e5403733e0e8d",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.hansung.ac.kr/bbs/hansung/2127/223756/artclView.do": {
-    "content_fingerprint": "12c1c831d628b557c7a831bd260c8cf1a55ae3687b43a4ed7c271683c3c9cb58",
+    "content_fingerprint": "01eea2a44155ac757e895ce3681b09f5cebb466d63a9f5e4c5c0535e8503299c",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.kyonggi.ac.kr/www/selectBbsNttView.do?key=7520&bbsNo=1073&nttNo=625173&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888": {
     "content_fingerprint": "c39c64f9a2cd4d120a849958778452f1116a99f8aad4c79599ee9e701e7d7c1f",
@@ -3228,106 +3228,106 @@
     "checked_at": "2026-08-05T10:47:23+09:00"
   },
   "https://www.yongin.ac.kr/cmn/board/SYSTEM_DEFAULT000001/6764noticeDetail.do": {
-    "content_fingerprint": "a56b9f8c3cd3c6fb702d2a7d3932b9a10407dd6cda7c8ab9e0170df51f642416",
+    "content_fingerprint": "88d643e3e4da35d410710ce22150ba587fdbde54425b11515b874bfc5fd9ae78",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.yongin.ac.kr/cmn/board/SYSTEM_DEFAULT000001/6763noticeDetail.do": {
-    "content_fingerprint": "e85d5e68ee2511efb31bcc7dbdb1bdd332355286e3273ab3ee81ac5c26b851c5",
+    "content_fingerprint": "f3ba7bc6ac9b8f678a16af4a9cb3a751e3d7935eccf3c34effe6110464fc6beb",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.yongin.ac.kr/cmn/board/SYSTEM_DEFAULT000001/6762noticeDetail.do": {
-    "content_fingerprint": "ef07c5b20f1186d4ca4b0ae52d851e818e5af71a0f36889d07cd51eb56b80942",
+    "content_fingerprint": "326c452719b423d3554fa63710149834b79e122e0bf17f16605bba7d11d25c23",
     "grade": "D",
     "deadline_status": "모집중",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.yongin.ac.kr/cmn/board/SYSTEM_DEFAULT000001/5779noticeDetail.do": {
-    "content_fingerprint": "0e96df10c7b395f0058f195a43d64510a6cfc318e74449179539a4296775537e",
+    "content_fingerprint": "d6811e2398233c98ee34589be3fdd8f3743f53b92645685550c26a7e493208d0",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.inu.ac.kr/bbs/inu/2611/428069/artclView.do": {
-    "content_fingerprint": "d90cb564ae77593e58b79e9a0469e2510661b1fef0198cdfa54b4f12c0db21df",
+    "content_fingerprint": "2eb486f4bb9d2f3fee6ac262acd911b6309c68ba97cdc2eab0b22ca47765b033",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.mju.ac.kr/bbs/mjukr/141/233956/artclView.do": {
-    "content_fingerprint": "57756497595c7886b49c1b63b7409216f88e7fee4b5659d1ff0c8a5d7de16d5f",
+    "content_fingerprint": "fcf3a4786a55e08ffd44c3d6136943113401667315eba156c039a254bb6b1076",
     "grade": "D",
     "deadline_status": "모집중",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=274504&article.offset=0&articleLimit=10": {
-    "content_fingerprint": "7572f00b3b7ae10cb629d44665a63ee3e6f175d4c287561f518be6f4c5c7a5e8",
+    "content_fingerprint": "9e6fcc315289608a17d3395c8a1776867eae925cb315800cd0fe49dfee05cb26",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=274487&article.offset=0&articleLimit=10": {
-    "content_fingerprint": "b4a41551e30f0ef146893c18773ad2add2e7647d6e824c687d761a2bdac28f24",
+    "content_fingerprint": "5962b84fbed8ac0bf8d9646a0163666f7db2e863b85a08db12935106f33f29e8",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=373246&article.offset=0&articleLimit=10": {
-    "content_fingerprint": "12890c050d6d6facad33a134d57fba58d391fb7bf3b504eac1370c7ac4e54a0e",
+    "content_fingerprint": "f35b84169f87b8dfa6005f789b74f1b599b46bf43c6959ecf8b60e303354abd0",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=373250&article.offset=0&articleLimit=10": {
-    "content_fingerprint": "b9c6292578e31f77667990ac17493ddf5e50a72e8b4d9323b1e6001d3021923b",
+    "content_fingerprint": "681c89a9a87e27a45c0ccb0508e07644f9da550b078e8a74fa6d59f2bd8ef707",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=373242&article.offset=0&articleLimit=10": {
-    "content_fingerprint": "666de0147f553fa473ab0cd2d30e01fd84e48b8abb819a6e49b2fab3945952b9",
+    "content_fingerprint": "2fb1bf796c1e72a96dd4fe0f35f873e34107870c33986d000c75c8418dd84627",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=373239&article.offset=0&articleLimit=10": {
-    "content_fingerprint": "b6c8c8a8928807b6eb8945e8664e70382c9208baeefec73b247be5425279ea7f",
+    "content_fingerprint": "6d4dea13afafd04cdb698e8a22d966c6a4c21e9da1487b430cde462f4ce8e3ed",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=373235&article.offset=0&articleLimit=10": {
-    "content_fingerprint": "a03913bf7b6fbe5ee39a8944c5b4ba2b003bcccba828f169abddc7a35228db65",
+    "content_fingerprint": "e55b53fc204ca97b99611ff49a2673e5a22e61bb7dcf5290fd5fcf05442f8caa",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.hansung.ac.kr/bbs/hansung/2127/223783/artclView.do": {
-    "content_fingerprint": "aa755e21e570c24a0fe51ce04b2c64135d2d83057c76f5c6a209842f7bdd01bd",
+    "content_fingerprint": "0efc31d3f2b23da0aa69dfd2e9ffd68336e04fd3160ea2104cd6b20ccc5f1380",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.hansung.ac.kr/bbs/hansung/2127/223782/artclView.do": {
-    "content_fingerprint": "56796e7c42b1caed21dbdb747bfc0ab9484b17d5a29b21bcd0be09da2d92145e",
+    "content_fingerprint": "fb291245f29c835a8819743c44a2ad64cd48f9f7902050cddbc75d21ba6bdee6",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.hansung.ac.kr/bbs/hansung/2127/223780/artclView.do": {
-    "content_fingerprint": "0152c63f0e9018beb22470627b0ef5352fb1b2f7270f6434fe08bc0e0ce01c3c",
+    "content_fingerprint": "3bffe8bb6420e5d33089d399f69d960c9d2bdae42ea04d404ffef1c16b8d0bcc",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.kyonggi.ac.kr/www/selectBbsNttView.do?key=7520&bbsNo=1073&nttNo=625186&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888": {
-    "content_fingerprint": "2e6cc3e2469533115ea1d056f70fe08e82dd7edb9a3c648e49b7384ddf043852",
+    "content_fingerprint": "b6ae459b823eb1c6ff936f634c5475e012c2a160b986367a6631ea645cb4970f",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.kyonggi.ac.kr/www/selectBbsNttView.do?key=7520&bbsNo=1073&nttNo=625185&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888": {
     "content_fingerprint": "8ae836ce4683869396a003c19fbb909877cd5ea29acdb99db63df50c459628fe",
@@ -3348,27 +3348,177 @@
     "checked_at": "2026-08-05T10:47:23+09:00"
   },
   "https://www.mju.ac.kr/bbs/mjukr/141/233978/artclView.do": {
-    "content_fingerprint": "ed0e95af36812f18b0db26eba3510fd102a78dc00ea05059313004c7cd0d996c",
+    "content_fingerprint": "9ab5c20ecc8a7a173935911fc6465dde248c647cd9a087d194bb7c54f5845793",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=274512&article.offset=0&articleLimit=10": {
-    "content_fingerprint": "5553beaa372543e92459892c124ec0656a74dc96ed263188793acaab835ef63d",
+    "content_fingerprint": "782de56c3eaf833f98ef87f18ce9e082e234654420abd18451ddf326e292a914",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=274509&article.offset=0&articleLimit=10": {
-    "content_fingerprint": "c9f635a42a256dad4ab320c35179655007cdd110d4b6e6a6626e9bdaf61d5308",
+    "content_fingerprint": "9a055d3810db7f63e3604df678cf8d6aa0697dd2250e3d4fd61377c27011da08",
     "grade": "D",
     "deadline_status": "날짜확인필요",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
   },
   "https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=274508&article.offset=0&articleLimit=10": {
-    "content_fingerprint": "3839000ac9ca2653abf77dcff8a29ba0ca8607a304b8e9893713b909b97889c9",
+    "content_fingerprint": "be1212d64f719c2096719f937077067331c8d40841cd8e5ec3c0d326230dd72e",
     "grade": "D",
     "deadline_status": "모집중",
-    "checked_at": "2026-08-05T10:47:23+09:00"
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=373300&article.offset=0&articleLimit=10": {
+    "content_fingerprint": "8ebf77492d1fc778e26a0be2a037ce9cbb3d6b96aca298d9d16c3881304ce731",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=373298&article.offset=0&articleLimit=10": {
+    "content_fingerprint": "9019e67b6d6079a69757bec3259a657e83a6d27b007f03e2d93fc1920546bb11",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=373293&article.offset=0&articleLimit=10": {
+    "content_fingerprint": "151f3ff8ee01fd30e410e0adc12c1663b86e1e6f555b0f70a3ed312c016023f2",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=373292&article.offset=0&articleLimit=10": {
+    "content_fingerprint": "91883f4a3d770af8c66a8f9dcb8a8ef5448a6a9994a4e7ae89f05860749f7906",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=373282&article.offset=0&articleLimit=10": {
+    "content_fingerprint": "2639482ff91a4b83a89df0e87a3008a63a875d99d0c60d0111c308dd51ee4812",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.ajou.ac.kr/kr/ajou/notice.do?mode=view&articleNo=373258&article.offset=0&articleLimit=10": {
+    "content_fingerprint": "bf5f5e5a8583f69a4fa3aed7c809bf43766f7ded844717e5cab6890953746bae",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.hansung.ac.kr/bbs/hansung/2127/223790/artclView.do": {
+    "content_fingerprint": "b336d8f0c3060a7cd4322d047dd0b27a3743617bc9a8c714b82c0fdc620f4e9d",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.hansung.ac.kr/bbs/hansung/2127/223787/artclView.do": {
+    "content_fingerprint": "d2094e1695b9170352c1693d26376d9e56c32b0cbfb8ce2b1c3944c7f256270e",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.kyonggi.ac.kr/www/selectBbsNttView.do?key=7520&bbsNo=1073&nttNo=625204&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888": {
+    "content_fingerprint": "60c6f9c19616ad6e8e06c5d52d758ff5ede4d1387ebd0c969bddf6799ffc15a4",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.kyonggi.ac.kr/www/selectBbsNttView.do?key=7520&bbsNo=1073&nttNo=625207&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888": {
+    "content_fingerprint": "97d3340e787c198612e21b8a6591c74f00e236972125e807633c7e052035edaa",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.kyonggi.ac.kr/www/selectBbsNttView.do?key=7520&bbsNo=1073&nttNo=625206&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888": {
+    "content_fingerprint": "4f771d646c051667020c60444a380fc2b969dc8a03446cd95b6963ad55b54546",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.kyonggi.ac.kr/www/selectBbsNttView.do?key=7520&bbsNo=1073&nttNo=625203&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888": {
+    "content_fingerprint": "f93a8a549647f844910e619249ce4b6877b7144d852ae0a2335d7ca315fbc9f7",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.kyonggi.ac.kr/www/selectBbsNttView.do?key=7520&bbsNo=1073&nttNo=625202&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888": {
+    "content_fingerprint": "095e352a3326707bddc669af24fe4b3a365b5c159a702437366453b138441071",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.kyonggi.ac.kr/www/selectBbsNttView.do?key=7520&bbsNo=1073&nttNo=625201&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888": {
+    "content_fingerprint": "3b4a9da65afb199bb1fec0674f29a4978bcf3cca90f1768bd0bf9611223bcf37",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.kyonggi.ac.kr/www/selectBbsNttView.do?key=7520&bbsNo=1073&nttNo=625200&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888": {
+    "content_fingerprint": "dd50e331be670b126b80c62ad3f1d9532df05cca282a481bbd2e95c0027cedf6",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.kyonggi.ac.kr/www/selectBbsNttView.do?key=7520&bbsNo=1073&nttNo=625198&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888": {
+    "content_fingerprint": "f2229ed3f4ea63236412bb5b61ad5d889bf02ec82f4b0225daf81ab385ca4666",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.kyonggi.ac.kr/www/selectBbsNttView.do?key=7520&bbsNo=1073&nttNo=625197&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888": {
+    "content_fingerprint": "df389d4318e1098b8530ea7eb6638b3ddc5fe7636e7571195982ee106dc3caca",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.kyonggi.ac.kr/www/selectBbsNttList.do?key=7520&bbsNo=1073&pageUnit=10&searchCnd=all&sf.pnos=1073&sf.pnos=888&pageIndex=1317": {
+    "content_fingerprint": "88e5a6aa44d170aaa20d2cdf8150622c742117956793920dc97199ef5715cfc0",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.inu.ac.kr/bbs/inu/2611/428150/artclView.do": {
+    "content_fingerprint": "ec105ba85da35f8c7af63b5c5285015781bd48e4771d0ef9c760916361d938e0",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.inu.ac.kr/bbs/inu/2611/428140/artclView.do": {
+    "content_fingerprint": "8dbd6c90780fdaf9ce607e325eafdd480ce7e1ff7486bca698975577a4c264b1",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.kookmin.ac.kr/user/kmuNews/notice/8/12193/view.do?currentPageNo=1": {
+    "content_fingerprint": "749baf1e100862b6104ea905309c63f44e3e5a4f965a810540d47d2edebfa27d",
+    "grade": "D",
+    "deadline_status": "접수예정",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=274515&article.offset=0&articleLimit=10": {
+    "content_fingerprint": "304e385e33dbcd6a21369818e6561c03c686f35125342904f0a60f4fff4bcd57",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=274526&article.offset=0&articleLimit=10": {
+    "content_fingerprint": "267060321ccacec73d1c0fadd7b3eb51d79fb5a0cec0ccba5ce643235994641e",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=274529&article.offset=0&articleLimit=10": {
+    "content_fingerprint": "c80281e6a7d52a2b6b107a908659b08a3d88bf12cfaad4163581cdd118835aea",
+    "grade": "D",
+    "deadline_status": "접수예정",
+    "checked_at": "2026-08-05T21:02:19+09:00"
+  },
+  "https://www.catholic.ac.kr/ko/campuslife/notice.do?mode=view&articleNo=274535&article.offset=0&articleLimit=10": {
+    "content_fingerprint": "4dcc6e4d1c65c290c6efff1cafae6683e71d3032e5e1307a13bd0976e20e0ad4",
+    "grade": "D",
+    "deadline_status": "날짜확인필요",
+    "checked_at": "2026-08-05T21:02:19+09:00"
   }
 }
