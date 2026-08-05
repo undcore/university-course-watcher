@@ -1,6 +1,6 @@
 [
   {
-    "checked_at": "2026-08-04T21:04:15+09:00",
+    "checked_at": "2026-08-05T10:47:23+09:00",
     "university_name": "서울과학기술대학교",
     "region": "서울",
     "city": "서울",
@@ -38,7 +38,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-08-04T21:04:15+09:00",
+    "checked_at": "2026-08-05T10:47:23+09:00",
     "university_name": "가톨릭대학교",
     "region": "경기",
     "city": "부천",
@@ -70,7 +70,7 @@
     "date_conflict": false,
     "matched_keywords": "1학기; 2학기; 전기; 비학위; 비학위과정; 평생교육원; 대학원; 고졸; 성인학습자; AI; 전산; IT",
     "reason": "공식 게시판에서 유력 후보가 발견되었으나 외부 신청 또는 컴퓨터 과목 여부 추가 확인 필요. 현재 상태: 날짜확인필요.",
-    "content_fingerprint": "0c3fb018c9610a572a4cfebd1065729ab87e80a7f2123212a46205663b88cd77",
+    "content_fingerprint": "8f8ffae3ee4815ee01e3289d5ead5a428ec57d785fe69b6cf813e7ae7fdde7e2",
     "change_type": "content_changed",
     "previous_grade": "B",
     "is_new": false
