@@ -56,10 +56,11 @@
     "message_id": 216
   },
   "cd6bd7fe9d6bd0f8f038623efdf1d631b5c744720bfabec0a7dc41d5bd3a7a19": {
-    "status": "sending",
+    "status": "delivered",
     "attempt_count": 1,
     "logical_key": "graduate-empty:9b639b6be09b114207f1976cff46137c4fb7d786",
     "message_preview": "[일반대학원 모집 확인 완료] 신규 알림 대상: 없음 확인 시각: 2026-08-19T19:38:22+09:00 활성 감시 대상: 20개 보류/비활성 대상: 4개 기존/참고 후보 감지: 17건 새로 알릴 일반대학원 모집 공고는 발견되지 않았습니다. 보류/비활성 대상은 공식 URL 확인 또는 접근 방식 보정 후 재활성화가 필요합니다.",
-    "updated_at": "2026-08-19T10:38:45+00:00"
+    "updated_at": "2026-08-19T10:38:48+00:00",
+    "message_id": 226
   }
 }
