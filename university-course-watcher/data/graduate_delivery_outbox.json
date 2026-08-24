@@ -72,10 +72,11 @@
     "message_id": 229
   },
   "2f448dff68b270f40021e2a7f59b2536d892d9c8a590f5b8c32a6cf1d506420c": {
-    "status": "sending",
+    "status": "delivered",
     "attempt_count": 1,
     "logical_key": "graduate-candidate:19f73e79189798e67995887a499e86b0e1458f9a42a0bbb370c1ef67f6d87653",
     "message_preview": "[일반대학원 모집 알림] 등급: A 대학: 동국대학교 지역: 서울 서울 게시판: 입학 공지 제목: 2026학년도 후기 일반대학원 특별전형 입학생 학번 조회 안내 게시일: 2026-08-24 확인 키워드: 2026, 2026학년도, 일반대학원, 대학원, 입학전형, 특별전형, 학부, 편입, 특수대학원, 전문대학원, 후기 판단 근거: 일반대학원 모집 공고로 판단됩니다. 링크: https://gs.dongguk.edu/article/",
-    "updated_at": "2026-08-24T10:42:33+00:00"
+    "updated_at": "2026-08-24T10:42:36+00:00",
+    "message_id": 234
   }
 }
