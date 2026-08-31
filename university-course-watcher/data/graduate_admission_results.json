@@ -1,6 +1,6 @@
 [
   {
-    "checked_at": "2026-08-31T11:35:00+09:00",
+    "checked_at": "2026-09-01T02:30:24+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -15,7 +15,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-08-31T11:35:00+09:00",
+    "checked_at": "2026-09-01T02:30:24+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -30,7 +30,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-08-31T11:35:00+09:00",
+    "checked_at": "2026-09-01T02:30:24+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -45,7 +45,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-08-31T11:35:00+09:00",
+    "checked_at": "2026-09-01T02:30:24+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -60,7 +60,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-08-31T11:35:00+09:00",
+    "checked_at": "2026-09-01T02:30:24+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -75,22 +75,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-08-31T11:35:00+09:00",
-    "university_name": "동국대학교",
-    "region": "서울",
-    "city": "서울",
-    "board_type": "입학 공지",
-    "title": "2026학년도 후기 일반대학원 특별전형 입학생 학번 조회 안내",
-    "url": "https://gs.dongguk.edu/article/admission/detail/15218860?pageIndex=1",
-    "notice_date": "2026-08-24",
-    "grade": "A",
-    "matched_keywords": "2026; 2026학년도; 일반대학원; 대학원; 입학전형; 특별전형; 학부; 편입; 특수대학원; 전문대학원; 후기",
-    "reason": "일반대학원 모집 공고로 판단됩니다.",
-    "attachment_urls": "https://gs.dongguk.edu/cmmn/fileDown.do?fileSeq=25941",
-    "is_new": false
-  },
-  {
-    "checked_at": "2026-08-31T11:35:00+09:00",
+    "checked_at": "2026-09-01T02:30:24+09:00",
     "university_name": "상명대학교",
     "region": "서울",
     "city": "서울",
@@ -105,14 +90,14 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-08-31T11:35:22+09:00",
+    "checked_at": "2026-09-01T02:30:38+09:00",
     "university_name": "건국대학교",
     "region": "서울",
     "city": "서울",
     "board_type": "유웨이어플라이 대학원 후기",
     "title": "건국대학교 일반대학원",
     "url": "https://ipsi3.uwayapply.com/2026/gradu/konkukgs/?CHA=1",
-    "notice_date": "2026-08-31",
+    "notice_date": "2026-09-01",
     "grade": "A",
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 후기' 목록에서 원서접수 확인됨 (상태: 접수마감).",
@@ -120,14 +105,14 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-08-31T11:35:22+09:00",
+    "checked_at": "2026-09-01T02:30:38+09:00",
     "university_name": "경희대학교",
     "region": "서울",
     "city": "서울",
     "board_type": "유웨이어플라이 대학원 후기",
     "title": "경희대학교 일반대학원",
     "url": "https://ipsi1.uwayapply.com/2026/gradu/gskh/?CHA=2",
-    "notice_date": "2026-08-31",
+    "notice_date": "2026-09-01",
     "grade": "A",
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 후기' 목록에서 원서접수 확인됨 (상태: 접수마감).",
@@ -135,14 +120,14 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-08-31T11:35:22+09:00",
+    "checked_at": "2026-09-01T02:30:38+09:00",
     "university_name": "고려대학교",
     "region": "서울",
     "city": "서울",
     "board_type": "유웨이어플라이 대학원 후기",
     "title": "고려대학교 일반대학원",
     "url": "https://ipsi2.uwayapply.com/2026/gradu/korea/?CHA=1",
-    "notice_date": "2026-08-31",
+    "notice_date": "2026-09-01",
     "grade": "A",
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 후기' 목록에서 원서접수 확인됨 (상태: 접수마감).",
@@ -150,14 +135,14 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-08-31T11:35:22+09:00",
+    "checked_at": "2026-09-01T02:30:38+09:00",
     "university_name": "국민대학교",
     "region": "서울",
     "city": "서울",
     "board_type": "유웨이어플라이 대학원 후기",
     "title": "국민대학교 일반대학원",
     "url": "https://ipsi1.uwayapply.com/2026/gradu/kookmin/?CHA=1",
-    "notice_date": "2026-08-31",
+    "notice_date": "2026-09-01",
     "grade": "A",
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 후기' 목록에서 원서접수 확인됨 (상태: 접수마감).",
@@ -165,14 +150,14 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-08-31T11:35:22+09:00",
+    "checked_at": "2026-09-01T02:30:38+09:00",
     "university_name": "명지대학교",
     "region": "서울",
     "city": "서울",
     "board_type": "유웨이어플라이 대학원 후기",
     "title": "명지대학교 일반대학원",
     "url": "https://ipsi1.uwayapply.com/2026/gradu/mju/?CHA=1",
-    "notice_date": "2026-08-31",
+    "notice_date": "2026-09-01",
     "grade": "A",
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 후기' 목록에서 원서접수 확인됨 (상태: 접수마감).",
@@ -180,14 +165,14 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-08-31T11:35:22+09:00",
+    "checked_at": "2026-09-01T02:30:38+09:00",
     "university_name": "서울시립대학교",
     "region": "서울",
     "city": "서울",
     "board_type": "유웨이어플라이 대학원 후기",
     "title": "서울시립대학교 일반대학원",
     "url": "https://ipsi2.uwayapply.com/2026/gradu/uosgrad/?CHA=1",
-    "notice_date": "2026-08-31",
+    "notice_date": "2026-09-01",
     "grade": "A",
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 후기' 목록에서 원서접수 확인됨 (상태: 접수마감).",
@@ -195,14 +180,14 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-08-31T11:35:22+09:00",
+    "checked_at": "2026-09-01T02:30:38+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
     "board_type": "유웨이어플라이 대학원 후기",
     "title": "중앙대학교 일반대학원(일반전형 2차)",
     "url": "https://apply.uwayapply.com/e/598372qa544555",
-    "notice_date": "2026-08-31",
+    "notice_date": "2026-09-01",
     "grade": "A",
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 후기' 목록에서 원서접수 확인됨 (상태: 접수마감).",
@@ -210,14 +195,14 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-08-31T11:35:22+09:00",
+    "checked_at": "2026-09-01T02:30:38+09:00",
     "university_name": "한국외국어대학교",
     "region": "서울",
     "city": "서울",
     "board_type": "유웨이어플라이 대학원 후기",
     "title": "한국외국어대학교 일반대학원",
     "url": "https://ipsi3.uwayapply.com/2026/gradu/hufs/?CHA=1",
-    "notice_date": "2026-08-31",
+    "notice_date": "2026-09-01",
     "grade": "A",
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 후기' 목록에서 원서접수 확인됨 (상태: 접수마감).",
@@ -225,14 +210,14 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-08-31T11:35:22+09:00",
+    "checked_at": "2026-09-01T02:30:38+09:00",
     "university_name": "한양대학교",
     "region": "서울",
     "city": "서울",
     "board_type": "유웨이어플라이 대학원 후기",
     "title": "한양대학교 일반대학원",
     "url": "https://ipsi1.uwayapply.com/2026/gradu/hanyang_sgs/?CHA=1",
-    "notice_date": "2026-08-31",
+    "notice_date": "2026-09-01",
     "grade": "A",
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 후기' 목록에서 원서접수 확인됨 (상태: 접수마감).",
