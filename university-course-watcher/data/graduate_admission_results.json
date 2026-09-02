@@ -1,6 +1,6 @@
 [
   {
-    "checked_at": "2026-09-02T11:10:10+09:00",
+    "checked_at": "2026-09-02T23:14:19+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -15,7 +15,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-02T11:10:10+09:00",
+    "checked_at": "2026-09-02T23:14:19+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -30,7 +30,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-02T11:10:10+09:00",
+    "checked_at": "2026-09-02T23:14:19+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -45,7 +45,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-02T11:10:10+09:00",
+    "checked_at": "2026-09-02T23:14:19+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -60,7 +60,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-02T11:10:10+09:00",
+    "checked_at": "2026-09-02T23:14:19+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -75,7 +75,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-02T11:10:10+09:00",
+    "checked_at": "2026-09-02T23:14:19+09:00",
     "university_name": "상명대학교",
     "region": "서울",
     "city": "서울",
@@ -90,7 +90,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-02T11:10:26+09:00",
+    "checked_at": "2026-09-02T23:14:42+09:00",
     "university_name": "건국대학교",
     "region": "서울",
     "city": "서울",
@@ -105,7 +105,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-02T11:10:26+09:00",
+    "checked_at": "2026-09-02T23:14:42+09:00",
     "university_name": "경희대학교",
     "region": "서울",
     "city": "서울",
@@ -120,7 +120,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-02T11:10:26+09:00",
+    "checked_at": "2026-09-02T23:14:42+09:00",
     "university_name": "고려대학교",
     "region": "서울",
     "city": "서울",
@@ -135,7 +135,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-02T11:10:26+09:00",
+    "checked_at": "2026-09-02T23:14:42+09:00",
     "university_name": "국민대학교",
     "region": "서울",
     "city": "서울",
@@ -150,7 +150,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-02T11:10:26+09:00",
+    "checked_at": "2026-09-02T23:14:42+09:00",
     "university_name": "명지대학교",
     "region": "서울",
     "city": "서울",
@@ -165,7 +165,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-02T11:10:26+09:00",
+    "checked_at": "2026-09-02T23:14:42+09:00",
     "university_name": "서울시립대학교",
     "region": "서울",
     "city": "서울",
@@ -180,7 +180,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-02T11:10:26+09:00",
+    "checked_at": "2026-09-02T23:14:42+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -195,7 +195,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-02T11:10:26+09:00",
+    "checked_at": "2026-09-02T23:14:42+09:00",
     "university_name": "한국외국어대학교",
     "region": "서울",
     "city": "서울",
@@ -210,7 +210,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-02T11:10:26+09:00",
+    "checked_at": "2026-09-02T23:14:42+09:00",
     "university_name": "한양대학교",
     "region": "서울",
     "city": "서울",
@@ -223,5 +223,20 @@
     "reason": "유웨이어플라이 '대학원 후기' 목록에서 원서접수 확인됨 (상태: 접수마감).",
     "attachment_urls": "",
     "is_new": false
+  },
+  {
+    "checked_at": "2026-09-02T23:14:42+09:00",
+    "university_name": "고려대학교",
+    "region": "서울",
+    "city": "서울",
+    "board_type": "유웨이어플라이 대학원 전기",
+    "title": "고려대학교 일반대학원",
+    "url": "https://graduate.korea.ac.kr/main/main.html",
+    "notice_date": "2026-09-02",
+    "grade": "A",
+    "matched_keywords": "대학원; 유웨이어플라이",
+    "reason": "유웨이어플라이 '대학원 전기' 목록에서 원서접수 확인됨 (상태: 접수예정).",
+    "attachment_urls": "",
+    "is_new": true
   }
 ]
