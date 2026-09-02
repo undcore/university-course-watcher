@@ -104,10 +104,11 @@
     "message_id": 246
   },
   "ca125591d5d3ab3fa2d3c09a0b9fb45c8c4c81332ee9ade5da2dc18a556d7bec": {
-    "status": "sending",
+    "status": "delivered",
     "attempt_count": 1,
     "logical_key": "graduate-portal:c318ac1d26fc320173f0e3e0f8aa9729bb1fe80a47a070b5e93371eede2a5553",
     "message_preview": "[원서접수 포털 - 접수중인 일반대학원 1건] - 고려대학교 일반대학원 https://graduate.korea.ac.kr/main/main.html 유웨이어플라이/진학사어플라이 접수 목록에서 확인된 신규 항목입니다.",
-    "updated_at": "2026-09-02T14:14:42+00:00"
+    "updated_at": "2026-09-02T14:14:45+00:00",
+    "message_id": 251
   }
 }
