@@ -126,5 +126,12 @@
     "message_preview": "[일반대학원 모집 알림] 등급: A 대학: 성균관대학교 지역: 서울 서울 게시판: 대학원 입학 제목: 2027학년도 전기 일반대학원 학생모집 안내 게시일: 2026-09-11 확인 키워드: 2027, 2027학년도, 일반대학원, 대학원, 모집요강, 원서접수, 전기 판단 근거: 일반대학원 모집 공고로 판단됩니다. 링크: https://gradschool.skku.edu/grad/mojip/regul.htm?bbsid=grad_d",
     "updated_at": "2026-09-11T14:11:10+00:00",
     "message_id": 267
+  },
+  "c8d72da6d9548a42ce32d70653650ec1f704eb60f88c12c9f03ddda7651e7564": {
+    "status": "sending",
+    "attempt_count": 1,
+    "logical_key": "graduate-candidate:aa78a52c09d5ccb581b9acda0add88098a3876b7e5d5c3b57084caaa96c3a614",
+    "message_preview": "[일반대학원 모집 알림] 등급: A 대학: 성균관대학교 지역: 서울 서울 게시판: 대학원 입학 제목: 일반 2027학년도 전기 일반대학원 일반전형 모집 안내 게시일: 2026-09-11 확인 키워드: 2027, 2027학년도, 일반대학원, 대학원, 모집요강, 원서접수, 전기 판단 근거: 일반대학원 모집 공고로 판단됩니다. 링크: https://gradschool.skku.edu/grad/mojip/regul.htm?bbsid=",
+    "updated_at": "2026-09-11T14:11:11+00:00"
   }
 }
