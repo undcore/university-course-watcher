@@ -41,8 +41,8 @@ class WorkflowDurableStateContractTest(unittest.TestCase):
         self.assertIn(GRADUATE_HTTP_STATE, cache_text)
 
     def test_only_weekday_schedule_and_manual_dispatch_can_trigger(self) -> None:
-        self.assertIn('cron: "0 0 * * 1-5"', self.workflow_text)
-        self.assertIn('cron: "0 10 * * 1-5"', self.workflow_text)
+        self.assertIn('cron: "37 23 * * 0-4"', self.workflow_text)
+        self.assertIn('cron: "37 9 * * 1-5"', self.workflow_text)
         self.assertIn("workflow_dispatch:", self.workflow_text)
         self.assertNotRegex(self.workflow_text, r"(?m)^\s{2}push:")
         self.assertNotRegex(self.workflow_text, r"(?m)^\s{2}pull_request:")

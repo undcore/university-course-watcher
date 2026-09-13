@@ -2,10 +2,12 @@ name: Daily university notice check
 
 on:
   schedule:
-    # 09:00 and 19:00 KST, Monday through Friday.
+    # 08:37 and 18:37 KST, Monday through Friday.
+    # GitHub 예약은 정각에 몰려 수 시간 지연되므로 정각을 피한다.
+    # 08:37 KST = 전날 23:37 UTC 이므로 UTC 요일은 일~목(0-4)이다.
     # 시간제등록(course) 감시와 그 텔레그램 알림은 중단했고 일반대학원 모집만 감시한다.
-    - cron: "0 0 * * 1-5"
-    - cron: "0 10 * * 1-5"
+    - cron: "37 23 * * 0-4"
+    - cron: "37 9 * * 1-5"
   workflow_dispatch:
     inputs:
       telegram_test:

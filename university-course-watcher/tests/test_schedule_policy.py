@@ -39,6 +39,21 @@ class SchedulePolicyTest(unittest.TestCase):
 
         self.assertTrue(should_run("schedule", monday_1110_kst, schedule="0 0 * * 1-5"))
 
+    def test_0837_kst_slot_scheduled_on_previous_utc_day_counts_as_kst_weekday(self) -> None:
+        cron_0837_kst = "37 23 * * 0-4"
+        # 월 08:37 KST 예약(일 23:37 UTC)이 월 10:10 KST에 늦게 시작
+        monday_1010_kst = datetime(2026, 9, 14, 1, 10, tzinfo=timezone.utc)
+        # 금 08:37 KST 예약(목 23:37 UTC)이 금 23:50 KST까지 밀림
+        friday_2350_kst = datetime(2026, 9, 18, 14, 50, tzinfo=timezone.utc)
+
+        self.assertTrue(should_run("schedule", monday_1010_kst, schedule=cron_0837_kst))
+        self.assertTrue(should_run("schedule", friday_2350_kst, schedule=cron_0837_kst))
+
+    def test_delayed_1837_kst_friday_slot_counts_as_friday(self) -> None:
+        saturday_0310_kst = datetime(2026, 9, 18, 18, 10, tzinfo=timezone.utc)
+
+        self.assertTrue(should_run("schedule", saturday_0310_kst, schedule="37 9 * * 1-5"))
+
     def test_unparseable_schedule_falls_back_to_start_time(self) -> None:
         saturday_noon_kst = datetime(2026, 7, 18, 3, 0, tzinfo=timezone.utc)
 

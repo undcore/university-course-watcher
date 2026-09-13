@@ -23,7 +23,7 @@ class WorkflowScheduleContractTest(unittest.TestCase):
         self.assertRegex(trigger_section, r"(?m)^  schedule:")
         self.assertRegex(trigger_section, r"(?m)^  workflow_dispatch:")
 
-    def test_crons_resolve_to_weekday_0900_and_1900_kst(self) -> None:
+    def test_crons_resolve_to_weekday_0837_and_1837_kst(self) -> None:
         cron_matches = re.findall(r'cron: "(\d+) (\d+) \* \* (\d+)-(\d+)"', self.workflow_text)
         actual_run_times = set()
         monday_utc = datetime(2026, 7, 20, tzinfo=timezone.utc)
@@ -39,9 +39,9 @@ class WorkflowScheduleContractTest(unittest.TestCase):
                 actual_run_times.add((run_kst.weekday(), run_kst.hour, run_kst.minute))
 
         expected_run_times = {
-            (weekday, hour, 0)
+            (weekday, hour, 37)
             for weekday in range(0, 5)
-            for hour in (9, 19)
+            for hour in (8, 18)
         }
         self.assertEqual(expected_run_times, actual_run_times)
 
