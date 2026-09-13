@@ -45,14 +45,21 @@ class WorkflowScheduleContractTest(unittest.TestCase):
         }
         self.assertEqual(expected_run_times, actual_run_times)
 
-    def test_both_watcher_jobs_depend_on_runtime_guard(self) -> None:
+    def test_graduate_watcher_depends_only_on_runtime_guard(self) -> None:
         self.assertIn("python university-course-watcher/src/schedule_policy.py", self.workflow_text)
-        self.assertIn("course-check:\n    needs: run-window", self.workflow_text)
-        self.assertIn("      - run-window\n      - publish-course-results", self.workflow_text)
-        self.assertGreaterEqual(
+        self.assertIn("SCHEDULE: ${{ github.event.schedule }}", self.workflow_text)
+        self.assertIn('--schedule "${SCHEDULE}"', self.workflow_text)
+        self.assertIn("graduate-admission-check:\n    needs: run-window\n", self.workflow_text)
+        self.assertEqual(
+            1,
             self.workflow_text.count("needs.run-window.outputs.should_run == 'true'"),
-            2,
         )
+
+    def test_course_watcher_and_its_telegram_alerts_are_stopped(self) -> None:
+        self.assertNotIn("course-check", self.workflow_text)
+        self.assertNotIn("publish-course-results", self.workflow_text)
+        self.assertNotRegex(self.workflow_text, r"(?m)python main\.py --once\s*$")
+        self.assertIn("python main.py --once --watch graduate-admission", self.workflow_text)
 
     def test_overlapping_workflow_runs_are_serialized(self) -> None:
         self.assertIn("group: university-notice-check-${{ github.ref }}", self.workflow_text)
@@ -60,7 +67,7 @@ class WorkflowScheduleContractTest(unittest.TestCase):
 
     def test_write_permission_is_limited_to_state_and_publish_jobs(self) -> None:
         self.assertIn("permissions:\n  contents: read", self.workflow_text)
-        self.assertEqual(4, self.workflow_text.count("      contents: write"))
+        self.assertEqual(2, self.workflow_text.count("      contents: write"))
 
     def test_failure_notification_rejects_http_errors(self) -> None:
         self.assertIn("curl --fail-with-body", self.workflow_text)

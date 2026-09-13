@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from datetime import date
 
 from bs4 import BeautifulSoup
 
@@ -17,9 +18,29 @@ from .utils import CONFIG_DIR, DATA_DIR, load_json, normalize_space, now_kst
 LOGGER = logging.getLogger(__name__)
 
 
-TARGET_YEARS = ["2026", "2027"]
+def target_years(today: date | None = None) -> list[str]:
+    # 하반기에는 다음 학년도 전기 모집이 올라오므로 올해와 내년 학년도를 함께 본다.
+    iYear = (today or now_kst().date()).year
+    return [str(iYear), str(iYear + 1)]
+
+
+def recruitment_year_hint(today: date | None = None) -> str:
+    # 7월 이후에는 다음 학년도 전기 모집 공고가 주 대상이다.
+    dateToday = today or now_kst().date()
+    return str(dateToday.year + 1 if dateToday.month >= 7 else dateToday.year)
+
+
 # 전기/후기 구분 없이 모집 차수(1차/2차/추가모집 등)를 함께 추적
 TERM_KEYWORDS = ["전기", "후기", "추가모집", "추가 모집", "1차", "2차", "3차"]
+
+
+def select_region_universities(universities: list[dict], region: str) -> list[dict]:
+    # graduate_watch_always 대학(가톨릭대 성심교정 등)은 지역 필터와 무관하게 감시한다.
+    return [
+        university
+        for university in universities
+        if university.get("region") == region or university.get("graduate_watch_always")
+    ]
 
 
 @dataclass
@@ -73,25 +94,26 @@ class GraduateAdmissionWatcher:
             max_notice_age_days=notice_max_age_days(),
         )
         self.attachment_parser = AttachmentParser(state_cache=self.http_state)
+        self.portal_failures: list[str] = []
 
     def run(self, region: str | None = None, dry_run: bool = False) -> list[dict]:
         universities = load_json(CONFIG_DIR / "universities.json", [])
         graduate_boards = load_json(CONFIG_DIR / "graduate_admission_boards.json", [])
 
         if region:
-            universities = [university for university in universities if university.get("region") == region]
+            universities = select_region_universities(universities, region)
 
         university_map = {university["name"]: university for university in universities}
         boards = self._select_boards(graduate_boards, university_map)
 
         LOGGER.info("Crawling %d graduate admission boards for 일반대학원 모집 notices.", len(boards))
         notices = self._scan_direct_pages(boards)
-        board_notices = self.crawler.crawl_boards(boards, university_map, keyword_hint="2026")
+        board_notices = self.crawler.crawl_boards(boards, university_map, keyword_hint=recruitment_year_hint())
         notices.extend(self._trusted_board_notices(board_notices))
         items = self._build_items(notices, university_map)
 
         if not self.smoke_test:
-            portal_items = fetch_portal_items()
+            portal_items = fetch_portal_items(failures=self.portal_failures)
             for item in portal_items:
                 if region and item["university_name"] not in university_map:
                     continue
@@ -209,7 +231,7 @@ class GraduateAdmissionWatcher:
 
             if grade == "D":
                 continue
-            if self._is_direct_page_notice(notice) and not any(year in notice.title for year in TARGET_YEARS):
+            if self._is_direct_page_notice(notice) and not any(year in notice.title for year in target_years()):
                 # 상시 안내/메뉴 페이지는 수집원으로만 사용하고 공고 결과로 노출하지 않는다.
                 continue
 
@@ -240,7 +262,8 @@ class GraduateAdmissionWatcher:
         lowered_title = normalized_title.lower()
         lowered_text = normalized_text.lower()
 
-        year_keywords = TARGET_YEARS + [f"{sYear}학년도" for sYear in TARGET_YEARS]
+        lstYears = target_years()
+        year_keywords = lstYears + [f"{sYear}학년도" for sYear in lstYears]
         school_keywords = ["일반대학원", "대학원"]
         admission_keywords = ["모집요강", "신입생 모집", "신입생모집", "입학전형", "전형일정", "원서접수", "특별전형", "추가모집"]
         negative_keywords = ["학부", "편입", "재외국민", "특수대학원", "전문대학원", "교육대학원", "경영전문대학원"]
@@ -253,10 +276,12 @@ class GraduateAdmissionWatcher:
 
         title_has_year = self._collect_matches(lowered_title, year_keywords, matched_keywords)
         title_admission_keywords = admission_keywords + ["학생모집", "일반전형"]
-        title_has_admission = any(keyword in lowered_title for keyword in title_admission_keywords)
+        # "모집 요강", "일반 전형"처럼 띄어 쓴 제목도 같은 모집 신호로 본다.
+        compact_title = lowered_title.replace(" ", "")
+        title_has_admission = any(keyword.replace(" ", "") in compact_title for keyword in title_admission_keywords)
         has_year = title_has_year or any(keyword.lower() in lowered_text for keyword in year_keywords)
         has_school = self._collect_matches(lowered_text, school_keywords, matched_keywords)
-        has_admission = self._collect_matches(lowered_text, admission_keywords, matched_keywords)
+        has_admission = self._collect_matches(lowered_text, admission_keywords, matched_keywords) or title_has_admission
         has_negative = self._collect_matches(lowered_text, negative_keywords, matched_keywords)
         # 차수(전기/후기/1차/2차/추가모집)는 필터가 아니라 표시용으로 수집
         self._collect_matches(lowered_title, TERM_KEYWORDS, matched_keywords)

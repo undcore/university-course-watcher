@@ -45,10 +45,10 @@ class SupplyChainContractTest(unittest.TestCase):
             "-r university-course-watcher/requirements.lock"
         )
 
-        self.assertEqual(2, self.workflow_text.count(install_command))
+        self.assertEqual(1, self.workflow_text.count(install_command))
         self.assertNotIn("pip install -r university-course-watcher/requirements.txt", self.workflow_text)
         self.assertEqual(
-            2,
+            1,
             self.workflow_text.count(
                 "cache-dependency-path: university-course-watcher/requirements.lock"
             ),

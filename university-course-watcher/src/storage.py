@@ -375,15 +375,20 @@ class GraduateAdmissionStorage:
         attachments = "|".join(sorted(self._list_values(item.get("attachment_urls"))))
         matched_keywords = "|".join(sorted(self._list_values(item.get("matched_keywords"))))
         notice_date = item.get("notice_date", "")
+        title_key = self._normalized_title(item.get("title", ""))
 
         if "어플라이" in item.get("board_type", ""):
             # 접수중 포털 항목은 확인일을 게시일로 사용하므로 날짜가 바뀌어도 같은 공고다.
             notice_date = ""
+            # 포털 항목명의 괄호·차수는 캠퍼스와 모집 회차 구분이다. "일반대학원(성심)"과 "(성의)",
+            # "(일반전형 1차)"와 "(일반전형 2차)"를 합치면 나중에 열린 접수가 알림에서 빠진다.
+            # 학기 구분은 board_type(유웨이어플라이 대학원 전기/후기)에 이미 들어 있다.
+            title_key = self._normalized_portal_title(item.get("title", ""))
 
         raw = "::".join([
             item.get("university_name", ""),
             item.get("board_type", ""),
-            self._normalized_title(item.get("title", "")),
+            title_key,
             notice_date,
             matched_keywords,
             attachments,
@@ -396,6 +401,9 @@ class GraduateAdmissionStorage:
         if isinstance(value, str):
             return [item.strip() for item in value.split(";") if item.strip()]
         return []
+
+    def _normalized_portal_title(self, title: str) -> str:
+        return re.sub(r"\s+", " ", title.lower()).strip()
 
     def _normalized_title(self, title: str) -> str:
         normalized = re.sub(r"\[[^\]]+\]|\([^)]+\)", " ", title.lower())

@@ -370,7 +370,9 @@ class GraduateAdmissionNotifier(TelegramNotifier):
         max_lines: int = 25,
     ) -> list[tuple[list[dict], str]]:
         lstLines = [
-            f"- {item.get('title')}\n  {item.get('url')}"
+            f"- {item.get('title')}"
+            + (f" [{item.get('apply_status')}]" if item.get("apply_status") else "")
+            + f"\n  {item.get('url')}"
             for item in items
         ]
         batches: list[tuple[list[dict], str]] = []
@@ -379,7 +381,7 @@ class GraduateAdmissionNotifier(TelegramNotifier):
             chunk = lstLines[iStart:iStart + max_lines]
             batch_items = items[iStart:iStart + max_lines]
             message = (
-                f"[원서접수 포털 - 접수중인 일반대학원 {len(items)}건]\n\n"
+                f"[원서접수 포털 - 접수예정·접수중 일반대학원 {len(items)}건]\n\n"
                 + "\n".join(chunk)
                 + "\n\n유웨이어플라이/진학사어플라이 접수 목록에서 확인된 신규 항목입니다."
             )

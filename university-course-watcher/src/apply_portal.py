@@ -25,7 +25,7 @@ NEGATIVE_WORDS = ["교육대학원", "경영전문", "경영대학원", "특수�
                   "학석사", "계약학과"]
 
 
-def fetch_portal_items(target_term: str = "") -> list[dict]:
+def fetch_portal_items(target_term: str = "", failures: list[str] | None = None) -> list[dict]:
     items: list[dict] = []
 
     for fn in (_fetch_uway, _fetch_jinhak):
@@ -33,6 +33,10 @@ def fetch_portal_items(target_term: str = "") -> list[dict]:
             items.extend(fn(target_term))
         except Exception as exc:
             LOGGER.warning("Apply portal fetch failed (%s): %s", fn.__name__, exc)
+            # 유웨이어플라이는 가톨릭대 등 핵심 원서접수 확인 경로라 실패를 숨기지 않는다.
+            # 진학사어플라이는 GitHub Actions에서 상시 403이라 경고만 남긴다.
+            if failures is not None and fn is _fetch_uway:
+                failures.append(f"유웨이어플라이: {exc}")
 
     return items
 
@@ -76,10 +80,14 @@ def _fetch_uway(target_term: str) -> list[dict]:
     response.raise_for_status()
     soup = BeautifulSoup(response.content.decode("utf-8", errors="replace"), HTML_PARSER)
     items: list[dict] = []
+    iGraduateSectionCount = 0
 
     for nodeSection in soup.select("div.list"):
         nodeHeading = nodeSection.find("h4")
         sSection = normalize_space(nodeHeading.get_text(" ")) if nodeHeading else ""
+
+        if "대학원" in sSection:
+            iGraduateSectionCount += 1
 
         # 전기/후기 구분 없이 대학원 섹션 전체 수집 (target_term 지정 시에만 제한)
         if "대학원" not in sSection or (target_term and target_term not in sSection):
@@ -88,6 +96,9 @@ def _fetch_uway(target_term: str) -> list[dict]:
         for nodeLink in nodeSection.find_all("a", href=True):
             nodeStatus = nodeLink.find("i")
             sStatus = nodeStatus.get("title", "") if nodeStatus else ""
+            # 이미 마감된 접수는 "접수중" 알림으로 보내지 않는다 (접수예정·접수중만 대상)
+            if sStatus == "접수마감":
+                continue
             # 상태 아이콘(<i>접</i>, <span><i>U</i></span>) 텍스트가 제목에 섞이지 않도록 제거
             for nodeIcon in nodeLink.find_all(["i", "span"]):
                 nodeIcon.decompose()
@@ -97,10 +108,15 @@ def _fetch_uway(target_term: str) -> list[dict]:
                 f"유웨이어플라이 {sSection}",
                 f"유웨이어플라이 '{sSection}' 목록에서 원서접수 확인됨 (상태: {sStatus or '확인 필요'}).",
             )
+            item["apply_status"] = sStatus
 
             # 포털은 전국 단위라 일반대학원 명시(A)만 알림 대상으로 유지
             if item["grade"] == "A":
                 items.append(item)
+
+    if iGraduateSectionCount == 0:
+        # 목록 구조가 바뀌어 대학원 섹션을 못 찾으면 "신규 없음"으로 오인하지 않도록 실패 처리
+        raise RuntimeError("유웨이어플라이 목록에서 대학원 섹션을 찾지 못했습니다.")
 
     return items
 

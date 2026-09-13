@@ -315,6 +315,53 @@ class GraduateAdmissionStorageTest(unittest.TestCase):
 
             self.assertFalse(next_day["is_new"])
 
+    def test_portal_campus_entries_are_not_merged(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            storage = GraduateAdmissionStorage(Path(directory))
+            seongui = self._item(
+                university_name="가톨릭대학교",
+                board_type="유웨이어플라이 대학원 전기",
+                title="가톨릭대학교 일반대학원(성의)",
+                matched_keywords=["대학원", "유웨이어플라이"],
+                attachment_urls=[],
+            )
+            storage.update_seen([seongui])
+
+            songsim = self._item(
+                university_name="가톨릭대학교",
+                board_type="유웨이어플라이 대학원 전기",
+                title="가톨릭대학교 일반대학원(성심)",
+                url="https://ipsi1.uwayapply.com/2027/gradu1/gen/?CHA=1",
+                matched_keywords=["대학원", "유웨이어플라이"],
+                attachment_urls=[],
+            )
+
+            self.assertEqual(2, len(storage.dedupe([seongui, songsim])))
+            storage.mark_is_new([songsim])
+            self.assertTrue(songsim["is_new"])
+
+    def test_portal_later_round_is_not_merged_with_earlier_round(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            storage = GraduateAdmissionStorage(Path(directory))
+            first_round = self._item(
+                board_type="유웨이어플라이 대학원 후기",
+                title="중앙대학교 일반대학원(일반전형 1차)",
+                matched_keywords=["대학원", "유웨이어플라이"],
+                attachment_urls=[],
+            )
+            storage.update_seen([first_round])
+
+            second_round = self._item(
+                board_type="유웨이어플라이 대학원 후기",
+                title="중앙대학교 일반대학원(일반전형 2차)",
+                url="https://apply.uwayapply.com/e/second",
+                matched_keywords=["대학원", "유웨이어플라이"],
+                attachment_urls=[],
+            )
+            storage.mark_is_new([second_round])
+
+            self.assertTrue(second_round["is_new"])
+
 
 if __name__ == "__main__":
     unittest.main()

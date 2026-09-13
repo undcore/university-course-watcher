@@ -27,6 +27,23 @@ class SchedulePolicyTest(unittest.TestCase):
         self.assertFalse(should_run("schedule", sunday_2359_kst))
         self.assertTrue(should_run("schedule", monday_0000_kst))
 
+    def test_delayed_friday_evening_run_still_counts_as_friday(self) -> None:
+        # 2026-08-28(금) 19:00 KST 예약이 토요일 06:08 KST에 시작돼 통째로 건너뛰어진 사례
+        saturday_0608_kst = datetime(2026, 8, 28, 21, 8, tzinfo=timezone.utc)
+
+        self.assertFalse(should_run("schedule", saturday_0608_kst))
+        self.assertTrue(should_run("schedule", saturday_0608_kst, schedule="0 10 * * 1-5"))
+
+    def test_delayed_monday_morning_run_keeps_monday_slot(self) -> None:
+        monday_1110_kst = datetime(2026, 9, 14, 2, 10, tzinfo=timezone.utc)
+
+        self.assertTrue(should_run("schedule", monday_1110_kst, schedule="0 0 * * 1-5"))
+
+    def test_unparseable_schedule_falls_back_to_start_time(self) -> None:
+        saturday_noon_kst = datetime(2026, 7, 18, 3, 0, tzinfo=timezone.utc)
+
+        self.assertFalse(should_run("schedule", saturday_noon_kst, schedule="*/5 * * * *"))
+
     def test_manual_run_bypasses_weekday_guard(self) -> None:
         saturday_noon_kst = datetime(2026, 7, 18, 3, 0, tzinfo=timezone.utc)
 

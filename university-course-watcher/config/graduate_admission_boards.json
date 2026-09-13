@@ -22,5 +22,7 @@
   {"university_name": "상명대학교", "board_type": "대학원 입학 공지", "url": "https://www.smu.ac.kr/grad/admission/notice.do", "enabled": true},
   {"university_name": "삼육대학교", "board_type": "모집요강", "url": "https://www.syu.ac.kr/grad/admission-guide/application-guideline/", "enabled": true, "scan_page": true},
   {"university_name": "한성대학교", "board_type": "대학원 입학 공지", "url": "https://hansung.ac.kr/graduate/8385/subview.do", "enabled": true},
-  {"university_name": "서울과학기술대학교", "board_type": "대학원공지", "url": "https://www.seoultech.ac.kr/service/info/graduate/", "enabled": true}
+  {"university_name": "서울과학기술대학교", "board_type": "대학원공지", "url": "https://www.seoultech.ac.kr/service/info/graduate/", "enabled": true},
+  {"university_name": "가톨릭대학교", "board_type": "일반대학원 모집요강(성심교정)", "url": "https://gs.catholic.ac.kr/gs/admission/recruitment.do", "enabled": true},
+  {"university_name": "가톨릭대학교", "board_type": "일반대학원 공지사항(성심교정)", "url": "https://gs.catholic.ac.kr/gs/graduate/notice.do", "enabled": true}
 ]

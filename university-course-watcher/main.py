@@ -254,6 +254,10 @@ def main() -> int:
         if notifier.delivery_failures:
             raise RuntimeError(f"Telegram delivery failed {len(notifier.delivery_failures)} time(s).")
 
+        if watcher.portal_failures:
+            # 실패로 끝내야 notify-failure 작업이 텔레그램으로 누락 가능성을 알린다.
+            raise RuntimeError("Apply portal check failed: " + "; ".join(watcher.portal_failures))
+
         LOGGER.info("Done. graduate_admission_candidates=%d notifications=%d", len(items), len(sent))
         return 0
 
