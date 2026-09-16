@@ -1,6 +1,6 @@
 [
   {
-    "checked_at": "2026-09-15T23:26:32+09:00",
+    "checked_at": "2026-09-16T10:37:45+09:00",
     "university_name": "성균관대학교",
     "region": "서울",
     "city": "서울",
@@ -15,7 +15,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-15T23:26:32+09:00",
+    "checked_at": "2026-09-16T10:37:45+09:00",
     "university_name": "성균관대학교",
     "region": "서울",
     "city": "서울",
@@ -30,7 +30,7 @@
     "is_new": true
   },
   {
-    "checked_at": "2026-09-15T23:26:32+09:00",
+    "checked_at": "2026-09-16T10:37:45+09:00",
     "university_name": "성균관대학교",
     "region": "서울",
     "city": "서울",
@@ -45,13 +45,13 @@
     "is_new": true
   },
   {
-    "checked_at": "2026-09-15T23:26:32+09:00",
+    "checked_at": "2026-09-16T10:37:45+09:00",
     "university_name": "성균관대학교",
     "region": "서울",
     "city": "서울",
     "board_type": "대학원 입학",
     "title": "일반 2027학년도 전기 일반대학원 일반전형 모집 안내",
-    "url": "https://gradschool.skku.edu/grad/mojip/regul.htm?bbsid=grad_dataroom&ctg_cd=REGUL&mode=view&bltn_seq=59065&PHPSESSID=05d681a042a456f8d5b2990c19bbd6b3",
+    "url": "https://gradschool.skku.edu/grad/mojip/regul.htm?bbsid=grad_dataroom&ctg_cd=REGUL&mode=view&bltn_seq=59065&PHPSESSID=15159383df3e3911f3b90e15b3209ea0",
     "notice_date": "2026-09-11",
     "grade": "A",
     "matched_keywords": "2027; 2027학년도; 일반대학원; 대학원; 모집요강; 원서접수; 전기",
@@ -60,7 +60,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-15T23:26:32+09:00",
+    "checked_at": "2026-09-16T10:37:45+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -75,7 +75,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-15T23:26:32+09:00",
+    "checked_at": "2026-09-16T10:37:45+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -90,7 +90,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-15T23:26:32+09:00",
+    "checked_at": "2026-09-16T10:37:45+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -105,7 +105,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-15T23:26:32+09:00",
+    "checked_at": "2026-09-16T10:37:45+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -120,7 +120,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-15T23:26:32+09:00",
+    "checked_at": "2026-09-16T10:37:45+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -135,7 +135,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-15T23:26:32+09:00",
+    "checked_at": "2026-09-16T10:37:45+09:00",
     "university_name": "가톨릭대학교",
     "region": "경기",
     "city": "부천",
@@ -146,11 +146,11 @@
     "grade": "A",
     "matched_keywords": "2027; 2027학년도; 일반대학원; 대학원; 모집요강; 신입생 모집; 입학전형; 원서접수; 학부; 특수대학원; 교육대학원; 전기; 1차",
     "reason": "일반대학원 모집 공고로 판단됩니다.",
-    "attachment_urls": "https://gs.catholic.ac.kr/gs/admission/recruitment.do?mode=download&articleNo=275860&attachNo=225608",
+    "attachment_urls": "https://gs.catholic.ac.kr/gs/admission/recruitment.do?mode=download&articleNo=275860&attachNo=225646",
     "is_new": true
   },
   {
-    "checked_at": "2026-09-15T23:26:32+09:00",
+    "checked_at": "2026-09-16T10:37:45+09:00",
     "university_name": "가톨릭대학교",
     "region": "경기",
     "city": "부천",
@@ -161,18 +161,18 @@
     "grade": "A",
     "matched_keywords": "2027; 2027학년도; 일반대학원; 대학원; 모집요강; 신입생 모집; 입학전형; 원서접수; 학부; 특수대학원; 교육대학원; 전기; 1차",
     "reason": "일반대학원 모집 공고로 판단됩니다.",
-    "attachment_urls": "https://gs.catholic.ac.kr/gs/graduate/notice.do?mode=download&articleNo=275859&attachNo=225607",
+    "attachment_urls": "https://gs.catholic.ac.kr/gs/graduate/notice.do?mode=download&articleNo=275859&attachNo=225645",
     "is_new": true
   },
   {
-    "checked_at": "2026-09-15T23:26:49+09:00",
+    "checked_at": "2026-09-16T10:38:08+09:00",
     "university_name": "고려대학교",
     "region": "서울",
     "city": "서울",
     "board_type": "유웨이어플라이 대학원 전기",
     "title": "고려대학교 일반대학원",
     "url": "https://ipsi2.uwayapply.com/2027/gradu1/korea/?CHA=1",
-    "notice_date": "2026-09-15",
+    "notice_date": "2026-09-16",
     "grade": "A",
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 전기' 목록에서 원서접수 확인됨 (상태: 접수예정).",
