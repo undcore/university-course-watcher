@@ -192,10 +192,11 @@
     "message_id": 275
   },
   "780c4f6df7fd2914a3928fe7cd63725d5d2c13bf0709bc05089ad20992160ef6": {
-    "status": "sending",
+    "status": "delivered",
     "attempt_count": 1,
     "logical_key": "graduate-candidate:446aa47170b02fc6f5a515a0d21ed5cb9269b583ae530ceec1165cfca6c9150e",
     "message_preview": "[일반대학원 모집 알림] 등급: A 대학: 한양대학교 지역: 서울 서울 게시판: 모집요강 자료실 제목: 127 [입학] 2027학년도 일반대학원 신입학 전기 특별전형 모집요강 관리자 26.09.16 453 게시일: 2026-09-16 확인 키워드: 2027, 2027학년도, 일반대학원, 대학원, 모집요강, 특별전형, 전기 판단 근거: 일반대학원 모집 공고로 판단됩니다. 링크: http://www.grad.hanyang.ac.k",
-    "updated_at": "2026-09-17T01:40:48+00:00"
+    "updated_at": "2026-09-17T01:40:50+00:00",
+    "message_id": 276
   }
 }
