@@ -1,6 +1,6 @@
 [
   {
-    "checked_at": "2026-09-16T23:20:09+09:00",
+    "checked_at": "2026-09-17T10:40:13+09:00",
     "university_name": "성균관대학교",
     "region": "서울",
     "city": "서울",
@@ -15,7 +15,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-16T23:20:09+09:00",
+    "checked_at": "2026-09-17T10:40:13+09:00",
     "university_name": "성균관대학교",
     "region": "서울",
     "city": "서울",
@@ -30,7 +30,7 @@
     "is_new": true
   },
   {
-    "checked_at": "2026-09-16T23:20:09+09:00",
+    "checked_at": "2026-09-17T10:40:13+09:00",
     "university_name": "성균관대학교",
     "region": "서울",
     "city": "서울",
@@ -45,22 +45,7 @@
     "is_new": true
   },
   {
-    "checked_at": "2026-09-16T23:20:09+09:00",
-    "university_name": "성균관대학교",
-    "region": "서울",
-    "city": "서울",
-    "board_type": "대학원 입학",
-    "title": "일반 2027학년도 전기 일반대학원 일반전형 모집 안내",
-    "url": "https://gradschool.skku.edu/grad/mojip/regul.htm?bbsid=grad_dataroom&ctg_cd=REGUL&mode=view&bltn_seq=59065&PHPSESSID=8355b8cd699d3969898955c8800911e8",
-    "notice_date": "2026-09-11",
-    "grade": "A",
-    "matched_keywords": "2027; 2027학년도; 일반대학원; 대학원; 모집요강; 원서접수; 전기",
-    "reason": "일반대학원 모집 공고로 판단됩니다.",
-    "attachment_urls": "",
-    "is_new": false
-  },
-  {
-    "checked_at": "2026-09-16T23:20:09+09:00",
+    "checked_at": "2026-09-17T10:40:13+09:00",
     "university_name": "한양대학교",
     "region": "서울",
     "city": "서울",
@@ -72,15 +57,15 @@
     "matched_keywords": "2027; 2027학년도; 일반대학원; 대학원; 모집요강; 신입생 모집; 원서접수; 특별전형; 학부; 특수대학원; 전문대학원; 교육대학원; 경영전문대학원; 전기",
     "reason": "일반대학원 모집 공고로 판단됩니다.",
     "attachment_urls": "http://www.grad.hanyang.ac.kr/img/roadmap.hwp; http://www.grad.hanyang.ac.kr/img/tel_number.pdf; http://www.grad.hanyang.ac.kr/admin/bbs/down.php?code=data&idx=10548&no=1; http://www.grad.hanyang.ac.kr/admin/bbs/down.php?code=data&idx=10548&no=2; http://www.grad.hanyang.ac.kr/admin/bbs/down.php?code=data&idx=10548&no=3",
-    "is_new": true
+    "is_new": false
   },
   {
-    "checked_at": "2026-09-16T23:20:09+09:00",
+    "checked_at": "2026-09-17T10:40:13+09:00",
     "university_name": "한양대학교",
     "region": "서울",
     "city": "서울",
     "board_type": "모집요강 자료실",
-    "title": "127 [입학] 2027학년도 일반대학원 신입학 전기 특별전형 모집요강 관리자 26.09.16 309",
+    "title": "127 [입학] 2027학년도 일반대학원 신입학 전기 특별전형 모집요강 관리자 26.09.16 453",
     "url": "http://www.grad.hanyang.ac.kr/admin/bbs/down.php?code=data&idx=10548&no=1",
     "notice_date": "2026-09-16",
     "grade": "A",
@@ -90,7 +75,7 @@
     "is_new": true
   },
   {
-    "checked_at": "2026-09-16T23:20:09+09:00",
+    "checked_at": "2026-09-17T10:40:13+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -105,7 +90,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-16T23:20:09+09:00",
+    "checked_at": "2026-09-17T10:40:13+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -120,7 +105,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-16T23:20:09+09:00",
+    "checked_at": "2026-09-17T10:40:13+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -135,7 +120,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-16T23:20:09+09:00",
+    "checked_at": "2026-09-17T10:40:13+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -150,7 +135,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-16T23:20:09+09:00",
+    "checked_at": "2026-09-17T10:40:13+09:00",
     "university_name": "중앙대학교",
     "region": "서울",
     "city": "서울",
@@ -165,7 +150,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-16T23:20:09+09:00",
+    "checked_at": "2026-09-17T10:40:13+09:00",
     "university_name": "가톨릭대학교",
     "region": "경기",
     "city": "부천",
@@ -180,7 +165,7 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-16T23:20:09+09:00",
+    "checked_at": "2026-09-17T10:40:13+09:00",
     "university_name": "가톨릭대학교",
     "region": "경기",
     "city": "부천",
@@ -195,14 +180,14 @@
     "is_new": false
   },
   {
-    "checked_at": "2026-09-16T23:20:34+09:00",
+    "checked_at": "2026-09-17T10:40:48+09:00",
     "university_name": "고려대학교",
     "region": "서울",
     "city": "서울",
     "board_type": "유웨이어플라이 대학원 전기",
     "title": "고려대학교 일반대학원",
     "url": "https://ipsi2.uwayapply.com/2027/gradu1/korea/?CHA=1",
-    "notice_date": "2026-09-16",
+    "notice_date": "2026-09-17",
     "grade": "A",
     "matched_keywords": "대학원; 유웨이어플라이",
     "reason": "유웨이어플라이 '대학원 전기' 목록에서 원서접수 확인됨 (상태: 접수예정).",
