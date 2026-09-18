@@ -224,10 +224,11 @@
     "message_id": 279
   },
   "9f588f39eeea37f6240e687a86643d2c8aa10c2967dc3accc476b839b65b6967": {
-    "status": "sending",
+    "status": "delivered",
     "attempt_count": 1,
     "logical_key": "graduate-candidate:0adece2002541cc2a5ea337e8f0650755386b1c0aa07a5fc51c013840e26a1f6",
     "message_preview": "[일반대학원 모집 알림] 등급: A 대학: 홍익대학교 지역: 서울 서울 게시판: 대학원 입학 공지 제목: 2027학년도 전기 대학원 신입생 모집 (군위탁전형 포함) 게시일: 2026-09-18 확인 키워드: 2027, 2027학년도, 일반대학원, 대학원, 모집요강, 신입생 모집, 전형일정, 원서접수, 특수대학원, 전문대학원, 교육대학원, 전기 판단 근거: 일반대학원 모집 공고로 판단됩니다. 링크: https://www.hong",
-    "updated_at": "2026-09-18T13:46:49+00:00"
+    "updated_at": "2026-09-18T13:46:51+00:00",
+    "message_id": 280
   }
 }
