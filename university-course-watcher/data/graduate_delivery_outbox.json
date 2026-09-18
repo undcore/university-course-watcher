@@ -232,10 +232,11 @@
     "message_id": 280
   },
   "542bf3f5ace4f9301bc47b3e6ff7c3a07bc084d69b67187bfda46a6898a0c7ff": {
-    "status": "sending",
+    "status": "delivered",
     "attempt_count": 1,
     "logical_key": "graduate-portal:fd81507024adcfb2f231a5acc340083e6046ddc263002fc4f1d79cd3e17108f8",
     "message_preview": "[원서접수 포털 - 접수예정·접수중 일반대학원 1건] - 한국외국어대학교 일반대학원 [접수예정] https://ipsi3.uwayapply.com/2027/gradu1/hufs/?CHA=1 유웨이어플라이/진학사어플라이 접수 목록에서 확인된 신규 항목입니다.",
-    "updated_at": "2026-09-18T13:46:53+00:00"
+    "updated_at": "2026-09-18T13:46:55+00:00",
+    "message_id": 281
   }
 }
