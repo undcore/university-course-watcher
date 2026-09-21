@@ -238,5 +238,12 @@
     "message_preview": "[원서접수 포털 - 접수예정·접수중 일반대학원 1건] - 한국외국어대학교 일반대학원 [접수예정] https://ipsi3.uwayapply.com/2027/gradu1/hufs/?CHA=1 유웨이어플라이/진학사어플라이 접수 목록에서 확인된 신규 항목입니다.",
     "updated_at": "2026-09-18T13:46:55+00:00",
     "message_id": 281
+  },
+  "495f6bb4e7c0dc2b96e15c7ff943a2004c1491cfe6e8a0ec6c832ff2596d6497": {
+    "status": "sending",
+    "attempt_count": 1,
+    "logical_key": "graduate-candidate:1ec4fb13add6916dc1a62eb53a167c432d55db6a31146bf126586ae2fd9b951b",
+    "message_preview": "[일반대학원 모집 알림] 등급: A 대학: 한양대학교 지역: 서울 서울 게시판: 모집요강 자료실 제목: 127 [입학] 2027학년도 일반대학원 신입학 전기 특별전형 모집요강 관리자 26.09.16 2045 게시일: 2026-09-16 확인 키워드: 2027, 2027학년도, 일반대학원, 대학원, 모집요강, 특별전형, 전기 판단 근거: 일반대학원 모집 공고로 판단됩니다. 링크: http://www.grad.hanyang.ac.",
+    "updated_at": "2026-09-21T01:35:09+00:00"
   }
 }
